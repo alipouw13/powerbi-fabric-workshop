@@ -1,98 +1,114 @@
-# Direct Lake in Fabric and Power BI
+# Direct Lake for the Contoso Insurance semantic model
 
-Direct Lake is a Power BI semantic model storage mode for Microsoft Fabric.
-It loads OneLake Delta tables into memory on demand.
-It avoids scheduled import refresh while preserving interactive, in-memory query performance.
+Direct Lake is the storage mode used for `sm_insurance`. It lets Power BI load
+OneLake Delta data into memory on demand without importing a scheduled copy into
+the semantic model.
 
-Workshop lab:
+## Lab connection
 
-- [Lab 06: Direct Lake semantic model](../labs/lab-06-semantic-model-directlake/README.md)
-
-Microsoft overview: [Direct Lake overview](https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview).
+- Lab: ../labs/lab-06-semantic-model-directlake/README.md
+- Lakehouse: `lh_insurance`
+- Warehouse: `wh_insurance`
+- Semantic model: `sm_insurance`
+- Source: [Direct Lake overview](sources.md#power-bi-and-fabric-modeling)
 
 ## What Direct Lake means
 
-| Concept | Practical meaning |
+| Idea | Practical meaning |
 | --- | --- |
-| OneLake Delta tables | The semantic model reads Delta tables from Fabric Lakehouse or Warehouse storage. |
-| On-demand loading | Data is loaded into memory when needed by queries. |
-| No import refresh | The model does not require a scheduled import refresh to copy data into Power BI. |
-| Import-like speed | Queries can use in-memory VertiPaq performance after data is loaded. |
-| DirectQuery-like freshness | Data can reflect current Delta table state without a traditional import refresh cycle. |
+| Data stays in OneLake | Tables are stored as Delta data in Fabric. |
+| No scheduled import refresh | The model does not need a separate import refresh cycle for those tables. |
+| Loaded into memory on demand | Power BI loads column data as needed for queries. |
+| Import-like performance goal | Queries can run fast because data is cached in memory. |
+| Fresher than Import | Data can be available after upstream Delta tables are updated. |
 
-For Tableau authors, Direct Lake feels closest to a live connection with cached, optimized analytical performance.
-It is not the same as Tableau live.
-The storage layer is OneLake Delta tables, and the semantic layer still controls relationships, measures, RLS, and metadata.
+Direct Lake is often the easiest bridge for Tableau users who like the idea of a
+live connection but want the performance profile of an in-memory model.
 
-## Requirements
+## Requirements to confirm
 
-Use Direct Lake when these are true:
+| Requirement | Workshop setting |
+| --- | --- |
+| Fabric capacity | Workspaces run on Fabric capacity. |
+| Supported storage | Gold tables are Delta tables in OneLake. |
+| Fabric item | Tables come from a Lakehouse or Warehouse. |
+| Semantic model | `sm_insurance` is configured in Direct Lake mode. |
+| Permissions | Users have appropriate workspace and model access. |
+| Governance | Sensitivity labels and endorsement are applied after validation. |
 
-1. Data is stored as Delta tables in Fabric.
-2. Tables are in a Lakehouse or Warehouse.
-3. The workspace is backed by Fabric capacity.
-4. The semantic model is built on tables that are intended for analytics.
-5. Model authors can define relationships, measures, and security in Power BI.
+## Storage mode comparison
 
-In the workshop, the Direct Lake path is:
-
-1. `lh_housing`
-2. Files in `Files/raw`
-3. Bronze tables: `bronze_market_tracker`, `bronze_listings`
-4. Silver tables: `dim_region`, `dim_date`, `dim_property_type`, `fact_home_sales`
-5. Gold tables: `gold_market_summary`, `gold_region_latest`
-6. Semantic model: `Housing-Market-Insights (Direct Lake)` on gold
-
-## Import vs DirectQuery vs Direct Lake
-
-| Storage mode | How data is queried | Strengths | Tradeoffs | Workshop fit |
+| Mode | Data movement | Refresh model | Query behavior | Good fit |
 | --- | --- | --- | --- | --- |
-| Import | Data is copied into the semantic model during refresh | Fast, mature, predictable | Needs refresh, duplicates data | Good for small curated extracts or snapshots |
-| DirectQuery | Queries are sent to the source at interaction time | Fresh source data, no import copy | Depends on source performance and query folding | Useful for sources that must stay live |
-| Direct Lake | Delta tables are loaded from OneLake into memory on demand | No import refresh, fast interactive analysis, Fabric-native | Requires Fabric and Delta tables | Preferred path for `Housing-Market-Insights` |
+| Import | Data is copied into the semantic model. | Scheduled refresh. | Fast in-memory queries. | Small to medium stable models. |
+| DirectQuery | Queries are sent to the source. | No import refresh. | Depends on source query performance. | Operational sources requiring source-time freshness. |
+| Direct Lake | Delta data is loaded from OneLake into memory on demand. | No scheduled import refresh for Direct Lake tables. | Import-like speed with OneLake data freshness. | Fabric Lakehouse or Warehouse analytics. |
 
 ## DirectQuery fallback
 
-Direct Lake can fall back to DirectQuery in some cases.
-Fallback means a query is sent through a SQL endpoint rather than served fully from Direct Lake in-memory structures.
-This can affect performance and should be monitored during model testing.
+Direct Lake models can fall back to DirectQuery in some situations. Treat
+fallback as a design signal, not just an implementation detail.
 
-Common reasons to watch for fallback:
-
-- Unsupported model or table features.
-- Security or permission paths that require a different query route.
-- Model design that does not align with Direct Lake constraints.
-- Large or complex queries that need careful validation.
-
-Use performance testing before certifying a Direct Lake model.
-
-## When to use Direct Lake
-
-| Use Direct Lake when | Consider another mode when |
+| Signal | Action |
 | --- | --- |
-| Data is already curated in Fabric Lakehouse or Warehouse. | The source is outside Fabric and cannot be landed in OneLake. |
-| Users need current analytics without waiting for import refresh. | A small static dataset is easier to manage as Import. |
-| The team wants one governed OneLake copy. | The source system must handle row-by-row operational lookups. |
-| Multiple reports reuse the same semantic model. | A one-off prototype does not justify Fabric setup. |
-| Model authors can invest in star schema design. | The data is not modeled and needs heavy preparation first. |
+| Query unexpectedly behaves like DirectQuery | Review model features and table support. |
+| Performance changes after a model edit | Check if the edit introduced fallback behavior. |
+| Users report slow visuals | Test DAX, visual grain, and table eligibility. |
+| Security design changed | Re-test RLS and permissions. |
 
-## Tableau mental model
+For a workshop, document any fallback observed during setup. Do not surprise
+participants during a live demo.
 
-If a Tableau workbook uses a live connection for freshness, map the requirement before choosing Power BI storage.
+## Insurance table mapping
 
-Ask:
+| Layer | Table | Direct Lake role |
+| --- | --- | --- |
+| Bronze | `bronze_policy_claims` | Landing copy of the flat Tableau-style extract. |
+| Bronze | `bronze_claims_intake` | Operational intake feed for claims. |
+| Silver | `dim_policy` | Policy attributes and product mapping. |
+| Silver | `dim_customer` | Customer segment and region. |
+| Silver | `dim_agent` | Agent, agency, channel, and region. |
+| Silver | `dim_coverage` | Coverage names by product. |
+| Silver | `dim_date` | Calendar and period logic. |
+| Silver | `fact_premium` | Premium, policy written, and in-force facts. |
+| Silver | `fact_claim` | Claim, loss, severity, and fraud facts. |
+| Gold | `gold_premium_summary` | Aggregated premium reporting. |
+| Gold | `gold_loss_ratio` | Loss ratio reporting. |
+| Gold | `gold_agent_scorecard` | Agent performance reporting. |
 
-1. Does the business need fresh data or just frequent refresh?
-2. Can data be landed in OneLake as Delta tables?
-3. Is the analytical grain stable enough for a shared semantic model?
-4. Can one certified model replace several workbook extracts?
-5. Are performance and RLS validated against realistic user roles?
+## Measures on Direct Lake tables
 
-For the workshop, the answer is yes.
-The synthetic housing data is curated into Gold tables, then modeled once for reuse.
+| Measure | Table grain to validate |
+| --- | --- |
+| Written Premium | `fact_premium` by policy, date, product, region, channel, agent |
+| Earned Premium | `fact_premium` by policy and date |
+| Policies In Force | `fact_premium` by policy and date |
+| Incurred Losses | `fact_claim` by claim and coverage |
+| Paid Losses | `fact_claim` by claim and coverage |
+| Claim Count | `fact_claim` by claim |
+| Loss Ratio | Incurred Losses divided by Earned Premium |
 
-## Microsoft Learn anchors
+## Tableau live connection comparison
 
-- [Direct Lake overview](https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview)
-- [DirectQuery in Power BI](https://learn.microsoft.com/en-us/power-bi/connect-data/desktop-directquery-about)
-- [Understand star schema and the importance for Power BI](https://learn.microsoft.com/en-us/power-bi/guidance/star-schema)
+| Tableau live idea | Direct Lake distinction |
+| --- | --- |
+| Query the source at interaction time | Direct Lake reads OneLake Delta and loads data into memory on demand. |
+| Source performance controls the report | Capacity, model design, and Delta layout all matter. |
+| No extract refresh | Also no scheduled import refresh for Direct Lake tables. |
+| Workbook owns calculations | Measures should live in the shared semantic model. |
+
+## Design checklist
+
+- Keep Gold tables report-friendly.
+- Use a star schema with clear relationships.
+- Avoid duplicating the same measure in multiple reports.
+- Validate Direct Lake behavior before executive demos.
+- Monitor capacity during concurrent use.
+- Certify the semantic model only after tie-out.
+
+## Related workshop files
+
+- Tableau translation: tableau-to-powerbi.md
+- Copilot authoring: copilot-in-power-bi.md
+- Governance: ../governance/workspace-governance.md
+- Source list: sources.md

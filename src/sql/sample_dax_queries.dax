@@ -1,42 +1,46 @@
--- Sample DAX queries for the Housing-Market-Insights model.
+-- Sample DAX queries for the sm_insurance model.
 -- Use these to verify the model, and to demo the Power BI MCP server (remote):
 -- in VS Code, GitHub Copilot calls the "Execute Query" tool with a query like
 -- these against the semantic model. See labs/lab-09-mcp-github-copilot.
 
--- 1. Homes sold and average median price by metro, latest full month
+-- 1. Written premium and loss ratio by product
 EVALUATE
 SUMMARIZECOLUMNS(
-    dim_region[region],
-    "Homes Sold", [Homes Sold],
-    "Avg Median Sale Price", [Avg Median Sale Price]
+    dim_policy[product],
+    "Written Premium", [Written Premium],
+    "Earned Premium", [Earned Premium],
+    "Loss Ratio", [Loss Ratio]
 )
-ORDER BY [Homes Sold] DESC;
+ORDER BY [Written Premium] DESC;
 
--- 2. Homes sold YoY % by metro (tests the time-intelligence measure)
+-- 2. Loss ratio by region (find the worst-performing books)
 EVALUATE
 SUMMARIZECOLUMNS(
-    dim_region[region],
-    "Homes Sold", [Homes Sold],
-    "Homes Sold YoY %", [Homes Sold YoY %]
-);
+    dim_policy[region],
+    "Earned Premium", [Earned Premium],
+    "Incurred Losses", [Incurred Losses],
+    "Loss Ratio", [Loss Ratio]
+)
+ORDER BY [Loss Ratio] DESC;
 
--- 3. Months of supply trend for one metro (buyer vs seller market)
+-- 3. Written premium trend and YoY for Auto
 EVALUATE
 CALCULATETABLE(
     SUMMARIZECOLUMNS(
         dim_date[period_begin],
-        "Months of Supply", [Months of Supply],
-        "Median Days on Market", [Median Days on Market]
+        "Written Premium", [Written Premium],
+        "Written Premium YoY %", [Written Premium YoY %]
     ),
-    dim_region[region] = "Seattle, WA",
-    dim_property_type[property_type] = "All Residential"
+    dim_policy[product] = "Auto"
 )
 ORDER BY dim_date[period_begin];
 
--- 4. Competitiveness: share of homes sold above list, by property type
+-- 4. Claim count and severity mix by loss type
 EVALUATE
 SUMMARIZECOLUMNS(
-    dim_property_type[property_type],
-    "Sold Above List %", [Sold Above List %],
-    "Avg Sale to List %", [Avg Sale to List %]
-);
+    fact_claim[loss_type],
+    "Claim Count", [Claim Count],
+    "Incurred Losses", [Incurred Losses],
+    "Paid Losses", [Paid Losses]
+)
+ORDER BY [Incurred Losses] DESC;

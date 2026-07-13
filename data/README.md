@@ -1,133 +1,126 @@
-# Workshop data
+# Contoso Insurance synthetic data
 
-The workshop data is synthetic.
-It is generated for a 3-day Microsoft Power BI and Fabric workshop for Charles Schwab.
-It is safe for hands-on labs because it does not contain client, employee, or proprietary Schwab data.
+This folder documents the synthetic P&C insurance data used by the Schwab Power
+BI and Fabric workshop. The data is generated for training only and aligns to
+the Fabric demo at https://github.com/alipouw13/fabric-test.
 
-## Generate the data
+## Synthetic data notice
 
-From the workshop root:
+All names, policy numbers, claims, premiums, losses, regions, and operational
+records are synthetic. Do not treat this data as Charles Schwab data, customer
+data, production insurance data, or regulated data.
 
-```powershell
-python data\generate_data.py --months 24
-```
+## Generation command
 
-You can change the month count:
+Generate the raw files with:
 
 ```powershell
 python data\generate_data.py --months N
 ```
 
-The default contract is 24 months x 12 metros x 4 property types.
+The default workshop shape is 24 months x 5 products x 5 regions.
 
-## Metros
+## Business dimensions
 
-The generated metros are:
-
-Seattle WA, Denver CO, Austin TX, Phoenix AZ, Chicago IL, Atlanta GA, Boston MA, Nashville TN, Charlotte NC, Miami FL, Portland OR, and Dallas TX.
-
-## Property types
-
-The generated property types are:
-
-All Residential, Single Family Residential, Condo/Co-op, and Townhouse.
-
-## Files under raw
-
-| File | Purpose |
+| Domain | Values |
 | --- | --- |
-| `raw/redfin/market_tracker.csv` | Wide "Tableau extract" shape for workbook migration exercises. |
-| `raw/redfin/fact_home_sales.csv` | Fact table for modeled Power BI and Fabric exercises. |
-| `raw/redfin/dim_region.csv` | Region dimension. |
-| `raw/redfin/dim_date.csv` | Date dimension. |
-| `raw/redfin/dim_property_type.csv` | Property type dimension. |
-| `raw/mls/listings.csv` | Synthetic listing-level MLS-style data. |
+| Products | Auto, Home, Renters, Life, Umbrella |
+| Regions | Northeast, Southeast, Midwest, Southwest, West |
+| Channels | Independent Agent, Captive Agent, Direct, Online |
 
-## `market_tracker.csv` columns
+The generated portfolio loss ratio is approximately 61 percent. Use that as a
+quick reasonableness check, not as an exact test assertion.
 
-This file is the flat extract shape Tableau authors will recognize.
+## Folder layout
 
-- `region`
-- `state`
-- `region_type`
-- `period_begin`
-- `period_end`
-- `year`
-- `month_name`
-- `property_type`
-- `median_sale_price`
-- `homes_sold`
-- `new_listings`
-- `inventory`
-- `months_of_supply`
-- `median_days_on_market`
-- `median_ppsf`
-- `avg_sale_to_list`
-- `sold_above_list_share`
-- `median_sale_price_yoy`
-- `homes_sold_yoy`
+| Path | Purpose |
+| --- | --- |
+| `data/raw/contoso/policy_claims_extract.csv` | Wide Tableau-style extract. |
+| `data/raw/contoso/dim_policy.csv` | Policy dimension. |
+| `data/raw/contoso/dim_customer.csv` | Customer dimension. |
+| `data/raw/contoso/dim_agent.csv` | Agent dimension. |
+| `data/raw/contoso/dim_coverage.csv` | Coverage dimension. |
+| `data/raw/contoso/dim_date.csv` | Date dimension. |
+| `data/raw/contoso/fact_premium.csv` | Premium and policy count fact. |
+| `data/raw/contoso/fact_claim.csv` | Claim and loss fact. |
+| `data/raw/ops/claims_intake.csv` | Operational claims intake feed. |
 
-## Star schema files
+## Wide extract
 
-Use these files for the modeled Power BI path.
+`policy_claims_extract.csv` is the flat "Tableau extract" used for migration
+discussion.
 
 | File | Columns |
 | --- | --- |
-| `raw/redfin/fact_home_sales.csv` | `region_id`, `date_id`, `property_type_id`, `median_sale_price`, `homes_sold`, `new_listings`, `inventory`, `months_of_supply`, `median_days_on_market`, `median_ppsf`, `avg_sale_to_list`, `sold_above_list_share` |
-| `raw/redfin/dim_region.csv` | `region_id`, `region`, `region_type`, `state` |
-| `raw/redfin/dim_date.csv` | `date_id`, `period_begin`, `period_end`, `year`, `month`, `month_name`, `quarter` |
-| `raw/redfin/dim_property_type.csv` | `property_type_id`, `property_type` |
+| `contoso/policy_claims_extract.csv` | `policy_number`, `product`, `region`, `channel`, `period_begin`, `year`, `month_name`, `agent_name`, `customer_segment`, `annual_premium`, `written_premium`, `earned_premium`, `policy_status`, `incurred_loss`, `claim_count`, `written_premium_yoy` |
 
-## `listings.csv` columns
+Use this file to show why workbook-level calculations and extracts become hard
+to govern as reporting grows.
 
-The MLS-style file has listing-level rows:
+## Star schema dimensions
 
-- `listing_id`
-- `region`
-- `state`
-- `property_type`
-- `list_date`
-- `list_price`
-- `status`
-- `sale_price`
-- `beds`
-- `baths`
-- `sqft`
-- `list_agent`
-- `office`
+| File | Grain | Columns |
+| --- | --- | --- |
+| `contoso/dim_customer.csv` | One row per customer | `customer_id`, `customer_name`, `segment`, `region`, `tenure_years` |
+| `contoso/dim_agent.csv` | One row per agent | `agent_id`, `agent_name`, `agency`, `region`, `channel` |
+| `contoso/dim_coverage.csv` | One row per coverage | `coverage_id`, `product`, `coverage` |
+| `contoso/dim_date.csv` | One row per month or period | `date_id`, `period_begin`, `period_end`, `year`, `month`, `month_name`, `quarter` |
+| `contoso/dim_policy.csv` | One row per policy | `policy_id`, `policy_number`, `product`, `customer_id`, `agent_id`, `region`, `channel`, `effective_date`, `annual_premium`, `status` |
+
+## Star schema facts
+
+| File | Grain | Columns |
+| --- | --- | --- |
+| `contoso/fact_premium.csv` | Policy and date period | `policy_id`, `date_id`, `product`, `region`, `channel`, `agent_id`, `written_premium`, `earned_premium`, `policies_written`, `policies_inforce` |
+| `contoso/fact_claim.csv` | One row per claim | `claim_id`, `claim_number`, `policy_id`, `date_id`, `product`, `region`, `coverage_id`, `loss_type`, `severity`, `status`, `incurred_loss`, `paid_loss`, `fraud_flag` |
+
+## Operational feed
+
+| File | Grain | Columns |
+| --- | --- | --- |
+| `ops/claims_intake.csv` | One row per claim intake event | `claim_number`, `policy_number`, `product`, `region`, `coverage`, `loss_type`, `loss_date`, `reported_date`, `status`, `reserve_amount`, `paid_amount`, `severity`, `adjuster` |
+
+Use this file for the Rayfin Claims Intake story and for discussing how
+operational app data can complement analytics data in Fabric.
 
 ## Wide vs star explanation
 
-`market_tracker.csv` is intentionally wide.
-It behaves like a Tableau extract where most attributes and metrics are in one file.
-That makes it easy to migrate a workbook quickly, but it can duplicate logic across reports.
+| Pattern | What it represents | Tradeoff |
+| --- | --- | --- |
+| Wide extract | `policy_claims_extract.csv` combines policy, date, agent, premium, and claim fields. | Fast to start, but logic is duplicated and hard to certify. |
+| Star schema | `dim_*` and `fact_*` files separate descriptive attributes from measurable events. | Requires modeling discipline, but supports reuse, RLS, and certified measures. |
 
-The `dim_` and `fact_` files are the modeled star schema.
-Dimensions hold descriptive filters.
-The fact table holds numeric measures at the date, region, and property type grain.
-This is the preferred path for `Housing-Market-Insights`.
+The wide extract is useful for Tableau migration assessment. The star schema is
+the target pattern for Power BI and Fabric.
 
-## Fabric object mapping
+## Fabric target alignment
 
-| Layer | Workshop object |
+| Fabric object | Data mapping |
 | --- | --- |
-| Workspace | `Schwab-Analytics-Dev`, `Schwab-Analytics-Test`, `Schwab-Analytics-Prod` |
-| Lakehouse | `lh_housing` |
-| Raw files | `Files/raw` |
-| Bronze | `bronze_market_tracker`, `bronze_listings` |
-| Silver | `dim_region`, `dim_date`, `dim_property_type`, `fact_home_sales` |
-| Gold | `gold_market_summary`, `gold_region_latest` |
-| Semantic model | `Housing-Market-Insights (Direct Lake)` |
+| Lakehouse `lh_insurance` Bronze | `bronze_policy_claims`, `bronze_claims_intake` |
+| Lakehouse `lh_insurance` Silver | `dim_*`, `fact_premium`, `fact_claim` |
+| Lakehouse `lh_insurance` Gold | `gold_premium_summary`, `gold_loss_ratio`, `gold_agent_scorecard` |
+| Warehouse `wh_insurance` | Curated relational serving layer. |
+| Semantic model `sm_insurance` | Direct Lake model on Gold tables. |
+| Report `rpt_insurance_executive` | Executive reporting experience. |
 
-Core measures expected in the model:
+## Core measures supported
 
-`Homes Sold`, `New Listings`, `Inventory`, `Avg Median Sale Price`, `Median Days on Market`, `Avg Sale to List %`, `Sold Above List %`, `Months of Supply`, `Homes Sold PY`, and `Homes Sold YoY %`.
+- Written Premium.
+- Earned Premium.
+- Policies In Force.
+- Policies Written.
+- Incurred Losses.
+- Paid Losses.
+- Claim Count.
+- Loss Ratio, calculated as Incurred Losses divided by Earned Premium.
+- Average Premium.
+- Written Premium PY.
+- Written Premium YoY %.
 
-## Using real Redfin data
+## Related workshop files
 
-The workshop data is synthetic and generated locally.
-If you want to replace it with real public market data, start with the Redfin Data Center:
-
-https://www.redfin.com/news/data-center/
-
-When swapping in real data, re-check schema, licensing, privacy, refresh cadence, and metric definitions before using the workshop labs.
+- Tableau translation: ../reference/tableau-to-powerbi.md
+- Direct Lake reference: ../reference/direct-lake.md
+- Rayfin reference: ../reference/rayfin.md
+- Migration worksheet: ../governance/migration-assessment-worksheet.md

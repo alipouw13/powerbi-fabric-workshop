@@ -1,111 +1,118 @@
-# Workspace governance
+# Workspace governance for Schwab Analytics
 
-This page defines how Schwab workshop content should be organized, secured, and promoted across Fabric workspaces.
-It applies to reports, semantic models, lakehouses, notebooks, dataflows, and deployment pipelines created for the workshop.
+Workspace governance keeps the workshop pattern production-ready. The goal is
+simple: separate environments, assign least-privilege roles, publish reusable
+content, and monitor capacity before users feel pain.
 
-Microsoft references:
+## Environment layout
 
-- [Roles in workspaces in Microsoft Fabric](https://learn.microsoft.com/en-us/fabric/fundamentals/roles-workspaces)
-- [About tenant settings](https://learn.microsoft.com/en-us/fabric/admin/about-tenant-settings)
-- [Overview of Fabric deployment pipelines](https://learn.microsoft.com/en-us/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines)
-- [Microsoft Fabric Capacity Metrics app](https://learn.microsoft.com/en-us/fabric/enterprise/metrics-app)
+| Environment | Workspace | Purpose | Who gets write access |
+| --- | --- | --- | --- |
+| Development | `Schwab-Analytics-Dev` | Build Lakehouse, Warehouse, semantic model, reports, and Rayfin app changes. | Delivery squad and approved developers. |
+| Test | `Schwab-Analytics-Test` | Validate data, security, performance, and deployment steps. | Delivery squad plus test leads. |
+| Production | `Schwab-Analytics-Prod` | Serve certified content to business users. | Few admins, release owners, and controlled service principals. |
 
-## Workspace layout
+Use deployment pipelines or source-controlled deployment automation to promote
+content instead of manual recreation.
 
-| Environment | Workspace | Purpose |
+## Workspace role guidance
+
+| Role | Practical meaning | Workshop rule |
 | --- | --- | --- |
-| Dev | `Schwab-Analytics-Dev` | Build, experiment, test notebooks, create models, and author reports. |
-| Test | `Schwab-Analytics-Test` | Validate promoted content with controlled users and test data checks. |
-| Prod | `Schwab-Analytics-Prod` | Host approved, supported content for business users. |
+| Admin | Full workspace management, access control, and item control. | Limit to platform owners and backup admins. |
+| Member | Can publish, manage content, and collaborate broadly. | Use for trusted delivery leads, not every report author. |
+| Contributor | Can create and edit workspace content. | Use in Dev for builders who do not manage access. |
+| Viewer | Can view content. | Use for most consumers in Test and Prod. |
 
-Do not publish workshop production content directly from Desktop to Prod.
-Use Dev first, validate in Test, then promote to Prod.
-
-## Workspace role model
-
-| Role | Can do | Workshop assignment guidance |
-| --- | --- | --- |
-| Admin | Manage workspace settings, access, items, and app publishing | Limited to platform owners and workshop admins. |
-| Member | Publish, update, share, and manage content | Use for lead BI engineers and model owners. |
-| Contributor | Create and edit content in the workspace | Use for report authors in Dev. Avoid in Prod unless operationally required. |
-| Viewer | View content and interact with reports | Use for consumers and UAT participants. |
-
-Least privilege is the default.
-Grant users the role they need for the current environment, not the highest role they might need later.
+For semantic model reuse, grant Build permission deliberately. Viewer access to
+a workspace is not the same as permission to build new reports from a model.
 
 ## Naming standards
 
-| Item type | Standard | Example |
+| Item type | Pattern | Example |
 | --- | --- | --- |
-| Workspace | `Schwab-Analytics-<Env>` | `Schwab-Analytics-Dev` |
-| Lakehouse | `lh_<domain>` | `lh_housing` |
-| Bronze table | `bronze_<source_or_entity>` | `bronze_market_tracker` |
-| Silver dimension | `dim_<entity>` | `dim_region` |
-| Silver fact | `fact_<process>` | `fact_home_sales` |
-| Gold table | `gold_<business_subject>` | `gold_market_summary` |
-| Semantic model | Business name plus storage mode when helpful | `Housing-Market-Insights (Direct Lake)` |
-| Report | Decision or audience name | `Housing Market Executive Overview` |
-| Deployment pipeline | `<domain>-analytics-pipeline` | `housing-analytics-pipeline` |
+| Workspace | `Schwab-Analytics-{Environment}` | `Schwab-Analytics-Prod` |
+| Lakehouse | `lh_{domain}` | `lh_insurance` |
+| Warehouse | `wh_{domain}` | `wh_insurance` |
+| Semantic model | `sm_{domain}` | `sm_insurance` |
+| Report | `rpt_{domain}_{audience}` | `rpt_insurance_executive` |
+| Data pipeline | `pl_{domain}_{purpose}` | `pl_insurance_gold_refresh` |
+| Notebook | `nb_{domain}_{layer}_{purpose}` | `nb_insurance_silver_transform` |
+| Rayfin app | `app_{domain}_{workflow}` | `app_insurance_claims_intake` |
+
+Names should make lineage obvious. Avoid personal names in production content.
+
+## Item ownership
+
+| Item | Business owner | Technical owner | Review cadence |
+| --- | --- | --- | --- |
+| `lh_insurance` | Analytics product owner | Data engineering lead | Monthly |
+| `wh_insurance` | Analytics product owner | Data engineering lead | Monthly |
+| `sm_insurance` | Insurance analytics owner | Semantic model owner | Monthly and before certification |
+| `rpt_insurance_executive` | Executive reporting owner | BI lead | Quarterly |
+| Rayfin Claims Intake | Claims operations owner | App engineering lead | Monthly |
+
+Every production item needs an accountable owner before certification.
 
 ## Sensitivity labels
 
-Use sensitivity labels when content leaves a personal sandbox or contains business data.
-Workshop synthetic data can be labeled as internal training content if required by tenant policy.
-When replacing it with real Redfin or Schwab data, choose the approved enterprise label.
+Use Microsoft Purview sensitivity labels consistently across reports, semantic
+models, and exported content.
 
-Reference:
+| Data class | Example workshop fields | Label guidance |
+| --- | --- | --- |
+| Public | Product names and synthetic region labels | Public or internal policy default. |
+| Internal | Aggregated premium and claim trends | Internal analytics label. |
+| Confidential | Customer, policy, claim, agent, and reserve details | Confidential or regulated data label. |
+| Restricted | Real PII, claims notes, payment data | Restricted label and additional access review. |
 
-- [Information protection in Fabric](https://learn.microsoft.com/en-us/fabric/governance/information-protection)
-- [Enable sensitivity labels in Fabric and Power BI](https://learn.microsoft.com/en-us/fabric/enterprise/powerbi/service-security-enable-data-sensitivity-labels)
+The workshop data is synthetic. Production governance should assume real
+insurance data is regulated and label accordingly.
 
 ## Key tenant settings to review
 
-| Setting area | Why it matters |
+| Setting area | Governance question |
 | --- | --- |
-| Workspace creation | Controls who can create new workspaces and prevents unmanaged sprawl. |
-| Publish to web | Should be restricted for enterprise data. |
-| Export data | Controls data exfiltration paths from reports. |
-| Build permission | Controls who can build new reports or query semantic models. |
-| Copilot | Required for Copilot authoring labs when capacity and region requirements are met. |
-| Service principal access | Needed only for approved automation scenarios. |
-| Sensitivity labels | Enables Microsoft Purview labels in Fabric and Power BI. |
-| Endorsement certification | Controls who can certify content. |
+| Copilot | Which security groups can use Copilot in Fabric and Power BI? |
+| Export data | Who can export summarized or underlying data? |
+| Publish to web | Is public publishing disabled except for approved groups? |
+| Service principals | Which service principals can use Fabric APIs? |
+| XMLA endpoint | Which groups can read or write semantic models through XMLA? |
+| External sharing | Can content be shared outside the tenant? |
+| Certified content | Who can certify Power BI and Fabric items? |
+| Sensitivity labels | Are required labels enforced for production content? |
+
+Review tenant settings before moving migrated reports to production.
 
 ## Capacity monitoring
 
-Use the Fabric Capacity Metrics app to monitor capacity health.
-During the workshop, review capacity if users see slow report rendering, Direct Lake fallback concerns, or queued operations.
+Use the Microsoft Fabric Capacity Metrics app to watch:
 
-Track:
+- Capacity utilization.
+- CU consumption by item.
+- Throttling and overage indicators.
+- Refresh and query patterns.
+- Long-running reports.
+- Noisy development workloads.
 
-- CU usage by workload
-- Interactive vs background operations
-- Throttling indicators
-- Copilot usage if enabled
-- Peak periods during labs
-- Long-running notebook or dataflow operations
+For the workshop, the Report Optimizer reference app in
+../reference/reference-apps.md provides a Day 3 example of building additional
+ops tooling around Fabric capacity data.
 
-## Ownership model
+## Dev to Test to Prod checklist
 
-| Asset | Owner | Backup owner | Support expectation |
-| --- | --- | --- | --- |
-| `lh_housing` | Data engineering lead | Fabric platform lead | Data load and table health |
-| Bronze and Silver tables | Data engineering lead | Workshop technical lead | Schema, transformations, and data quality |
-| Gold tables | Analytics engineering lead | Model owner | Business-ready aggregates |
-| `Housing-Market-Insights` semantic model | BI model owner | BI engineering lead | Measures, relationships, RLS, descriptions |
-| Reports | Report owner | Business product owner | Visual design, usability, adoption |
-| Deployment pipeline | Release owner | Platform lead | Promotion, approvals, rollback |
-| Sensitivity labels | Compliance owner | Fabric admin | Label policy and enforcement |
+| Gate | Required evidence |
+| --- | --- |
+| Dev complete | Model builds, report renders, and source control diff is reviewed. |
+| Test data | Written Premium, Earned Premium, Incurred Losses, and Claim Count tie out. |
+| Test security | RLS and workspace permissions are validated with test users. |
+| Test performance | Key pages meet target load expectations. |
+| Prod release | Owner approves release notes and support path. |
+| Post-release | Usage, refresh, query, and capacity metrics are reviewed. |
 
-## Operating rules
+## Related workshop files
 
-1. Dev is for iteration.
-2. Test is for validation.
-3. Prod is for supported content.
-4. Certified models must have an owner and backup owner.
-5. Reports should connect to shared semantic models where possible.
-6. Do not create one semantic model per report unless there is a documented exception.
-7. Use deployment pipelines for controlled promotion.
-8. Review workspace access monthly during the migration program.
-9. Remove inactive contributors after each migration wave.
-10. Track exceptions in the adoption backlog.
+- Endorsement: endorsement-certification.md
+- Adoption roadmap: adoption-roadmap.md
+- Direct Lake reference: ../reference/direct-lake.md
+- Source list: ../reference/sources.md

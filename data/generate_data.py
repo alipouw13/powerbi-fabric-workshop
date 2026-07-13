@@ -1,22 +1,24 @@
-"""Generate the synthetic housing-market dataset for the Schwab Power BI + Fabric workshop.
+"""Generate the synthetic P&C insurance dataset for the Schwab Power BI + Fabric workshop.
 
 The workshop teaches a Tableau audience how to move to Power BI and Microsoft
-Fabric. Tableau users know the public **Redfin Data Center** housing dataset
-well, so this generator produces data shaped like Redfin's market-tracker feed,
-plus a small MLS-style listings feed, so the labs feel familiar.
+Fabric, using a **property & casualty (P&C) insurance** story, "Contoso
+Insurance". The schema is aligned to the Contoso Insurance Fabric demo
+(github.com/alipouw13/fabric-test) so the lab and the demo tell one story.
 
-Everything here is SYNTHETIC. No real Redfin data, no real Schwab data. The
-numbers are randomly generated around believable ranges so the end-to-end labs
-(model, report, Copilot, MCP, Data Agent) run in your own Fabric tenant without
-touching any real system. To use the genuine public data instead, see the note
-in data/README.md.
+Everything here is SYNTHETIC. No real customer data. Contoso Insurance writes
+Auto, Home, Renters, Life and Umbrella policies through agents across regions and
+channels. The data lets the labs answer the questions a carrier cares about:
+written / earned premium, claims, and loss ratio.
 
-It writes two "shapes" on purpose so the migration story lands:
+It writes two "shapes" on purpose so the Tableau-to-Power-BI migration story
+lands:
 
-  1. raw/redfin/market_tracker.csv - one wide, denormalized extract, the way a
-     Tableau .hyper extract looks today. This is the "before" the labs migrate.
-  2. raw/redfin/*.csv normalized dims + fact, and raw/mls/listings.csv, so the
-     modeling lab can build a proper star schema (the "after").
+  1. raw/contoso/policy_claims_extract.csv - one wide, denormalized extract, the
+     way a Tableau .hyper extract looks today. This is the "before" the labs
+     migrate.
+  2. raw/contoso/*.csv normalized dims + facts (the star), and
+     raw/ops/claims_intake.csv, a second operational feed (the kind of data a
+     Rayfin claims-intake app would land in Fabric).
 
 Run:  python data/generate_data.py                 # default 24 months
       python data/generate_data.py --months 12
@@ -35,44 +37,38 @@ SEED = 42
 HERE = os.path.dirname(os.path.abspath(__file__))
 RAW = os.path.join(HERE, "raw")
 
-# ---- reference vocabulary (synthetic, but real US metros so maps work) ------
-# (metro display name, state, region_type, base median price, base monthly sales)
-METROS = [
-    ("Seattle, WA", "WA", 780000, 4200),
-    ("Denver, CO", "CO", 610000, 3600),
-    ("Austin, TX", "TX", 540000, 3900),
-    ("Phoenix, AZ", "AZ", 470000, 5200),
-    ("Chicago, IL", "IL", 360000, 6100),
-    ("Atlanta, GA", "GA", 410000, 5600),
-    ("Boston, MA", "MA", 720000, 3100),
-    ("Nashville, TN", "TN", 460000, 3300),
-    ("Charlotte, NC", "NC", 400000, 3800),
-    ("Miami, FL", "FL", 560000, 4400),
-    ("Portland, OR", "OR", 560000, 2600),
-    ("Dallas, TX", "TX", 420000, 6400),
+# ---- reference vocabulary (synthetic, aligned to Contoso Insurance) ----------
+# (product, base monthly new policies, base annual premium, base loss ratio)
+PRODUCTS = [
+    ("Auto", 280, 1450, 0.68),
+    ("Home", 180, 1850, 0.61),
+    ("Renters", 140, 280, 0.42),
+    ("Life", 100, 1200, 0.35),
+    ("Umbrella", 52, 520, 0.30),
 ]
-PROPERTY_TYPES = [
-    "All Residential",
-    "Single Family Residential",
-    "Condo/Co-op",
-    "Townhouse",
-]
-# non-"All" types get a share of the total so the parts sum sensibly
-TYPE_SHARE = {
-    "Single Family Residential": 0.62,
-    "Condo/Co-op": 0.22,
-    "Townhouse": 0.16,
+REGIONS = ["Northeast", "Southeast", "Midwest", "Southwest", "West"]
+CHANNELS = ["Independent Agent", "Captive Agent", "Direct", "Online"]
+CHANNEL_WEIGHTS = [0.34, 0.28, 0.22, 0.16]
+SEGMENTS = ["Personal", "Preferred", "High Net Worth", "Small Business"]
+COVERAGES = {
+    "Auto": ["Liability", "Collision", "Comprehensive", "Uninsured Motorist"],
+    "Home": ["Dwelling", "Personal Property", "Liability", "Loss of Use"],
+    "Renters": ["Personal Property", "Liability", "Loss of Use"],
+    "Life": ["Term", "Whole"],
+    "Umbrella": ["Excess Liability"],
 }
-TYPE_PRICE_FACTOR = {
-    "All Residential": 1.00,
-    "Single Family Residential": 1.08,
-    "Condo/Co-op": 0.78,
-    "Townhouse": 0.92,
-}
+LOSS_TYPES = ["Collision", "Theft", "Fire", "Water Damage", "Wind/Hail",
+              "Liability", "Medical", "Catastrophe"]
+CLAIM_STATUS = ["Open", "In Review", "Approved", "Paid", "Denied", "Closed"]
+FIRST = ["Avery", "Jordan", "Riley", "Morgan", "Casey", "Taylor", "Quinn", "Reese",
+         "Skyler", "Hayden", "Rowan", "Emerson", "Parker", "Sage", "Dakota", "Finley"]
+LAST = ["Nguyen", "Patel", "Garcia", "Smith", "Johnson", "Lee", "Brown", "Martinez",
+        "Davis", "Lopez", "Wilson", "Anderson", "Thomas", "Moore", "Clark", "Walker"]
+AGENCIES = ["Cascade", "Summit", "Blue Ridge", "Anchor", "Evergreen", "Skyline",
+            "Harborview", "Pinnacle", "Meridian", "Crossroads"]
 
 
 def month_starts(months: int):
-    """Return the first-of-month dates for the last `months`, oldest first."""
     today = date.today().replace(day=1)
     out = []
     y, m = today.year, today.month
@@ -91,17 +87,13 @@ def month_end(d: date) -> date:
     return date(d.year, d.month + 1, 1) - timedelta(days=1)
 
 
-def seasonal_factor(d: date) -> float:
-    """Spring/summer selling season bump, winter dip."""
-    # peak around May-June (month 5-6), trough Dec-Jan
-    return 1.0 + 0.18 * np.sin((d.month - 3) / 12.0 * 2 * np.pi)
+def seasonal(d: date) -> float:
+    # more auto/home claims in winter and storm season
+    return 1.0 + 0.15 * np.sin((d.month - 2) / 12.0 * 2 * np.pi)
 
 
-def price_trend(i: int, n: int) -> float:
-    """Gentle appreciation over the window with a mid-window softening."""
-    base = 1.0 + 0.06 * (i / max(1, n - 1))          # ~6% over the window
-    dip = -0.03 * np.exp(-(((i - n * 0.55) / (n * 0.16)) ** 2))  # a soft patch
-    return base + dip
+def growth(i: int, n: int) -> float:
+    return 1.0 + 0.05 * (i / max(1, n - 1))  # ~5% book growth over the window
 
 
 def main(months: int) -> None:
@@ -110,167 +102,185 @@ def main(months: int) -> None:
     periods = month_starts(months)
     n = len(periods)
 
-    # ---- dimensions --------------------------------------------------------
-    dim_region_rows = []
-    for rid, (metro, st, _p, _s) in enumerate(METROS, start=1):
-        dim_region_rows.append({
-            "region_id": rid,
-            "region": metro,
-            "region_type": "metro",
-            "state": st,
+    # ---- dim_date ----------------------------------------------------------
+    dim_date = pd.DataFrame([
+        {"date_id": i + 1, "period_begin": p.isoformat(), "period_end": month_end(p).isoformat(),
+         "year": p.year, "month": p.month, "month_name": p.strftime("%B"),
+         "quarter": f"Q{(p.month - 1)//3 + 1}"}
+        for i, p in enumerate(periods)
+    ])
+
+    # ---- dim_agent ---------------------------------------------------------
+    agents = []
+    for aid in range(1, 41):
+        agents.append({
+            "agent_id": aid,
+            "agent_name": f"{random.choice(FIRST)} {random.choice(LAST)}",
+            "agency": f"{random.choice(AGENCIES)} Insurance Group",
+            "region": random.choice(REGIONS),
+            "channel": random.choices(CHANNELS, weights=CHANNEL_WEIGHTS)[0],
         })
-    dim_region = pd.DataFrame(dim_region_rows)
+    dim_agent = pd.DataFrame(agents)
 
-    dim_date_rows = []
-    for did, p in enumerate(periods, start=1):
-        dim_date_rows.append({
-            "date_id": did,
-            "period_begin": p.isoformat(),
-            "period_end": month_end(p).isoformat(),
-            "year": p.year,
-            "month": p.month,
-            "month_name": p.strftime("%B"),
-            "quarter": f"Q{(p.month - 1)//3 + 1}",
+    # ---- dim_customer ------------------------------------------------------
+    customers = []
+    for cid in range(1, 1201):
+        customers.append({
+            "customer_id": cid,
+            "customer_name": f"{random.choice(FIRST)} {random.choice(LAST)}",
+            "segment": random.choices(SEGMENTS, weights=[0.5, 0.28, 0.10, 0.12])[0],
+            "region": random.choice(REGIONS),
+            "tenure_years": int(max(0, np.random.gamma(3, 2))),
         })
-    dim_date = pd.DataFrame(dim_date_rows)
+    dim_customer = pd.DataFrame(customers)
 
-    dim_property = pd.DataFrame(
-        [{"property_type_id": i + 1, "property_type": t} for i, t in enumerate(PROPERTY_TYPES)]
-    )
-    ptype_id = {t: i + 1 for i, t in enumerate(PROPERTY_TYPES)}
+    # ---- dim_coverage ------------------------------------------------------
+    cov_rows, cov_id = [], 1
+    cov_index = {}
+    for prod, covs in COVERAGES.items():
+        for c in covs:
+            cov_rows.append({"coverage_id": cov_id, "product": prod, "coverage": c})
+            cov_index[(prod, c)] = cov_id
+            cov_id += 1
+    dim_coverage = pd.DataFrame(cov_rows)
 
-    # ---- fact: one row per region x period x property_type ------------------
-    fact_rows = []
+    # ---- dim_policy + fact_premium (in-force earned curve) + fact_claim -----
+    policy_rows = []
+    premium_rows = []
+    claim_rows = []
     wide_rows = []
-    for rid, (metro, st, base_price, base_sales) in enumerate(METROS, start=1):
-        for i, p in enumerate(periods):
-            did = i + 1
-            trend = price_trend(i, n)
-            seas = seasonal_factor(p)
-            # "All Residential" first, then split into the sub-types
-            all_price = base_price * trend * (1 + np.random.normal(0, 0.012))
-            all_sales = int(base_sales * seas * (1 + np.random.normal(0, 0.05)))
-            for t in PROPERTY_TYPES:
-                if t == "All Residential":
-                    homes_sold = all_sales
-                    price_factor = 1.0
-                else:
-                    homes_sold = int(all_sales * TYPE_SHARE[t] * (1 + np.random.normal(0, 0.04)))
-                    price_factor = TYPE_PRICE_FACTOR[t]
-                median_price = round(all_price * price_factor / 500) * 500
-                new_listings = int(homes_sold * (1.05 + np.random.normal(0, 0.08)))
-                inventory = int(homes_sold * (1.6 + np.random.normal(0, 0.12)))
-                months_supply = round(inventory / max(1, homes_sold), 1)
-                median_dom = max(5, int(28 - 40 * (seas - 1.0) + np.random.normal(0, 4)))
-                ppsf = round(median_price / (1650 + np.random.normal(0, 120)), 2)
-                sale_to_list = round(0.995 + 0.03 * (seas - 1.0) + np.random.normal(0, 0.006), 4)
-                sold_above_list = round(min(0.85, max(0.10,
-                    0.42 + 0.6 * (seas - 1.0) + np.random.normal(0, 0.05))), 3)
-                new_listings = max(homes_sold, new_listings)
-
-                fact_rows.append({
-                    "region_id": rid,
-                    "date_id": did,
-                    "property_type_id": ptype_id[t],
-                    "median_sale_price": median_price,
-                    "homes_sold": homes_sold,
-                    "new_listings": new_listings,
-                    "inventory": inventory,
-                    "months_of_supply": months_supply,
-                    "median_days_on_market": median_dom,
-                    "median_ppsf": ppsf,
-                    "avg_sale_to_list": sale_to_list,
-                    "sold_above_list_share": sold_above_list,
+    intake_rows = []
+    pid = 1
+    clid = 1
+    for prod, base_new, base_prem, base_lr in PRODUCTS:
+        for i, p in enumerate(periods):        # effective (written) month
+            did0 = i + 1
+            n_new = int(base_new * growth(i, n) * (1 + np.random.normal(0, 0.05)))
+            for _ in range(n_new):
+                region = random.choice(REGIONS)
+                channel = random.choices(CHANNELS, weights=CHANNEL_WEIGHTS)[0]
+                agent = random.randint(1, 40)
+                cust = random.randint(1, 1200)
+                annual_prem = round(base_prem * (1 + np.random.normal(0, 0.22)) / 10) * 10
+                annual_prem = max(120, annual_prem)
+                status = random.choices(["In Force", "Lapsed", "Cancelled"],
+                                        weights=[0.86, 0.09, 0.05])[0]
+                policy_no = f"{prod[:2].upper()}-{p.year}{p.month:02d}-{pid:06d}"
+                policy_rows.append({
+                    "policy_id": pid, "policy_number": policy_no, "product": prod,
+                    "customer_id": cust, "agent_id": agent, "region": region,
+                    "channel": channel, "effective_date": p.isoformat(),
+                    "annual_premium": annual_prem, "status": status,
                 })
+                monthly_earned = round(annual_prem / 12, 2)
+                policy_incurred = 0
+                policy_claims = 0
+                # policy earns 1/12 each in-force month (up to 12 months, within window)
+                for mi in range(i, min(i + 12, n)):
+                    pm = periods[mi]
+                    did = mi + 1
+                    written = annual_prem if mi == i else 0
+                    premium_rows.append({
+                        "policy_id": pid, "date_id": did, "product": prod, "region": region,
+                        "channel": channel, "agent_id": agent,
+                        "written_premium": written, "earned_premium": monthly_earned,
+                        "policies_written": 1 if mi == i else 0, "policies_inforce": 1,
+                    })
+                    # claims tied to that month's EARNED exposure so LR ~ base_lr
+                    freq = 0.09
+                    nclaims = np.random.poisson(freq * seasonal(pm))
+                    base_sev = monthly_earned * base_lr / freq  # E[severity] anchor
+                    for _ in range(nclaims):
+                        cov = random.choice(COVERAGES[prod])
+                        lt = random.choice(LOSS_TYPES)
+                        sev = random.choices(["Low", "Medium", "High", "Severe"],
+                                             weights=[0.55, 0.28, 0.13, 0.04])[0]
+                        sev_mult = {"Low": 0.4, "Medium": 1.0, "High": 2.6, "Severe": 6.5}[sev] / 1.10
+                        noise = float(np.random.lognormal(-0.125, 0.5))  # mean ~1
+                        incurred = round(base_sev * sev_mult * noise / 10) * 10
+                        incurred = max(100, incurred)
+                        cstatus = random.choices(CLAIM_STATUS,
+                                                 weights=[0.10, 0.10, 0.12, 0.40, 0.10, 0.18])[0]
+                        paid = incurred if cstatus in ("Paid", "Closed") else (
+                            round(incurred * random.uniform(0.1, 0.7) / 10) * 10
+                            if cstatus in ("Approved", "In Review") else 0)
+                        fraud = 1 if (random.random() < 0.03) else 0
+                        loss_day = random.randint(0, 27)
+                        claim_no = f"CLM-{pm.year}{pm.month:02d}-{clid:06d}"
+                        claim_rows.append({
+                            "claim_id": clid, "claim_number": claim_no, "policy_id": pid,
+                            "date_id": did, "product": prod, "region": region,
+                            "coverage_id": cov_index[(prod, cov)], "loss_type": lt,
+                            "severity": sev, "status": cstatus,
+                            "incurred_loss": incurred, "paid_loss": paid,
+                            "fraud_flag": fraud,
+                        })
+                        intake_rows.append({
+                            "claim_number": claim_no, "policy_number": policy_no,
+                            "product": prod, "region": region, "coverage": cov,
+                            "loss_type": lt, "loss_date": (pm + timedelta(days=loss_day)).isoformat(),
+                            "reported_date": (pm + timedelta(days=loss_day + random.randint(0, 6))).isoformat(),
+                            "status": cstatus, "reserve_amount": incurred, "paid_amount": paid,
+                            "severity": sev, "adjuster": f"{random.choice(FIRST)} {random.choice(LAST)}",
+                        })
+                        policy_incurred += incurred
+                        policy_claims += 1
+                        clid += 1
+                # wide "Tableau extract" row (denormalized, one per policy)
                 wide_rows.append({
-                    "region": metro,
-                    "state": st,
-                    "region_type": "metro",
-                    "period_begin": p.isoformat(),
-                    "period_end": month_end(p).isoformat(),
-                    "year": p.year,
-                    "month_name": p.strftime("%B"),
-                    "property_type": t,
-                    "median_sale_price": median_price,
-                    "homes_sold": homes_sold,
-                    "new_listings": new_listings,
-                    "inventory": inventory,
-                    "months_of_supply": months_supply,
-                    "median_days_on_market": median_dom,
-                    "median_ppsf": ppsf,
-                    "avg_sale_to_list": sale_to_list,
-                    "sold_above_list_share": sold_above_list,
+                    "policy_number": policy_no, "product": prod, "region": region,
+                    "channel": channel, "period_begin": p.isoformat(),
+                    "year": p.year, "month_name": p.strftime("%B"),
+                    "agent_name": dim_agent.loc[agent - 1, "agent_name"],
+                    "customer_segment": dim_customer.loc[cust - 1, "segment"],
+                    "annual_premium": annual_prem, "written_premium": annual_prem,
+                    "earned_premium": monthly_earned, "policy_status": status,
+                    "incurred_loss": policy_incurred, "claim_count": policy_claims,
                 })
+                pid += 1
 
-    fact = pd.DataFrame(fact_rows)
+    dim_policy = pd.DataFrame(policy_rows)
+    fact_premium = pd.DataFrame(premium_rows)
+    fact_claim = pd.DataFrame(claim_rows)
     wide = pd.DataFrame(wide_rows)
+    intake = pd.DataFrame(intake_rows)
 
-    # year-over-year on the wide extract (so a Tableau-style calc exists to replace)
-    wide = wide.sort_values(["region", "property_type", "period_begin"]).reset_index(drop=True)
-    wide["median_sale_price_yoy"] = (
-        wide.groupby(["region", "property_type"])["median_sale_price"].pct_change(12).round(4)
+    # year-over-year on the wide extract (a Tableau-style table calc to replace)
+    wide = wide.sort_values(["product", "region", "period_begin"]).reset_index(drop=True)
+    wide["written_premium_yoy"] = (
+        wide.groupby(["product", "region"])["written_premium"].pct_change(12).round(4)
     )
-    wide["homes_sold_yoy"] = (
-        wide.groupby(["region", "property_type"])["homes_sold"].pct_change(12).round(4)
-    )
-
-    # ---- MLS-style listings feed (a second source, for the ingestion lab) --
-    agents = [f"Agent {i:03d}" for i in range(1, 61)]
-    offices = ["Cascade Realty", "Summit Homes", "Blue Sky Group", "Anchor Properties",
-               "Evergreen Realty", "Skyline Partners"]
-    listing_rows = []
-    lid = 1
-    for rid, (metro, st, base_price, base_sales) in enumerate(METROS, start=1):
-        # a sample of individual listings in the most recent 6 months
-        for p in periods[-6:]:
-            for _ in range(max(20, base_sales // 120)):
-                t = random.choices(
-                    ["Single Family Residential", "Condo/Co-op", "Townhouse"],
-                    weights=[62, 22, 16])[0]
-                lp = round(base_price * TYPE_PRICE_FACTOR[t] *
-                           (1 + np.random.normal(0, 0.22)) / 1000) * 1000
-                status = random.choices(["Sold", "Active", "Pending"], weights=[55, 30, 15])[0]
-                sp = round(lp * (0.98 + np.random.normal(0, 0.03)) / 1000) * 1000 if status == "Sold" else ""
-                listing_rows.append({
-                    "listing_id": lid,
-                    "region": metro,
-                    "state": st,
-                    "property_type": t,
-                    "list_date": (p + timedelta(days=random.randint(0, 27))).isoformat(),
-                    "list_price": int(lp),
-                    "status": status,
-                    "sale_price": int(sp) if sp != "" else "",
-                    "beds": random.choice([2, 3, 3, 4, 4, 5]),
-                    "baths": random.choice([1, 2, 2, 3, 3, 4]),
-                    "sqft": random.randint(900, 4200),
-                    "list_agent": random.choice(agents),
-                    "office": random.choice(offices),
-                })
-                lid += 1
-    listings = pd.DataFrame(listing_rows)
 
     # ---- write -------------------------------------------------------------
-    redfin_dir = os.path.join(RAW, "redfin")
-    mls_dir = os.path.join(RAW, "mls")
-    os.makedirs(redfin_dir, exist_ok=True)
-    os.makedirs(mls_dir, exist_ok=True)
+    contoso = os.path.join(RAW, "contoso")
+    ops = os.path.join(RAW, "ops")
+    os.makedirs(contoso, exist_ok=True)
+    os.makedirs(ops, exist_ok=True)
 
-    wide.to_csv(os.path.join(redfin_dir, "market_tracker.csv"), index=False)
-    dim_region.to_csv(os.path.join(redfin_dir, "dim_region.csv"), index=False)
-    dim_date.to_csv(os.path.join(redfin_dir, "dim_date.csv"), index=False)
-    dim_property.to_csv(os.path.join(redfin_dir, "dim_property_type.csv"), index=False)
-    fact.to_csv(os.path.join(redfin_dir, "fact_home_sales.csv"), index=False)
-    listings.to_csv(os.path.join(mls_dir, "listings.csv"), index=False)
+    wide.to_csv(os.path.join(contoso, "policy_claims_extract.csv"), index=False)
+    dim_date.to_csv(os.path.join(contoso, "dim_date.csv"), index=False)
+    dim_agent.to_csv(os.path.join(contoso, "dim_agent.csv"), index=False)
+    dim_customer.to_csv(os.path.join(contoso, "dim_customer.csv"), index=False)
+    dim_coverage.to_csv(os.path.join(contoso, "dim_coverage.csv"), index=False)
+    dim_policy.to_csv(os.path.join(contoso, "dim_policy.csv"), index=False)
+    fact_premium.to_csv(os.path.join(contoso, "fact_premium.csv"), index=False)
+    fact_claim.to_csv(os.path.join(contoso, "fact_claim.csv"), index=False)
+    intake.to_csv(os.path.join(ops, "claims_intake.csv"), index=False)
 
-    print("Wrote synthetic housing data:")
-    print(f"  redfin/market_tracker.csv      {len(wide):>6} rows  (wide 'Tableau extract' shape)")
-    print(f"  redfin/fact_home_sales.csv     {len(fact):>6} rows  (star-schema fact)")
-    print(f"  redfin/dim_region.csv          {len(dim_region):>6} rows")
-    print(f"  redfin/dim_date.csv            {len(dim_date):>6} rows")
-    print(f"  redfin/dim_property_type.csv   {len(dim_property):>6} rows")
-    print(f"  mls/listings.csv               {len(listings):>6} rows  (second source)")
-    print(f"\n  {n} months x {len(METROS)} metros x {len(PROPERTY_TYPES)} property types.")
-    print("  Synthetic only. See data/README.md to swap in the real public Redfin feed.")
+    lr = fact_claim["incurred_loss"].sum() / max(1, fact_premium["earned_premium"].sum())
+    print("Wrote synthetic Contoso Insurance data:")
+    print(f"  contoso/policy_claims_extract.csv {len(wide):>7} rows  (wide 'Tableau extract' shape)")
+    print(f"  contoso/dim_policy.csv            {len(dim_policy):>7} rows")
+    print(f"  contoso/fact_premium.csv          {len(fact_premium):>7} rows")
+    print(f"  contoso/fact_claim.csv            {len(fact_claim):>7} rows")
+    print(f"  contoso/dim_customer.csv          {len(dim_customer):>7} rows")
+    print(f"  contoso/dim_agent.csv             {len(dim_agent):>7} rows")
+    print(f"  contoso/dim_coverage.csv          {len(dim_coverage):>7} rows")
+    print(f"  contoso/dim_date.csv              {len(dim_date):>7} rows")
+    print(f"  ops/claims_intake.csv             {len(intake):>7} rows  (operational feed)")
+    print(f"\n  {n} months x {len(PRODUCTS)} products x {len(REGIONS)} regions.")
+    print(f"  Portfolio loss ratio ~ {lr:.1%}.  Synthetic only; aligned to the Contoso")
+    print("  Insurance Fabric demo (github.com/alipouw13/fabric-test). See data/README.md.")
 
 
 if __name__ == "__main__":

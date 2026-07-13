@@ -1,67 +1,85 @@
-# Workshop Microsoft Learn sources
+# Workshop sources
 
-This page lists the Microsoft Learn pages used to ground the reference and governance material.
-Use it as the first stop when a workshop participant asks, "Where does this product behavior come from?"
+This page is the curated source list for the reference and governance docs in
+the Schwab Power BI and Fabric workshop. Use these links when updating product
+facts, presenter notes, or lab instructions.
 
-## Migration and modeling
+## Copilot for Power BI
 
-| Topic | Microsoft Learn source |
+| Topic | Microsoft Learn URL |
 | --- | --- |
-| Power BI migration overview | https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-overview |
-| Conduct proof of concept to migrate to Power BI | https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-proof-of-concept |
-| Understand star schema and the importance for Power BI | https://learn.microsoft.com/en-us/power-bi/guidance/star-schema |
-| Direct Lake overview | https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview |
-| DirectQuery in Power BI | https://learn.microsoft.com/en-us/power-bi/connect-data/desktop-directquery-about |
+| Copilot for Power BI overview | https://learn.microsoft.com/power-bi/create-reports/copilot-introduction |
+| Copilot in Power BI integration overview | https://learn.microsoft.com/power-bi/create-reports/copilot-integration |
+| Use Copilot with semantic models | https://learn.microsoft.com/power-bi/create-reports/copilot-semantic-models |
+| Write DAX queries with Copilot | https://learn.microsoft.com/dax/dax-copilot |
+| Privacy, security, and responsible use for Copilot in Power BI | https://learn.microsoft.com/fabric/fundamentals/copilot-power-bi-privacy-security |
 
-## Copilot and AI
+## MCP and agent tooling
 
-| Topic | Microsoft Learn source |
+| Topic | Microsoft Learn URL |
 | --- | --- |
-| Copilot for Power BI overview | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-introduction |
-| Create and edit Power BI reports with Copilot | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-create-reports |
-| Create a narrative visual with Copilot | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-create-narrative |
-| Write DAX queries with Copilot | https://learn.microsoft.com/en-us/dax/dax-copilot |
-| Use Copilot to create measure descriptions | https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-measure-copilot-descriptions |
-| Prepare your data for AI to improve Copilot results | https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai |
-| Copilot and Agent admin settings | https://learn.microsoft.com/en-us/fabric/admin/service-admin-portal-copilot |
-| Fabric data agent creation | https://learn.microsoft.com/en-us/fabric/data-science/concept-data-agent |
+| Overview of the Power BI MCP servers | https://learn.microsoft.com/power-bi/developer/mcp/mcp-servers-overview |
+| Get started with remote Power BI MCP server | https://learn.microsoft.com/power-bi/developer/mcp/remote-mcp-server-get-started |
+| Power BI MCP server remote tools | https://learn.microsoft.com/power-bi/developer/mcp/remote-mcp-server-tools |
 
-## Power BI MCP servers
+## Power BI and Fabric modeling
 
-| Topic | Microsoft Learn source |
+| Topic | Microsoft Learn URL |
 | --- | --- |
-| What are the Power BI MCP servers? | https://learn.microsoft.com/en-us/power-bi/developer/mcp/mcp-servers-overview |
-| Get started with the remote Power BI MCP server | https://learn.microsoft.com/en-us/power-bi/developer/mcp/remote-mcp-server-get-started |
-| Remote Power BI MCP server tools | https://learn.microsoft.com/en-us/power-bi/developer/mcp/remote-mcp-server-tools |
-| Build permission for shared semantic models | https://learn.microsoft.com/en-us/power-bi/connect-data/service-datasets-build-permissions |
-| Row-level security with Power BI | https://learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security |
+| Direct Lake overview | https://learn.microsoft.com/fabric/fundamentals/direct-lake-overview |
+| Power BI semantic models in Microsoft Fabric | https://learn.microsoft.com/fabric/data-warehouse/semantic-models |
+| Understand star schema and the importance for Power BI | https://learn.microsoft.com/power-bi/guidance/star-schema |
+| Row-level security guidance in Power BI Desktop | https://learn.microsoft.com/power-bi/guidance/rls-guidance |
 
-## Governance and lifecycle
+## Migration and delivery
 
-| Topic | Microsoft Learn source |
+| Topic | Microsoft Learn URL |
 | --- | --- |
-| Roles in workspaces in Microsoft Fabric | https://learn.microsoft.com/en-us/fabric/fundamentals/roles-workspaces |
-| About tenant settings | https://learn.microsoft.com/en-us/fabric/admin/about-tenant-settings |
-| Overview of Fabric deployment pipelines | https://learn.microsoft.com/en-us/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines |
-| Information protection in Fabric | https://learn.microsoft.com/en-us/fabric/governance/information-protection |
-| Enable sensitivity labels in Fabric and Power BI | https://learn.microsoft.com/en-us/fabric/enterprise/powerbi/service-security-enable-data-sensitivity-labels |
-| Promote and certify Power BI content with endorsement | https://learn.microsoft.com/en-us/power-bi/collaborate-share/service-endorsement-overview |
-| Microsoft Fabric Capacity Metrics app | https://learn.microsoft.com/en-us/fabric/enterprise/metrics-app |
+| Power BI migration overview | https://learn.microsoft.com/power-bi/guidance/powerbi-migration-overview |
+| Conduct proof of concept to migrate to Power BI | https://learn.microsoft.com/power-bi/guidance/powerbi-migration-proof-of-concept |
+| Introduction to deployment pipelines | https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines |
+| Automate deployment pipelines for Power BI items by using APIs | https://learn.microsoft.com/fabric/cicd/deployment-pipelines/pipeline-automation |
 
-## Data movement and connectivity
+## Governance and security
 
-| Topic | Microsoft Learn source |
+| Topic | Microsoft Learn URL |
 | --- | --- |
-| Dataflow Gen2 overview | https://learn.microsoft.com/en-us/fabric/data-factory/dataflows-gen2-overview |
-| On-premises data gateway | https://learn.microsoft.com/en-us/data-integration/gateway/service-gateway-onprem |
-| Virtual network data gateway | https://learn.microsoft.com/en-us/data-integration/vnet/overview |
+| Sensitivity labels in Power BI | https://learn.microsoft.com/fabric/enterprise/powerbi/service-security-sensitivity-label-overview |
+| How to apply sensitivity labels in Power BI | https://learn.microsoft.com/fabric/enterprise/powerbi/service-security-apply-data-sensitivity-labels |
+| Data protection in Power BI | https://learn.microsoft.com/fabric/enterprise/powerbi/service-security-data-protection-overview |
+| Promote and certify Power BI content with endorsement | https://learn.microsoft.com/power-bi/collaborate-share/service-endorsement-overview |
+| Endorse your content | https://learn.microsoft.com/power-bi/collaborate-share/service-endorse-content |
+| Endorse Fabric and Power BI items | https://learn.microsoft.com/fabric/fundamentals/endorsement-promote-certify |
+| What is an on-premises data gateway? | https://learn.microsoft.com/power-bi/connect-data/service-gateway-onprem |
+| What is a virtual network data gateway? | https://learn.microsoft.com/data-integration/vnet/overview |
 
-## How to use the sources
+## Fabric platform
 
-1. Start with the topic that matches the workshop question.
-2. Prefer Microsoft Learn for product behavior, prerequisites, and limitations.
-3. Use workshop docs for Schwab-specific decisions, examples, naming, and governance.
-4. Use labs for hands-on execution.
-5. Use the reference docs for Tableau-to-Power BI translation.
-6. Use governance docs for workspace, endorsement, and adoption decisions.
-7. When product behavior changes, update this page first, then update the dependent workshop docs.
+| Topic | Microsoft Learn URL |
+| --- | --- |
+| Microsoft Fabric overview | https://learn.microsoft.com/fabric/fundamentals/microsoft-fabric-overview |
+| Get started with Microsoft Fabric | https://learn.microsoft.com/training/paths/get-started-fabric/ |
+| Fabric data agent concepts | https://learn.microsoft.com/fabric/data-science/concept-data-agent |
+| Quickstart: Create your first Dataflow Gen2 | https://learn.microsoft.com/fabric/data-factory/create-first-dataflow-gen2 |
+| Dataflow Gen2 with CI/CD and Git integration | https://learn.microsoft.com/fabric/data-factory/dataflow-gen2-cicd-and-git-integration |
+| Microsoft Fabric Capacity Metrics app | https://learn.microsoft.com/fabric/enterprise/metrics-app |
+
+## Rayfin
+
+| Topic | URL |
+| --- | --- |
+| Rayfin repository | https://github.com/microsoft/rayfin |
+| Rayfin documentation | https://aka.ms/rayfin/docs |
+| Awesome Rayfin | https://github.com/microsoft/awesome-rayfin |
+| Fabric apps analytic templates | https://github.com/microsoft/fabric-apps-analytic-templates |
+
+## Workshop-local references
+
+| Topic | Relative path |
+| --- | --- |
+| Direct Lake lab | ../labs/lab-06-semantic-model-directlake/README.md |
+| Copilot reports lab | ../labs/lab-07-copilot-reports/README.md |
+| MCP and GitHub Copilot lab | ../labs/lab-09-mcp-github-copilot/README.md |
+| Rayfin insurance app lab | ../labs/lab-11-rayfin-insurance-app/README.md |
+| Rayfin app skeleton | ../rayfin-app/README.md |
+| PBIP reference | ../src/pbip/README.md |

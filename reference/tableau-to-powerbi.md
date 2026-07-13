@@ -1,89 +1,126 @@
-# Tableau to Power BI concept translation
+# Tableau to Power BI translation guide
 
-This guide gives Tableau authors a practical translation layer for the 3-day Schwab Power BI and Fabric workshop.
-Use it when you hear a familiar Tableau term and need the closest Power BI or Fabric concept.
+Use this guide when a Tableau term comes up in the workshop and the team needs
+the closest Power BI or Fabric concept. The goal is not a one-to-one copy. The
+goal is a governed semantic model, reusable measures, and fewer duplicated
+extracts.
 
-Related workshop assets:
+## Workshop context
 
-- Direct Lake model lab: [lab 06](../labs/lab-06-semantic-model-directlake/README.md)
-- PBIP project reference: [src/pbip](../src/pbip/README.md)
-- Governance worksheet: [migration assessment worksheet](../governance/migration-assessment-worksheet.md)
+- Theme: Contoso Insurance, a P&C carrier with Auto, Home, Renters, Life, and
+  Umbrella products.
+- Regions: Northeast, Southeast, Midwest, Southwest, West.
+- Channels: Independent Agent, Captive Agent, Direct, Online.
+- Target model: `sm_insurance` in Direct Lake mode on Gold tables in
+  `lh_insurance`.
+- Lab path: ../labs/lab-06-semantic-model-directlake/README.md
+- Core source: [Understand star schema and the importance for Power BI](sources.md#power-bi-and-fabric-modeling)
 
-## Quick translation table
+## Concept translation table
 
-| Tableau concept | Power BI or Fabric concept | What changes for Schwab teams |
+| Tableau concept | Power BI or Fabric concept | Workshop guidance |
 | --- | --- | --- |
-| Worksheet | Report visual | Build visuals on a report canvas. Visuals query the semantic model. |
-| Dashboard | Report page | Warning: a Power BI "dashboard" is a different Service pin-board feature, not the main authoring canvas. |
-| Story | Bookmarks / report | Use bookmarks, buttons, drillthrough, and report page navigation for guided narratives. |
-| Published data source | Shared semantic model | Create one governed semantic model, then connect many thin reports to it. |
-| Extract (.hyper) | Import mode or Direct Lake | Import stores compressed data in the model. Direct Lake loads Delta tables from OneLake on demand. |
-| Live connection | DirectQuery or Direct Lake | DirectQuery sends queries to the source. Direct Lake reads OneLake Delta tables into memory without scheduled import refresh. |
-| Calculated field | Measure or calculated column | Use measures for aggregations and reusable business logic. Use calculated columns for row-level attributes. |
-| LOD expression (FIXED/INCLUDE/EXCLUDE) | DAX with CALCULATE + filter context | Recreate the grain explicitly with measures, relationships, and filter modifiers. |
-| Table calculation | DAX (for example, time intelligence) | Move percent change, prior period, rank, and running totals into model measures. |
-| Parameter | Field parameter / what-if parameter | Field parameters swap dimensions or measures. What-if parameters support scenario input. |
-| Set / Group | Group / calculation group | Groups can be created in Power BI. Calculation groups centralize reusable measure logic. |
-| Tableau Prep | Dataflow Gen2 or Fabric notebook | Dataflow Gen2 handles low-code shaping. Notebooks handle repeatable Spark transformations. |
-| Tableau Server / Cloud | Power BI Service / Microsoft Fabric | Workspaces hold reports, semantic models, lakehouses, warehouses, notebooks, and pipelines. |
-| Row-level security | Power BI RLS | Define security roles in the semantic model, then test and deploy with workspace controls. |
-| VizQL | The Power BI query engine (VertiPaq/DAX) | DAX queries run against a semantic model. Import and Direct Lake can use in-memory storage. |
+| Worksheet | Report visual | A worksheet that shows Loss Ratio by Product becomes one visual on a report page. |
+| Dashboard | Report page | Warning: a Power BI dashboard is a different Service pin-board made from pinned visuals. |
+| Story | Report navigation or PowerPoint export | Use pages, bookmarks, buttons, and narrative summaries. |
+| Published data source | Shared semantic model | Use `sm_insurance` as the certified reusable model for reports. |
+| Extract `.hyper` | Import mode or Direct Lake | Flat extracts map to Import. Fabric Delta tables can map to Direct Lake. |
+| Live connection | DirectQuery or Direct Lake | Use Direct Lake for OneLake Delta freshness with Import-like speed. |
+| Data pane fields | Model fields and measures | Hide technical columns and expose business names. |
+| Calculated field | DAX measure or calculated column | Prefer measures for aggregations such as Loss Ratio. |
+| LOD `FIXED` | `CALCULATE` with explicit filter context | Create a measure that ignores visual granularity where needed. |
+| LOD `INCLUDE` | `CALCULATE`, iterators, or grouping tables | Add grain to the measure logic, not to every visual. |
+| LOD `EXCLUDE` | `CALCULATE` with `REMOVEFILTERS` | Remove Product, Region, or Agent filters intentionally. |
+| Table calculation | DAX time intelligence or visual calculation | Use model measures for YoY, running totals, and prior period logic. |
+| Parameter | Field parameter or what-if parameter | Let users switch Product, Region, Channel, or metric. |
+| Set | Group, calculated table, or calculation group | Use groups for static cohorts and calculation groups for metric logic. |
+| Group | Power BI group or dimension attribute | Keep reusable insurance groupings in dimension tables when possible. |
+| Tableau Prep | Dataflow Gen2 or notebook | Use visual Power Query for simple prep, notebooks for medallion transforms. |
+| Tableau Server or Cloud | Power BI Service and Microsoft Fabric | Fabric hosts Lakehouse, Warehouse, semantic model, reports, pipelines, and apps. |
+| Row-level security | Power BI RLS | Secure region, agency, or book of business in the semantic model. |
+| VizQL | Power BI engine and DAX | DAX measures plus filter context drive query behavior. |
 
 ## Key mindset shifts
 
-1. Start with the model, not the report page.
-2. In Tableau, workbook authors often repeat logic in each workbook.
-3. In Power BI, create measures once in `Housing-Market-Insights` and reuse them everywhere.
-4. Treat the semantic model as the governed product.
-5. The workshop model uses gold tables from `lh_housing` as the presentation layer.
-6. The target model grain is clear: date, region, property type, and home sales metrics.
-7. Use a star schema where facts hold measures and dimensions hold filter attributes.
-8. Microsoft guidance: [Understand star schema and the importance for Power BI](https://learn.microsoft.com/en-us/power-bi/guidance/star-schema).
-9. Put reusable metrics in measures: `Homes Sold`, `Inventory`, `Avg Median Sale Price`, and `Homes Sold YoY %`.
-10. Avoid copying DAX into every report.
-11. Build thin reports on the shared semantic model.
-12. Certify the shared model after data quality, ownership, and performance checks.
-13. Use Dev/Test/Prod workspaces for lifecycle control.
-14. In this workshop those workspaces are `Schwab-Analytics-Dev`, `Schwab-Analytics-Test`, and `Schwab-Analytics-Prod`.
-15. Use deployment pipelines when content is ready to move across environments.
-16. Keep one governed copy of logic instead of one copy per workbook.
-17. If a Tableau workbook has a local extract and many workbook-only calculations, it is a consolidation candidate.
+| Shift | What changes | Insurance example |
+| --- | --- | --- |
+| Workbook-first to model-first | Business logic moves out of each workbook and into `sm_insurance`. | Define Loss Ratio once as `DIVIDE([Incurred Losses], [Earned Premium])`. |
+| Extract sprawl to one governed copy | Replace many `.hyper` extracts with Gold Delta tables and a semantic model. | `gold_loss_ratio` supports executive, product, and agent reports. |
+| Sheet logic to reusable measures | Measures are shared across pages and reports. | Written Premium YoY % is consistent for Auto and Home. |
+| Wide table to star schema | Facts and dimensions separate grain and descriptive attributes. | `fact_premium` joins to `dim_agent`, `dim_policy`, and `dim_date`. |
+| Dashboard as artifact to dashboard as pin-board | A Power BI report page is the design surface. | The executive view is a report page, not a Service dashboard. |
 
-## Where Power BI is genuinely different
+## Insurance examples
 
-| Difference | What to watch |
-| --- | --- |
-| Dashboard terminology | A Power BI dashboard is a Service artifact made from pinned tiles. Most workshop work happens in reports. |
-| Model-based analytics | The semantic model can be reused by reports, Excel, Copilot, and MCP tools. |
-| Measures as contracts | A measure is a governed calculation. Changing it affects every connected report. |
-| Storage choices | Import, DirectQuery, and Direct Lake are model storage patterns, not workbook publishing options. |
-| Fabric workspace scope | A workspace can contain lakehouse, notebook, semantic model, report, dataflow, and pipeline items. |
-| Certification | Certified content is discoverable and trusted across the tenant. |
+### Tableau LOD example
 
-## Workshop example
+Tableau idea:
 
-The Tableau-like extract is `data/raw/redfin/market_tracker.csv`.
-It is intentionally wide so Tableau authors can recognize the shape.
+```text
+{ FIXED [Region] : SUM([Written Premium]) }
+```
 
-The modeled Power BI path is the star schema:
+Power BI measure pattern:
 
-1. `dim_region`
-2. `dim_date`
-3. `dim_property_type`
-4. `fact_home_sales`
-5. Gold summaries: `gold_market_summary` and `gold_region_latest`
+```DAX
+Written Premium by Region =
+CALCULATE(
+    [Written Premium],
+    ALLEXCEPT('dim_agent', 'dim_agent'[Region])
+)
+```
 
-In the Direct Lake lab, those gold tables support the `Housing-Market-Insights` semantic model.
+Use this when the page has Product, Channel, or Agent filters, but the business
+question is explicitly regional.
 
-## Practical translation rule
+### Tableau table calculation example
 
-If the Tableau item answers a business question, migrate the question first.
-If the Tableau item encodes shared business logic, migrate the logic into the semantic model.
-If the Tableau item is a one-off visual layout, rebuild it as a report page only after the model is stable.
+Tableau idea:
 
-## Microsoft Learn anchors
+```text
+LOOKUP(SUM([Written Premium]), -12)
+```
 
-- [Power BI migration overview](https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-overview)
-- [Understand star schema and the importance for Power BI](https://learn.microsoft.com/en-us/power-bi/guidance/star-schema)
-- [Direct Lake overview](https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview)
-- [Row-level security with Power BI](https://learn.microsoft.com/en-us/fabric/security/service-admin-row-level-security)
+Power BI measure pattern:
+
+```DAX
+Written Premium PY =
+CALCULATE(
+    [Written Premium],
+    SAMEPERIODLASTYEAR('dim_date'[period_begin])
+)
+```
+
+The measure belongs in `sm_insurance` so every report page uses the same YoY
+definition.
+
+## Model-first checklist
+
+- Confirm the grain of each fact table before building visuals.
+- Use `fact_premium` for premium and policy counts.
+- Use `fact_claim` for incurred losses, paid losses, and claim counts.
+- Use `dim_date` for month, quarter, and prior year logic.
+- Use `dim_agent` for agency, channel, and book of business analysis.
+- Hide surrogate keys from report authors.
+- Name fields in business language, for example `Written Premium`, not
+  `written_premium`.
+- Add descriptions to key measures so Copilot and authors understand intent.
+- Certify `sm_insurance` only after tie-out and owner review.
+
+## Migration rule of thumb
+
+| If the Tableau workbook has... | Start with... | Reason |
+| --- | --- | --- |
+| One flat extract and many calculated fields | Star schema rebuild | The model will be cleaner than copying sheet logic. |
+| A stable certified data source | Shared semantic model | Reuse the same business layer. |
+| Heavy custom visuals and layout | Report rebuild | Recreate the experience using Power BI-native visuals. |
+| Complex prep logic | Dataflow Gen2 or notebook | Keep transformation code outside the report. |
+| Live operational queries | Direct Lake or DirectQuery assessment | Match freshness needs before choosing storage mode. |
+
+## Related workshop files
+
+- Migration plan: migration-approaches.md
+- Governance worksheet: ../governance/migration-assessment-worksheet.md
+- Direct Lake reference: direct-lake.md
+- Copilot authoring: copilot-in-power-bi.md
+- Source list: sources.md

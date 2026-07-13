@@ -1,92 +1,113 @@
 # Migration assessment worksheet
 
-Use this worksheet to inventory Tableau content before deciding what to migrate, consolidate, rebuild, or retire.
-Copy the table into Excel, Power BI, or a planning board for migration wave management.
+Use this worksheet before rebuilding Tableau content in Power BI. The purpose is
+to decide what to rebuild, what to retire, what to consolidate, and which
+semantic model should become the governed target.
 
-Related docs:
+## Worksheet table
 
-- [Tableau to Power BI concept translation](../reference/tableau-to-powerbi.md)
-- [Migration approaches](../reference/migration-approaches.md)
-- [Endorsement and certification](endorsement-certification.md)
-
-## Inventory template
-
-| Workbook | Owner | # sheets | Data sources | Extract vs Live | Complexity 1-5 | Business value 1-5 | Priority | Target semantic model | Approach rebuild/re-platform | Notes |
+| Workbook | Owner | # sheets | Data sources | Extract vs Live | Complexity 1-5 | Business value 1-5 | Priority | Target semantic model | Approach | Notes |
 | --- | --- | ---: | --- | --- | ---: | ---: | --- | --- | --- | --- |
-| Housing Market | Analytics Enablement | 12 | Redfin market tracker, MLS listings | Extract | 3 | 5 | Wave 1 | Housing-Market-Insights | Rebuild | Good POC. Convert wide extract into Fabric star schema and Direct Lake model. |
+| Insurance Executive | Executive Reporting Owner | 12 | `policy_claims_extract.csv`, Claims Intake | Extract | 4 | 5 | P1 | `sm_insurance` | Rebuild | Validate Written Premium, Loss Ratio, Claim Count, and Region filters. |
+|  |  |  |  |  |  |  |  |  |  |  |
 |  |  |  |  |  |  |  |  |  |  |  |
 |  |  |  |  |  |  |  |  |  |  |  |
 |  |  |  |  |  |  |  |  |  |  |  |
 
-## Field guidance
-
-| Field | How to fill it |
-| --- | --- |
-| Workbook | Tableau workbook or project name. |
-| Owner | Business owner, not only the publisher. |
-| # sheets | Count worksheets, dashboards, and story points if useful. |
-| Data sources | Published data sources, embedded connections, extracts, files, and custom SQL. |
-| Extract vs Live | Note extract, live, mixed, or unknown. |
-| Complexity 1-5 | Technical difficulty to migrate. Use the rubric below. |
-| Business value 1-5 | Business criticality and adoption value. Use the rubric below. |
-| Priority | Wave 1, Wave 2, backlog, retire, or investigate. |
-| Target semantic model | Existing or planned Power BI semantic model. |
-| Approach rebuild/re-platform | Rebuild, re-platform, consolidate, retire, or investigate. |
-| Notes | Risks, dependencies, validation needs, and open questions. |
-
-## Complexity scoring rubric
+## Complexity rubric
 
 | Score | Description | Examples |
 | --- | --- | --- |
-| 1 | Simple workbook | One source, few visuals, limited calculations, no security logic. |
-| 2 | Low complexity | Multiple pages, straightforward filters, common calculations. |
-| 3 | Moderate complexity | Several sources, LOD expressions, parameters, or custom SQL. |
-| 4 | High complexity | Heavy workbook logic, nested table calculations, entitlement rules, or performance issues. |
-| 5 | Very high complexity | Regulated reporting, complex security, unclear ownership, or fragile source dependencies. |
+| 1 | Simple | Few visuals, one clean source, minimal calculations. |
+| 2 | Low | Several sheets, basic filters, standard aggregations. |
+| 3 | Moderate | Multiple sources, calculated fields, moderate interactivity. |
+| 4 | High | LOD expressions, table calculations, RLS, complex layout. |
+| 5 | Very high | Many sources, custom extensions, heavy prep, critical operations use. |
 
-## Business value scoring rubric
+## Business value rubric
 
 | Score | Description | Examples |
 | --- | --- | --- |
-| 1 | Low value | Low usage, duplicate report, no clear owner. |
-| 2 | Limited value | Useful to a small team but not operationally critical. |
-| 3 | Moderate value | Recurring business review or team planning input. |
-| 4 | High value | Leadership reporting, revenue or risk decisions, broad adoption. |
-| 5 | Critical value | Executive, regulatory, client-impacting, or operationally required. |
+| 1 | Low | Rarely used, no clear owner, low decision impact. |
+| 2 | Limited | Used by a small team for non-critical monitoring. |
+| 3 | Moderate | Used monthly or by a department lead. |
+| 4 | High | Used weekly for business reviews or operational action. |
+| 5 | Critical | Executive, regulatory, financial, or daily decision support. |
 
-## Priority matrix
+## Priority rules
 
-| Business value | Complexity | Priority recommendation |
+| Priority | Use when | Recommended path |
 | --- | --- | --- |
-| 4-5 | 1-2 | Wave 1 quick win. |
-| 4-5 | 3 | Wave 1 or Wave 2 with POC. |
-| 4-5 | 4-5 | POC, then phased rebuild. |
-| 2-3 | 1-3 | Backlog or self-service migration. |
-| 1-2 | 4-5 | Retire, archive, or consolidate unless required. |
+| P1 | High value and feasible within the migration wave. | POC, rebuild, validate, certify. |
+| P2 | Important but depends on model or data readiness. | Sequence after shared model gaps close. |
+| P3 | Low value or duplicate content. | Consolidate or retire. |
+| Hold | Owner, source, or requirement is unclear. | Resolve before build starts. |
 
-## Approach definitions
+## Approach options
 
-| Approach | Definition |
-| --- | --- |
-| Rebuild | Redesign the solution around a shared semantic model and Power BI report. |
-| Re-platform | Move the workbook experience with minimal redesign for speed or parity. |
-| Consolidate | Replace several Tableau workbooks with one model and one or more reports. |
-| Retire | Decommission content because value is low or a replacement exists. |
-| Investigate | Ownership, source, usage, or security is unclear. |
+| Approach | Definition | Use for |
+| --- | --- | --- |
+| Rebuild | Design the model and report using Power BI patterns. | High-value workbooks with duplicated Tableau logic. |
+| Re-platform | Recreate the report experience with minimal logic change. | Simple workbooks on governed data. |
+| Consolidate | Replace multiple workbooks with one report or app. | Duplicate product, region, or agent views. |
+| Retire | Archive and remove from active navigation. | Low-use or ownerless content. |
 
-## Filled example
+## Data source assessment
 
-| Workbook | Owner | # sheets | Data sources | Extract vs Live | Complexity 1-5 | Business value 1-5 | Priority | Target semantic model | Approach rebuild/re-platform | Notes |
-| --- | --- | ---: | --- | --- | ---: | ---: | --- | --- | --- | --- |
-| Housing Market | Analytics Enablement | 12 | `market_tracker.csv`, `listings.csv` | Extract | 3 | 5 | Wave 1 | `Housing-Market-Insights` | Rebuild | Use Fabric `lh_housing`, Gold tables, Direct Lake, and certified semantic model. Validate `Homes Sold`, `Inventory`, and `Avg Median Sale Price`. |
+Capture details for each source:
 
-## Assessment meeting agenda
+- Source system or file.
+- Refresh cadence.
+- Extract size.
+- Live query dependency.
+- Credential owner.
+- Gateway requirement.
+- Data classification.
+- Known quality issues.
+- Replacement Fabric table or model.
 
-1. Confirm owner and audience.
-2. Identify the business decision supported by the workbook.
-3. Review sources and refresh paths.
-4. List calculations that must become model measures.
-5. Score complexity and business value.
-6. Pick approach and target semantic model.
-7. Assign validation owner.
-8. Decide whether to retire, consolidate, or migrate.
+For the workshop, `policy_claims_extract.csv` represents the flat Tableau
+extract. The target is the modeled star schema behind `sm_insurance`.
+
+## Calculation assessment
+
+For each workbook, list:
+
+- Calculated fields.
+- LOD expressions.
+- Table calculations.
+- Parameters.
+- Sets and groups.
+- Custom fiscal calendars.
+- Security filters.
+- Measures that should become shared DAX.
+
+Any measure used by more than one report should be a candidate for the semantic
+model, not a report-only calculation.
+
+## Validation notes
+
+| Metric | Tie-out grain | Expected source |
+| --- | --- | --- |
+| Written Premium | Month, Product, Region | Tableau extract and `fact_premium` |
+| Earned Premium | Month, Product | Tableau extract and `fact_premium` |
+| Incurred Losses | Month, Product, Region | Tableau extract and `fact_claim` |
+| Claim Count | Month, Product, Severity | Tableau extract and `fact_claim` |
+| Loss Ratio | Month, Product, Region | DAX measure validation |
+
+## Exit criteria for a workbook
+
+- Owner confirms the replacement scope.
+- Target semantic model is named.
+- Priority and approach are assigned.
+- Required calculations are mapped to DAX measures.
+- RLS and sensitivity needs are documented.
+- Validation grain is agreed.
+- Cutover and retirement path are known.
+
+## Related workshop files
+
+- Migration approaches: ../reference/migration-approaches.md
+- Tableau translation: ../reference/tableau-to-powerbi.md
+- Certification: endorsement-certification.md
+- Adoption roadmap: adoption-roadmap.md

@@ -1,99 +1,109 @@
-# Copilot in Power BI for report authors
+# Copilot in Power BI for insurance report authors
 
-Copilot in Power BI helps authors move faster when the semantic model is clear, governed, and described.
-For Schwab Tableau authors, think of Copilot as an assistant that works best after the data model is organized.
+Copilot is most useful when the semantic model is already clean. In this
+workshop, that means `sm_insurance` has a star schema, friendly names, governed
+measures, and descriptions that explain insurance terms.
 
-Workshop lab:
+## Lab connection
 
-- [Lab 07: Copilot reports](../labs/lab-07-copilot-reports/README.md)
+- Lab: ../labs/lab-07-copilot-reports/README.md
+- Semantic model: `sm_insurance`
+- Report: `rpt_insurance_executive`
+- Sources: [Copilot for Power BI overview](sources.md#copilot-for-power-bi)
 
 ## What Copilot can help authors do
 
-Microsoft documents Copilot capabilities in [Copilot for Power BI overview](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-introduction).
-
-| Author task | Copilot capability | Workshop example |
+| Author task | Copilot use | Insurance prompt example |
 | --- | --- | --- |
-| Create report pages | Generate report pages from a prompt or selected model fields | "Create an executive housing market overview by metro and property type." |
-| Edit report pages | Adjust report layout and visuals through prompts | "Add a line chart for median sale price trend by month." |
-| Summarize the semantic model | Describe model contents and likely analytical paths | Summarize `Housing-Market-Insights` tables and measures. |
-| Create a narrative visual | Add text summaries that update with report context | Explain which metros have the highest inventory pressure. |
-| Write DAX queries | Generate or explain DAX queries in DAX query view | Ask for `Homes Sold` by metro and month. |
-| Generate measure descriptions | Draft descriptions for model measures | Add business-friendly descriptions for `Homes Sold YoY %`. |
+| Create a report page | Generate a first layout from a model prompt. | "Create an executive page showing Written Premium, Loss Ratio, Claim Count, and Policies In Force." |
+| Edit a page | Add or change visuals using natural language. | "Add a line chart for Written Premium by month and Product." |
+| Summarize a model | Explain tables, fields, and measures. | "Summarize the insurance semantic model for a new analyst." |
+| Add a narrative visual | Generate explanatory text from report context. | "Explain why Loss Ratio changed by region this quarter." |
+| Write or refine DAX | Use Copilot in DAX query view for DAX queries and explanations. | "Show DAX to compare Written Premium to prior year by Product." |
+| Improve descriptions | Draft measure descriptions for model maintainers. | "Describe Loss Ratio for report authors in one sentence." |
 
-## Authoring surfaces
+## Prerequisites to confirm
 
-| Surface | Use it for | Notes |
-| --- | --- | --- |
-| Copilot pane | Report creation, page edits, summaries, and conversational authoring | Available in supported Power BI experiences when requirements are met. |
-| Inline Copilot | Focused assistance inside modeling or report tasks | Useful when generating measure descriptions or DAX. |
-| DAX query view | Natural language to DAX query, DAX explanation, and query edits | See [Write DAX queries with Copilot](https://learn.microsoft.com/en-us/dax/dax-copilot). |
-| Narrative visual | Context-aware written summary on a report page | See [Create a narrative visual with Copilot](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-create-narrative). |
+Use current tenant guidance and the sources in sources.md. For workshop
+planning, confirm:
 
-## Prerequisites
-
-Copilot availability depends on tenant and capacity settings.
-Confirm these before the lab:
-
-1. The workspace is backed by supported Fabric capacity or Power BI Premium capacity.
-2. Tenant settings allow users to use Copilot and Azure OpenAI-powered features.
-3. Authors have the needed workspace or model permissions.
-4. The report or semantic model is in a supported region.
-5. The semantic model has clear names, descriptions, and relationships.
-
-Admin settings are documented in [Copilot and Agent admin settings](https://learn.microsoft.com/en-us/fabric/admin/service-admin-portal-copilot).
+- The workspace is on supported Fabric or Power BI capacity.
+- Copilot is enabled by tenant and capacity settings.
+- Authors have permission to the workspace and semantic model.
+- Data is appropriate for Copilot use under company policy.
+- The semantic model has understandable table, column, and measure names.
+- The report author is working from the governed model, not a private copy.
 
 ## Make Copilot good
 
-Copilot quality is model quality multiplied by metadata quality.
-Treat the model like a product, not a hidden extract.
+Copilot quality depends on model quality. Do this before the demo:
 
-| Design choice | Why it helps Copilot |
+| Model preparation | Why it matters |
 | --- | --- |
-| Star schema | Copilot can infer filter paths and aggregation grain more reliably. |
-| Friendly table names | `Region` is clearer than `dim_region` for business prompts if display names are adjusted. |
-| Friendly measure names | `Avg Median Sale Price` is easier to prompt than a cryptic workbook calculation. |
-| Measure descriptions | Copilot can explain and use calculations with more business context. |
-| Hidden technical columns | Authors and Copilot see fewer irrelevant fields. |
-| Synonyms and descriptions | Business terms like "metro" and "market" map to the right fields. |
-| Certified model | Authors know which model to use and avoid duplicate versions. |
+| Use a star schema | Copilot can reason over clear facts and dimensions. |
+| Hide technical columns | Users should not see `policy_id`, `date_id`, or surrogate keys. |
+| Use friendly names | "Written Premium" is better than `written_premium`. |
+| Add measure descriptions | Copilot can use descriptions to explain intent. |
+| Define measures once | Reuse reduces conflicting answers. |
+| Set data categories | Dates, geography, and URLs behave better in visuals. |
+| Remove ambiguous duplicates | Do not expose two fields with the same business meaning. |
 
-Microsoft guidance: [Prepare your data for AI to improve Copilot results](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai).
+## Core insurance measures
 
-## Workshop model setup checklist
-
-Before running Copilot prompts against `Housing-Market-Insights`:
-
-- Confirm relationships from `fact_home_sales` to `dim_date`, `dim_region`, and `dim_property_type`.
-- Confirm measures exist for `Homes Sold`, `New Listings`, `Inventory`, and `Homes Sold YoY %`.
-- Add descriptions to core measures.
-- Hide keys and technical staging fields.
-- Use display folders for Market, Supply, Pricing, and Time Intelligence.
-- Apply a sensitivity label if the model is used outside the workshop.
-- Publish to `Schwab-Analytics-Dev` first, then promote through Test and Prod.
-
-## Example prompts
-
-Use prompts that name the grain and the decision.
-
-| Prompt | Why it works |
+| Measure | Description for authors |
 | --- | --- |
-| "Create a page showing inventory, months of supply, and median days on market by metro for the latest month." | It names metrics, dimensions, and time scope. |
-| "Summarize which metros have the fastest year-over-year growth in homes sold." | It points Copilot to the YoY measure and business question. |
-| "Write a DAX query that returns Homes Sold and Homes Sold YoY % by month_name for Seattle WA." | It names measures, dimension, and filter. |
-| "Add a narrative summary for the selected region and property type." | It connects narrative output to report filters. |
+| Written Premium | Premium written during the selected period. |
+| Earned Premium | Premium earned during the selected coverage period. |
+| Policies In Force | Count of active policies in force for the selected context. |
+| Policies Written | Count of policies written during the selected period. |
+| Incurred Losses | Loss amount incurred for claims in the selected context. |
+| Paid Losses | Claim payments made in the selected context. |
+| Claim Count | Count of claims in the selected context. |
+| Loss Ratio | Incurred Losses divided by Earned Premium. |
+| Average Premium | Written Premium divided by Policies Written. |
+| Written Premium YoY % | Year-over-year change in Written Premium. |
 
-## Guardrails
+## Prompt patterns
 
-Copilot accelerates authoring, but authors still own correctness.
-Review generated visuals, DAX, and summaries.
-Validate totals against known source values.
-Do not certify a report because Copilot created it.
-Certify it because owners, measures, lineage, and support processes are clear.
+| Pattern | Example |
+| --- | --- |
+| Start with business question | "Which product has the highest Loss Ratio in the West region?" |
+| Specify visual type | "Create a matrix with Product rows, Region columns, and Loss Ratio values." |
+| Name the measures | "Use Written Premium, Earned Premium, and Claim Count." |
+| Ask for explanation | "Explain the drivers of Loss Ratio for Auto in the Northeast." |
+| Ask for validation help | "List DAX queries I can use to tie out Written Premium by month." |
 
-## Microsoft Learn anchors
+## DAX Copilot examples
 
-- [Copilot for Power BI overview](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-introduction)
-- [Create and edit Power BI reports with Copilot](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-create-reports)
-- [Write DAX queries with Copilot](https://learn.microsoft.com/en-us/dax/dax-copilot)
-- [Use Copilot to create measure descriptions](https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-measure-copilot-descriptions)
-- [Prepare your data for AI to improve Copilot results](https://learn.microsoft.com/en-us/power-bi/create-reports/copilot-prepare-data-ai)
+Use DAX Copilot to generate queries for exploration and validation, not as a
+substitute for model owner review.
+
+```DAX
+EVALUATE
+SUMMARIZECOLUMNS(
+    'dim_date'[year],
+    'dim_date'[month_name],
+    'dim_policy'[product],
+    "Written Premium", [Written Premium],
+    "Loss Ratio", [Loss Ratio]
+)
+```
+
+Ask Copilot to explain the query, then have the model owner approve the final
+measure or validation query.
+
+## Guardrails for workshop presenters
+
+- Do not demo Copilot against messy duplicate fields.
+- Do not accept generated DAX without testing it.
+- Do not use synthetic results as proof of production readiness.
+- Do show that Copilot is better when the model is governed.
+- Do connect Copilot authoring to endorsement and certification.
+
+## Related workshop files
+
+- Model guidance: tableau-to-powerbi.md
+- Direct Lake model: direct-lake.md
+- Certification: ../governance/endorsement-certification.md
+- Adoption plan: ../governance/adoption-roadmap.md
+- Source list: sources.md

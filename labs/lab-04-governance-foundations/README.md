@@ -1,80 +1,95 @@
-# Lab 4 - Governance Foundations
+# Lab 4 - Governance foundations
 
-**Duration:** ~45 min - **Deck:** "Governance & migration approaches"
+**Duration:** ~50 min - **Deck:** "Governance foundations"
 
-You will define the governance basics for the workshop environment. The focus is practical: who can do what, where content moves, how users consume reports, and how trusted assets become Promoted or Certified.
+You will apply the governance pattern that makes the insurance migration safe to scale. The lab connects Power BI row-level security with Rayfin @role policies so teams see the same security idea in analytics and operational apps.
 
 ## Schwab context
-A Tableau migration is not only a rebuild of sheets and dashboards. Schwab teams also need a governed operating model so analytics content can move from development to production without losing ownership, security, or trust.
-
-You will use Schwab-Analytics-Dev, Schwab-Analytics-Test, and Schwab-Analytics-Prod as the backbone for the rest of the workshop. The same pattern can scale to department, domain, or product analytics teams.
+Schwab teams need more than a good-looking report. They need clear workspace roles, promotion paths, sensitivity labels, certified shared models, and access rules that match the way agents and teams are allowed to see insurance business data.
 
 ## What you'll build
-- A basic role model for Admin, Member, Contributor, and Viewer.
-- A Dev/Test/Prod content flow for the workshop assets.
-- A workspace purpose statement for each workspace.
-- A sensitivity label and endorsement checklist.
-- A decision on workspaces versus apps for report distribution.
-- A first look at deployment pipelines and migration approaches.
+- A governance checklist for Schwab-Analytics-Dev, Schwab-Analytics-Test, and Schwab-Analytics-Prod
+- A draft RLS rule where agents see only their own book of business
+- A clear parallel between Power BI RLS and Rayfin @role row-level security
+- Endorsement guidance for promoted and certified semantic models
+- A deployment pipeline path for rpt_insurance_executive and sm_insurance
 
 ## Prerequisites
-- Completed [Lab 3 - Visualization](../lab-03-visualization/README.md).
-- Access to the three workshop workspaces.
-- A published report or model from Day 1.
-- Governance references: [workspace-governance.md](../../governance/workspace-governance.md), [endorsement-certification.md](../../governance/endorsement-certification.md), and [migration-approaches.md](../../reference/migration-approaches.md).
+- Completed [Lab 3 - Visualization](../lab-03-visualization/README.md)
+- Access to the three workshop workspaces
+- A star model with dim_agent, dim_policy, fact_premium, and fact_claim
+- Reference docs: [workspace governance](../../governance/workspace-governance.md) and [endorsement certification](../../governance/endorsement-certification.md)
+- Rayfin reference: [rayfin-app/README.md](../../rayfin-app/README.md)
 
 ## Steps
-### 1. Review workspace purposes
-Open Schwab-Analytics-Dev, Schwab-Analytics-Test, and Schwab-Analytics-Prod.
+### 1. Review workspace roles
+- Open Schwab-Analytics-Dev in the Power BI Service.
+- Review workspace access.
+- Use Admin only for workspace owners.
+- Use Member or Contributor for builders who need to publish or edit content.
+- Use Viewer for consumers who only need to read reports.
+- Repeat the review for Schwab-Analytics-Test and Schwab-Analytics-Prod.
+- Record any role assignments that should be changed after the workshop.
 
-Write a one-sentence purpose for each workspace. Dev is for authoring, Test is for validation, and Prod is for certified consumption.
+### 2. Define the dev, test, and prod path
+- Treat Schwab-Analytics-Dev as the build workspace.
+- Treat Schwab-Analytics-Test as the validation workspace.
+- Treat Schwab-Analytics-Prod as the consumer workspace.
+- Connect the three workspaces in a deployment pipeline if your tenant allows it.
+- Promote content from Dev to Test only after measures and visuals tie out.
+- Promote content from Test to Prod only after ownership, sensitivity, and endorsement are clear.
+- Keep experimental extracts out of Prod.
 
-### 2. Assign roles deliberately
-Review the roles described in [governance/workspace-governance.md](../../governance/workspace-governance.md).
+### 3. Apply sensitivity and endorsement thinking
+- Discuss which sensitivity label fits insurance policy and claim data.
+- Apply a label if your tenant has labels configured for the workshop.
+- Mark the Lab 1 extract model as not endorsed.
+- Plan to promote sm_insurance after Lab 6 when it has clean measures and descriptions.
+- Plan to certify sm_insurance only after business owner review.
+- Use [endorsement certification](../../governance/endorsement-certification.md) as the checklist.
 
-Use Admin for workspace owners, Member for trusted publishers, Contributor for builders who do not manage access, and Viewer for consumers. Avoid giving broad Admin access just to solve short-term access issues.
+### 4. Create a Power BI RLS role
+- In Power BI Desktop, open the star model.
+- Select Manage roles.
+- Create a role named Agent Book.
+- Add a filter on dim_agent for the current user's identity if your data includes a user mapping field.
+- For the lab, you can simulate the rule by filtering dim_agent[agent_name] to one sample agent.
+- Confirm fact_premium and fact_claim filter through the model relationships.
+- Use View as to test the role.
+- Record what additional identity mapping would be required for production.
 
-### 3. Separate build access from consume access
-Discuss which users need to build reports and which users only need to view reports.
+### 5. Connect Power BI RLS to Rayfin @role
+- Open [rayfin-app/README.md](../../rayfin-app/README.md) and review the Policy and Claim model notes.
+- Rayfin uses TypeScript decorators such as @entity, @authenticated('*'), and @role(...).
+- The Rayfin app uses @role so an agent can see only policies and claims in their book.
+- Power BI RLS does the same kind of filtering for analytics views.
+- The difference is the surface: Power BI RLS protects reports and semantic model queries, while Rayfin @role protects operational app reads and writes.
+- Use the same access design conversation for both.
+- This parallel will come back in Lab 11.
 
-For report consumers, plan to distribute through an app from Schwab-Analytics-Prod instead of adding every user directly to the workspace.
+### 6. Confirm least-privilege access
+- Limit Build permission on semantic models to users and groups that need to create reports, query with MCP, or connect Excel.
+- Limit workspace Admin roles.
+- Use deployment pipelines instead of direct edits in Prod.
+- Keep service principals scoped to the minimum Fabric items they need.
+- Document who owns sm_insurance.
+- Document who owns rpt_insurance_executive.
+- Document who owns the Rayfin operational app after Day 3.
 
-### 4. Add or review sensitivity labels
-Open a report or semantic model and review sensitivity label options.
-
-If labels are enabled in the tenant, choose the workshop-approved label. If labels are not enabled, record that sensitivity labeling is a governance dependency for production rollout.
-
-### 5. Plan endorsement
-Open [governance/endorsement-certification.md](../../governance/endorsement-certification.md).
-
-Use Promoted for content that the owning team recommends. Use Certified for content that meets a formal standard for ownership, documentation, data quality, support, and access review.
-
-### 6. Compare workspaces and apps
-Create a simple decision rule.
-
-Use workspaces for collaboration among builders. Use apps for packaged consumption by business users, with navigation and permissions managed for the audience.
-
-### 7. Introduce deployment pipelines
-In Fabric, open Deployment pipelines if your tenant has the feature enabled.
-
-Map Schwab-Analytics-Dev to the development stage, Schwab-Analytics-Test to the test stage, and Schwab-Analytics-Prod to the production stage. You will automate a version of this pattern in Lab 9.
-
-### 8. Choose a migration approach
-Read the migration approach options in [reference/migration-approaches.md](../../reference/migration-approaches.md).
-
-For a Tableau workbook, decide whether the right approach is lift and shift, redesign into a shared model, or retire and replace. Most high-value Schwab assets should be redesigned around a shared semantic model.
-
-### 9. Capture the governance checklist
-Create a short checklist for any report before it moves to Prod.
-
-Include owner, audience, data source, sensitivity label, endorsement status, validation evidence, support contact, and refresh or Direct Lake behavior.
+### 7. Capture the governance decision log
+- Write down the workspace role pattern.
+- Write down the endorsement path for sm_insurance.
+- Write down the RLS approach for agents.
+- Write down how Rayfin @role maps to the same business rule.
+- Write down the deployment path from Dev to Test to Prod.
+- Keep this decision log with the team, not inside the lab files.
 
 ## You'll know it worked when
-- Each workspace has a clear purpose and role model.
-- You can explain the difference between a workspace and an app.
-- You know when Promoted and Certified should be used.
-- You have a checklist for moving workshop content toward production.
-- You understand why migration approach decisions affect governance.
+- You can describe the difference between Admin, Member, Contributor, and Viewer for the workshop workspaces.
+- You have a deployment path from Schwab-Analytics-Dev to Schwab-Analytics-Test to Schwab-Analytics-Prod.
+- You have a draft Agent Book RLS role or a documented simulation.
+- You can explain how Power BI RLS and Rayfin @role solve the same row-level access problem on different surfaces.
+- You know when to use Promoted and Certified endorsement for sm_insurance.
 
 ## Next
-Previous: [Lab 3 - Visualization](../lab-03-visualization/README.md). Continue to [Lab 5 - Ingestion to OneLake](../lab-05-ingestion-onelake/README.md).
+[Lab 5 - Ingestion to OneLake](../lab-05-ingestion-onelake/README.md)

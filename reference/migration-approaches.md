@@ -1,130 +1,139 @@
 # Tableau to Power BI migration approaches
 
-This guide describes how Schwab teams should migrate Tableau content into Power BI and Microsoft Fabric.
-The goal is not to clone every workbook.
-The goal is to preserve trusted decisions, consolidate repeated logic, and reduce workbook sprawl.
+Start migration work with inventory, not visuals. The fastest way to create a
+new mess is to rebuild every Tableau workbook as a separate Power BI report and
+semantic model.
 
-Related workshop assets:
+## Workshop outcome
 
-- Inventory template: [migration assessment worksheet](../governance/migration-assessment-worksheet.md)
-- Direct Lake model lab: [lab 06](../labs/lab-06-semantic-model-directlake/README.md)
-- PBIP reference: [src/pbip](../src/pbip/README.md)
+By the end of this workshop, the team should know how to move from a Tableau
+extract-centered estate to a Fabric-centered estate:
 
-## Grounding guidance
+- Lakehouse: `lh_insurance`
+- Warehouse: `wh_insurance`
+- Semantic model: `sm_insurance`
+- Report: `rpt_insurance_executive`
+- Environments: `Schwab-Analytics-Dev`, `Schwab-Analytics-Test`,
+  `Schwab-Analytics-Prod`
 
-Microsoft frames migration as a staged program: set up and evaluate, create new solutions, migrate selected assets, then adopt, govern, and monitor.
-See [Power BI migration overview](https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-overview).
-For technical risk reduction, use a proof of concept.
-See [Conduct proof of concept to migrate to Power BI](https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-proof-of-concept).
+Microsoft migration guidance is listed in [sources.md](sources.md#migration-and-delivery).
 
-## Migration flow
+## Migration stages
 
-| Step | Output | Schwab workshop action |
-| --- | --- | --- |
-| 1. Inventory | List of workbooks, owners, sources, usage, extracts, live connections, and calculations | Start with the [assessment worksheet](../governance/migration-assessment-worksheet.md). |
-| 2. Assess | Complexity score and business value score | Score from 1 to 5, then classify into waves. |
-| 3. Prioritize | Value x complexity matrix | Move high-value, low-complexity reports first. |
-| 4. Choose approach | Rebuild, re-platform, retire, or consolidate | Avoid copying a workbook if a shared model can replace it. |
-| 5. Build POC | Small validated solution | Use the housing model to test Direct Lake, DAX, RLS, and report parity. |
-| 6. Validate | Reconciled metrics and user acceptance | Numbers must tie out before cutover. |
-| 7. Cut over | Production report and adoption plan | Publish to `Schwab-Analytics-Prod` and communicate the new certified source. |
-| 8. Monitor | Usage, refresh, capacity, and defect tracking | Review adoption and capacity health weekly during launch. |
+| Stage | Output | Owner | Workshop artifact |
+| --- | --- | --- | --- |
+| Inventory | Workbook list, owners, data sources, usage | BI lead | ../governance/migration-assessment-worksheet.md |
+| Assess | Complexity and value scoring | BI lead plus business owner | Worksheet rubric |
+| Prioritize | Ranked backlog | Sponsor plus CoE | Adoption roadmap |
+| Prove | POC with success criteria | Delivery squad | `rpt_insurance_executive` slice |
+| Rebuild | Shared model, report pages, validation | Delivery squad | `sm_insurance` and report |
+| Cut over | Published app, training, deprecation plan | Product owner | Governance checklist |
 
-## Inventory and assess workbooks
+## Inventory fields to collect
 
-Capture each Tableau workbook before making design decisions.
-Do not start by recreating tabs.
-Start by asking what decisions the workbook supports.
-
-Minimum inventory fields:
+Use the worksheet in ../governance/migration-assessment-worksheet.md. At a
+minimum, capture:
 
 - Workbook name
 - Business owner
-- Technical owner
-- Data sources
+- Report audience
+- Number of sheets and dashboards
+- Tableau data sources
 - Extract or live connection
-- Number of sheets
-- Custom SQL
-- Calculated fields
-- LOD expressions
-- Table calculations
-- Parameters
-- RLS or entitlement rules
-- Refresh or publishing cadence
-- Business criticality
-- Known data quality issues
+- Refresh cadence
+- Key metrics
+- Row-level security needs
+- Usage over the last 90 days
+- Known pain points
+- Target semantic model
 
-Use the worksheet: [migration-assessment-worksheet.md](../governance/migration-assessment-worksheet.md).
+## Value x complexity prioritization
 
-## Prioritize by value x complexity
+| Category | Business value | Technical complexity | Action |
+| --- | --- | --- | --- |
+| Quick win | High | Low | Migrate early and use in enablement. |
+| Strategic | High | High | Run a POC before full rebuild. |
+| Commodity | Low | Low | Migrate only if still used. |
+| Retire candidate | Low | High | Archive or replace with a shared report. |
 
-| Category | What it means | Recommended action |
-| --- | --- | --- |
-| High value, low complexity | Important report, simple sources, few calculations | First migration wave. |
-| High value, high complexity | Executive or regulated report, heavy logic | POC first, then rebuild with governed model. |
-| Low value, low complexity | Useful but not critical | Backlog or self-service rebuild. |
-| Low value, high complexity | Expensive to migrate and low usage | Retire, archive, or consolidate. |
+For Contoso Insurance, the "Insurance Executive" workbook is a strategic early
+candidate because it validates Written Premium, Earned Premium, Loss Ratio, and
+Claim Count against executive expectations.
 
-## Choose rebuild or re-platform
+## Rebuild vs re-platform
 
 | Approach | Use when | Avoid when |
 | --- | --- | --- |
-| Rebuild | Logic should move into a shared semantic model, visuals can be improved, or data needs Fabric governance | Users require pixel-perfect temporary parity. |
-| Re-platform | Workbook is stable, scoped, and needed quickly with minimum redesign | The workbook embeds duplicated metrics or fragile custom SQL. |
-| Consolidate | Several workbooks answer the same question with different extracts | One team still owns a legitimate specialized workflow. |
-| Retire | Usage is low, owner is gone, or source is superseded | The report is required for audit, legal, or operational continuity. |
+| Rebuild in Power BI | Business logic is duplicated, extracts are wide, or the target is a shared semantic model. | The workbook is a temporary one-off. |
+| Re-platform layout first | The workbook is visually simple and already uses a clean governed source. | Tableau calculations are complex or undocumented. |
+| Replace with existing report | Usage overlaps with another migration candidate. | The report serves a unique regulated workflow. |
+| Retire | Usage is low and the owner agrees. | The workbook is tied to required reporting. |
 
-## Model-based vs report-based migration
+## Model-based migration
 
-Tableau estates often grow one workbook at a time.
-Power BI works better when reusable logic lives in a semantic model.
+Model-based migration creates the reusable layer first.
 
-For this workshop:
+| Step | Contoso Insurance example |
+| --- | --- |
+| Identify facts | `fact_premium`, `fact_claim` |
+| Identify dimensions | `dim_policy`, `dim_customer`, `dim_agent`, `dim_coverage`, `dim_date` |
+| Define measures | Written Premium, Earned Premium, Incurred Losses, Loss Ratio |
+| Validate totals | Compare the wide `policy_claims_extract.csv` to model totals |
+| Build reports | Executive summary, product trends, agent scorecard |
 
-1. Build `lh_housing` in Fabric.
-2. Promote raw data from Bronze to Silver to Gold.
-3. Build `Housing-Market-Insights (Direct Lake)` on Gold tables.
-4. Create thin reports against that model.
-5. Certify the model once it meets governance criteria.
+This is the preferred path for high-value shared reporting.
+
+## Report-based migration
+
+Report-based migration starts with a workbook and rebuilds the user experience.
+
+Use it when:
+
+- The Tableau workbook has few calculations.
+- The data source is already governed.
+- The audience needs a like-for-like replacement.
+- The report is not a candidate for a new enterprise semantic model.
+
+Still avoid creating one semantic model per workbook. If two reports use the
+same measures, they should share `sm_insurance` or another governed model.
 
 ## POC success criteria
 
-Use the housing market use case as the POC pattern.
+The Microsoft proof-of-concept guidance recommends validating assumptions,
+understanding product differences, and testing with real data. For this
+workshop, a POC should prove:
 
 | Area | Success criterion |
 | --- | --- |
-| Data parity | `Homes Sold`, `Inventory`, and `Avg Median Sale Price` reconcile to the Tableau extract. |
-| Model design | Dimensions filter facts correctly by date, region, and property type. |
-| Performance | Primary report pages open and filter interactively for 24 months x 12 metros x 4 property types. |
-| Security | Test users see only the intended region or role scope when RLS is enabled. |
-| Authoring | Report authors can build pages without copying DAX from another report. |
-| Governance | Owners, endorsements, sensitivity labels, and deployment path are assigned. |
+| Data | Written Premium ties to Tableau within agreed tolerance. |
+| Model | Loss Ratio uses one certified DAX measure. |
+| Performance | Executive page renders within the target service-level objective. |
+| Security | Region or book-of-business RLS works for test users. |
+| Delivery | Dev to Test to Prod movement is repeatable. |
+| Adoption | At least one business owner signs off on the replacement. |
 
-## Validation
+## Validation checklist
 
-Numbers must tie out before users switch tools.
-Validate at multiple grains:
+- Reconcile total Written Premium by month.
+- Reconcile Earned Premium by product.
+- Reconcile Incurred Losses by region.
+- Reconcile Claim Count by severity and status.
+- Confirm Loss Ratio equals `DIVIDE([Incurred Losses], [Earned Premium])`.
+- Check blanks, zero denominators, and inactive policies.
+- Validate filters for Product, Region, Channel, and Agent.
+- Test RLS with a user who should see only one region or book.
 
-- Total `Homes Sold` by month
-- Total `Inventory` by metro
-- `Avg Median Sale Price` by property type
-- `Homes Sold PY` for prior-year comparison
-- `Homes Sold YoY %` against the Tableau workbook logic
-- Row counts from Bronze, Silver, and Gold tables
+## Cutover pattern
 
-When numbers differ, document whether the cause is source filtering, date logic, aggregation grain, null handling, or an intentional business-rule change.
+| Step | Action |
+| --- | --- |
+| Announce | Tell users which Tableau workbook is being replaced and why. |
+| Parallel run | Keep both reports available for a defined validation window. |
+| Train | Run a short session on filters, drill, export, and subscriptions. |
+| Certify | Certify the semantic model after owner approval. |
 
-## Cutover and adoption
+## Related workshop files
 
-1. Publish the validated report to `Schwab-Analytics-Prod`.
-2. Endorse or certify the semantic model before broad rollout.
-3. Announce the new report, owner, support path, and retirement date for the old workbook.
-4. Keep the Tableau version read-only during the parallel run if policy allows it.
-5. Monitor usage, defects, and data refresh or Direct Lake behavior.
-6. Retire duplicated extracts once adoption is stable.
-
-## Microsoft Learn anchors
-
-- [Power BI migration overview](https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-overview)
-- [Conduct proof of concept to migrate to Power BI](https://learn.microsoft.com/en-us/power-bi/guidance/powerbi-migration-proof-of-concept)
-- [Overview of Fabric deployment pipelines](https://learn.microsoft.com/en-us/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines)
+- Translation guide: tableau-to-powerbi.md
+- Direct Lake reference: direct-lake.md
+- Governance worksheet: ../governance/migration-assessment-worksheet.md

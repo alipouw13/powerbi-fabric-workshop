@@ -1,87 +1,101 @@
-# Lab 9 - MCP + GitHub Copilot
+# Lab 9 - MCP and GitHub Copilot
 
-**Duration:** ~75 min - **Deck:** "Developer workflow: GitHub Copilot + MCP"
+**Duration:** ~75 min - **Deck:** "MCP + GitHub Copilot"
 
-You will connect GitHub Copilot in VS Code to Power BI MCP servers and use the model from prior labs as the working target. You will query an existing semantic model with the remote server, then discuss how the local server can build and modify models programmatically.
+You will connect GitHub Copilot in VS Code to Power BI MCP servers, query sm_insurance, and review how PBIP plus CI/CD changes the developer loop. You will also see Rayfin's MCP package as the app-building parallel.
 
 ## Schwab context
-Analysts and BI developers increasingly work in both visual tools and code. For Schwab teams, MCP creates a governed bridge where GitHub Copilot can inspect semantic models, run approved queries, and help manage PBIP assets without bypassing Fabric RBAC.
-
-In MCP terms, the host is VS Code, the client is GitHub Copilot, and the server is Power BI. Use least-privilege Fabric RBAC for every connection.
+Power BI development is becoming more code-friendly. Schwab teams can use GitHub Copilot, MCP, PBIP, and Fabric CI/CD to inspect models, run DAX, modify artifacts, and keep least-privilege controls in place.
 
 ## What you'll build
-- A VS Code MCP configuration file named mcp.json.
-- A GitHub Copilot chat session that calls Get Semantic Model Schema.
-- A DAX query run through Execute Query against Housing-Market-Insights.
-- A review of Get Report Metadata output.
-- A local MCP workflow discussion for building or modifying semantic models.
-- A PBIP and CI/CD handoff using [src/pbip/README.md](../../src/pbip/README.md) and [src/cicd](../../src/cicd/).
+- A VS Code MCP configuration for the Power BI remote MCP server
+- A schema inspection of sm_insurance
+- A DAX query against sm_insurance using src/sql/sample_dax_queries.dax
+- A local MCP workflow for build or model modification tasks
+- A PBIP source-control checkpoint tied to src/pbip/README.md and src/cicd/
 
 ## Prerequisites
-- Completed [Lab 8 - Migrate a Workbook](../lab-08-migrate-a-workbook/README.md).
-- VS Code with the GitHub Copilot extension installed and signed in.
-- Build permission on Housing-Market-Insights.
-- Power BI MCP server details from [reference/mcp-servers.md](../../reference/mcp-servers.md).
-- Node.js 20+ available if you test the local MCP server.
-- Sample DAX in [src/sql/sample_dax_queries.dax](../../src/sql/sample_dax_queries.dax).
+- Completed [Lab 8 - Migrate a workbook](../lab-08-migrate-a-workbook/README.md)
+- VS Code installed and signed in to GitHub Copilot
+- Node 20+ installed for local MCP workflows
+- Build permission on sm_insurance for DAX queries
+- Least-privilege access to Schwab-Analytics-Dev
+- Reference docs: [MCP servers](../../reference/mcp-servers.md), [PBIP](../../src/pbip/README.md), and [Rayfin](../../reference/rayfin.md)
 
 ## Steps
-### 1. Open the workshop repo in VS Code
-Open the workshop repository folder in VS Code.
+### 1. Review the MCP architecture
+- Host: VS Code.
+- Client: GitHub Copilot.
+- Server: Power BI.
+- The Power BI remote MCP server is Fabric-hosted and requires no local install.
+- The remote server uses Streamable HTTP and Entra ID or Service Principal authentication.
+- The remote tools include Execute Query, Get Semantic Model Schema, and Get Report Metadata.
+- Execute Query runs DAX, enforces RLS, and requires Build permission on the semantic model.
+- The local MCP server uses Node 20+, npx, and stdio for build and modification workflows.
 
-Confirm GitHub Copilot Chat is available. Keep the Fabric portal open so you can compare MCP responses to the actual semantic model.
+### 2. Add the remote MCP server to VS Code
+- Open this workshop repository in VS Code.
+- Open or create your user-level mcp.json according to your VS Code and GitHub Copilot setup.
+- Add the Power BI remote MCP server using the URL and authentication pattern from [reference/mcp-servers.md](../../reference/mcp-servers.md).
+- Do not paste secrets into the repository.
+- Keep tenant-specific values in user settings or approved secret storage.
+- Restart the MCP session if VS Code prompts you.
+- Confirm GitHub Copilot shows the Power BI tools.
 
-### 2. Configure the remote MCP server
-Create or update an mcp.json file using the facilitator-provided remote Power BI MCP server endpoint.
+### 3. Inspect sm_insurance schema
+- In GitHub Copilot chat, ask for the schema of sm_insurance in Schwab-Analytics-Dev.
+- Use the Get Semantic Model Schema tool.
+- Confirm the model includes fact_premium, fact_claim, dim_customer, dim_agent, dim_policy, dim_coverage, and dim_date.
+- Confirm the core measures appear with expected names.
+- Ask Copilot to summarize the model in insurance business terms.
+- Check the answer against the fields and descriptions you added in Lab 6.
 
-The remote MCP server is Fabric-hosted, requires no local install, uses Streamable HTTP, and supports Microsoft Entra ID OAuth or Service Principal auth. Do not paste secrets into source-controlled files.
+### 4. Execute DAX through MCP
+- Open [src/sql/sample_dax_queries.dax](../../src/sql/sample_dax_queries.dax).
+- Copy a query that returns Written Premium, Earned Premium, or Loss Ratio by product or region.
+- Ask GitHub Copilot to run the query against sm_insurance with the Execute Query tool.
+- Confirm the result respects your permissions and RLS.
+- If a query fails, check Build permission, workspace access, model name, and DAX syntax.
+- Compare the result to the Lab 6 validation output.
 
-### 3. Confirm the remote server tools
-In GitHub Copilot Chat, ask which Power BI MCP tools are available.
+### 5. Review report metadata
+- Ask Copilot to get metadata for rpt_insurance_executive.
+- Confirm report pages such as Insurance Executive Overview, Premium Production, Loss Ratio Trend, or Agent Scorecard are visible if they exist.
+- Ask Copilot to identify which semantic model the report uses.
+- Confirm it points to sm_insurance.
+- Use this step to discuss inventory, documentation, and migration assessment at scale.
 
-The remote server is for querying data and generating insights from existing models. It exposes Execute Query, Get Semantic Model Schema, and Get Report Metadata.
+### 6. Try the local MCP workflow
+- Configure the local Power BI MCP server according to [reference/mcp-servers.md](../../reference/mcp-servers.md).
+- Confirm Node 20+ is active.
+- Use npx only as documented by the server instructions.
+- Ask Copilot to inspect or modify a local PBIP artifact.
+- Use [src/pbip/README.md](../../src/pbip/README.md) as the PBIP contract.
+- Keep generated changes small and reviewable.
+- Do not let local edits bypass semantic model governance.
 
-### 4. Get the semantic model schema
-Ask Copilot to use Get Semantic Model Schema for Housing-Market-Insights.
+### 7. Commit and deploy the governed pattern
+- Review src/cicd/parameter.yml.
+- Review src/cicd/.github/workflows/fabric-cicd.yml.
+- Commit PBIP or metadata changes only after validation.
+- Use a focused commit message.
+- Let the Fabric CI/CD workflow deploy to the right workspace when configured.
+- Keep environment-specific values in parameter.yml or approved secret storage.
+- Confirm Dev, Test, and Prod remain aligned with Lab 4 governance.
 
-Review tables, columns, measures, relationships, and AI metadata. Confirm that the core measures from Lab 6 appear with the exact names.
-
-### 5. Execute a governed DAX query
-Open [src/sql/sample_dax_queries.dax](../../src/sql/sample_dax_queries.dax) and choose a query.
-
-Ask Copilot to run Execute Query against Housing-Market-Insights. Under user auth, Row-Level Security is enforced, and the user needs Build permission on the semantic model.
-
-### 6. Inspect report metadata
-Ask Copilot to use Get Report Metadata for the report created in Lab 7 or Lab 8.
-
-Review pages, visuals, fields, and model references. Use this to understand how report structure can be reviewed without manually clicking through every page.
-
-### 7. Configure the local MCP server
-Review the local server setup in [reference/mcp-servers.md](../../reference/mcp-servers.md).
-
-The local MCP server runs locally in VS Code or through Node.js 20+ with npx and uses stdio transport. It is intended for building and modifying semantic models programmatically, including metadata read and write, query, and database operations.
-
-### 8. Save the model as PBIP
-Review [src/pbip/README.md](../../src/pbip/README.md).
-
-Save or export the model and report as a Power BI Project where possible. PBIP makes semantic model metadata reviewable in Git and easier to automate in a developer workflow.
-
-### 9. Commit and prepare CI/CD
-Review [src/cicd/parameter.yml](../../src/cicd/parameter.yml) and [src/cicd/.github/workflows/fabric-cicd.yml](../../src/cicd/.github/workflows/fabric-cicd.yml).
-
-Use Git to commit only approved PBIP and configuration changes. The CI/CD pattern promotes content through Schwab-Analytics-Dev, Schwab-Analytics-Test, and Schwab-Analytics-Prod.
-
-### 10. Apply least privilege
-Review who has access to the model, the workspace, and the MCP connection.
-
-Use least-privilege Fabric RBAC. Give Build permission only to users who should query the semantic model through tools such as Execute Query.
+### 8. Connect the Rayfin MCP parallel
+- Rayfin ships an MCP package named @microsoft/rayfin-mcp.
+- Power BI MCP helps Copilot inspect and work with semantic models and reports.
+- Rayfin MCP is the app-building parallel for Fabric-backed operational apps.
+- Both patterns put Copilot in a tool-enabled workflow with least-privilege access.
+- You will use the Rayfin app skeleton directly in Lab 11.
 
 ## You'll know it worked when
-- VS Code can connect GitHub Copilot to the Power BI remote MCP server.
-- Get Semantic Model Schema returns tables, measures, relationships, and AI metadata for Housing-Market-Insights.
-- Execute Query runs a DAX query from sample_dax_queries.dax.
-- You can explain the difference between the remote MCP server and local MCP server.
-- You know where PBIP and CI/CD assets live in src/pbip and src/cicd.
+- GitHub Copilot can access the Power BI remote MCP tools in VS Code.
+- Get Semantic Model Schema returns sm_insurance tables and measures.
+- Execute Query runs a DAX query from src/sql/sample_dax_queries.dax and enforces RLS.
+- You understand when to use the remote MCP server and when to use the local MCP server.
+- You can explain how @microsoft/rayfin-mcp is analogous for Rayfin app development.
 
 ## Next
-Previous: [Lab 8 - Migrate a Workbook](../lab-08-migrate-a-workbook/README.md). Continue to [Lab 10 - Data Agent Showcase](../lab-10-data-agent-showcase/README.md).
+[Lab 10 - Data Agent showcase](../lab-10-data-agent-showcase/README.md)

@@ -1,105 +1,119 @@
 # Adoption roadmap
 
-This roadmap turns the 3-day workshop into a repeatable Tableau to Power BI and Fabric adoption program.
-It assumes Schwab wants governed self-service, shared semantic models, and a practical migration path.
+The migration succeeds only if users trust the new reports and builders reuse
+the governed model. This roadmap turns the workshop into a 30, 60, and 90 day
+operating plan.
 
-Related docs:
+## Adoption stages
 
-- [Workspace governance](workspace-governance.md)
-- [Endorsement and certification](endorsement-certification.md)
-- [Migration assessment worksheet](migration-assessment-worksheet.md)
-- [Migration approaches](../reference/migration-approaches.md)
+| Stage | Goal | What good looks like |
+| --- | --- | --- |
+| Crawl | Establish a governed pilot. | One validated semantic model, one executive report, named owners. |
+| Walk | Expand reuse and migration throughput. | Multiple Tableau workbooks mapped to shared models and deployment gates. |
+| Run | Operate as a Fabric analytics product. | Certified models, active champions, capacity monitoring, and regular releases. |
 
-## Adoption phases
+## Operating model
 
-| Phase | Goal | Typical activities | Exit criteria |
-| --- | --- | --- | --- |
-| Crawl | Establish foundations | Inventory Tableau content, define workspaces, train first authors, build POC | First validated model and report in Test. |
-| Walk | Scale governed reuse | Create certified models, migrate priority reports, build champions network | Report authors reuse shared semantic models. |
-| Run | Operate as a product | Monitor usage, optimize capacity, automate deployment, mature CoE | Certified models cover major analytical domains. |
-
-## Center of Excellence model
-
-| Role | Responsibility |
+| Group | Responsibilities |
 | --- | --- |
-| Executive sponsor | Sets priority, removes blockers, and reinforces the migration outcome. |
-| Power BI CoE lead | Owns standards, enablement, backlog, and adoption metrics. |
-| Fabric platform owner | Owns capacity, tenant settings, workspace policy, and monitoring. |
-| Data engineering lead | Owns Lakehouse, Bronze/Silver/Gold patterns, and data quality. |
-| Semantic model owner | Owns measures, relationships, RLS, model descriptions, and certification readiness. |
-| Business product owner | Owns requirements, acceptance criteria, and user communications. |
-| Champions | Help teams migrate, answer peer questions, and surface friction. |
-| Support lead | Owns intake, triage, known issues, and service expectations. |
-
-## Champions network
-
-Champions should be close to the work.
-Pick Tableau power users, analysts, and report consumers who can translate business questions.
-
-Champion responsibilities:
-
-- Attend migration office hours.
-- Test migrated reports before broad release.
-- Collect user feedback.
-- Identify duplicate workbooks.
-- Encourage use of certified semantic models.
-- Share successful report patterns.
-- Escalate missing data or metric definitions.
+| Executive sponsor | Sets priority, removes blockers, and reinforces migration outcomes. |
+| Center of Excellence | Defines standards, certification criteria, enablement, and reusable patterns. |
+| Fabric platform team | Manages capacity, tenant settings, workspace policy, gateways, and monitoring. |
+| Data engineering team | Owns Lakehouse, Warehouse, pipelines, and data quality. |
+| Semantic model owners | Own model design, DAX measures, descriptions, RLS, and certification evidence. |
+| Report authors | Build thin reports, test usability, and submit model enhancement requests. |
+| Champions | Help teams adopt Power BI practices and collect feedback. |
 
 ## Enablement plan
 
-| Audience | Enablement | Outcome |
+| Audience | Enablement | Format |
 | --- | --- | --- |
-| Tableau authors | Tableau to Power BI concept mapping, DAX basics, report design | Authors can rebuild reports without cloning old workbook patterns. |
-| BI model owners | Star schema, Direct Lake, measure governance, certification | Owners can create trusted shared semantic models. |
-| Data engineers | Fabric Lakehouse, medallion tables, Dataflow Gen2, notebooks | Engineers can land and curate analytics-ready data. |
-| Business consumers | Report navigation, slicers, subscriptions, export policy | Consumers trust and use the new reports. |
-| Admins | Workspace roles, tenant settings, capacity metrics, deployment pipelines | Admins can operate safely at scale. |
+| Executives | What changed, where to find certified reports, how to subscribe. | 30 minute briefing. |
+| Analysts | Tableau to Power BI translation, DAX basics, model reuse. | Hands-on workshop. |
+| Report authors | Thin reports, field parameters, Copilot authoring, validation. | Lab plus office hours. |
+| Model owners | Star schema, measure definitions, RLS, endorsement. | Working session. |
+| Platform admins | Workspaces, capacity, labels, tenant settings, deployment. | Governance review. |
 
 ## Success metrics
 
 | Metric | Definition | Target direction |
 | --- | --- | --- |
-| Certified models | Count of certified semantic models with owners and descriptions | Increase |
-| Report consolidation ratio | Tableau workbooks retired per new Power BI report or model | Increase |
-| Active users | Monthly active viewers and authors in approved workspaces | Increase |
-| Capacity health | Throttling, queued operations, and sustained high CU periods | Improve |
-| Model reuse | Reports connected to shared semantic models | Increase |
-| Duplicate model count | Models with overlapping metric definitions | Decrease |
-| Validation defects | Number of metric tie-out issues found after release | Decrease |
-| Adoption satisfaction | Survey or office-hour sentiment | Improve |
+| Certified models | Count of certified semantic models with named owners. | Increase. |
+| Report consolidation ratio | Retired Tableau workbooks or duplicate Power BI reports divided by migrated reports. | Increase. |
+| Active users | Monthly active viewers of certified reports. | Increase. |
+| Build permission coverage | Authors using governed models rather than private datasets. | Increase. |
+| Capacity health | Throttling, high CU items, and refresh contention. | Improve. |
+| Validation pass rate | Migrated reports that pass tie-out on first or second review. | Increase. |
+| Support tickets | Repeated data definition questions or broken refreshes. | Decrease. |
+| Champion participation | Active champions attending office hours or community sessions. | Increase. |
 
-## 30/60/90 day plan
+## 30 day plan
 
-| Timeframe | Owner | Actions | Deliverables |
-| --- | --- | --- | --- |
-| First 30 days | CoE lead and platform owner | Stand up workspaces, confirm tenant settings, inventory top Tableau assets, run housing POC | Dev/Test/Prod workspaces, initial inventory, validated POC report |
-| First 30 days | BI model owner | Build `Housing-Market-Insights`, document core measures, test Direct Lake | Shared model with measure descriptions |
-| First 30 days | Business product owner | Pick first migration wave and define acceptance criteria | Wave 1 backlog and sign-off checklist |
-| Days 31-60 | Data engineering lead | Stabilize Bronze/Silver/Gold pattern and data quality checks | Repeatable Fabric data pipeline pattern |
-| Days 31-60 | BI model owner | Prepare first model for promotion or certification | Endorsement request and validation evidence |
-| Days 31-60 | Champions | Run UAT sessions and collect feedback | UAT findings and adoption FAQ |
-| Days 61-90 | CoE lead | Publish standards, train authors, and launch office hours | Standards pack and enablement calendar |
-| Days 61-90 | Platform owner | Monitor capacity and workspace access | Capacity review and access review |
-| Days 61-90 | Business owners | Retire or freeze replaced Tableau workbooks | Retirement list and communication plan |
+| Workstream | Owner | Deliverable |
+| --- | --- | --- |
+| Migration backlog | BI lead | Completed assessment worksheet for top Tableau workbooks. |
+| Pilot model | Semantic model owner | `sm_insurance` reviewed with core measures and descriptions. |
+| Executive report | Report author | `rpt_insurance_executive` rebuilt and ready for validation. |
+| Governance | CoE lead | Workspace roles, naming, labels, and endorsement criteria approved. |
+| Platform | Fabric admin | Capacity Metrics app installed and reviewed weekly. |
+| Enablement | Champions lead | Tableau to Power BI translation session delivered. |
 
-## Operating cadence
+## 60 day plan
+
+| Workstream | Owner | Deliverable |
+| --- | --- | --- |
+| Migration wave 1 | BI lead | First P1 workbooks migrated or retired. |
+| Certification | Approved certifier | `sm_insurance` certified if criteria are met. |
+| Deployment | Release owner | Dev to Test to Prod process documented and used. |
+| RLS | Security owner | Region or book-of-business RLS tested with business users. |
+| Copilot | CoE lead | Copilot authoring guidance and prompt examples published. |
+| Office hours | Champions lead | Weekly support channel with captured FAQs. |
+
+## 90 day plan
+
+| Workstream | Owner | Deliverable |
+| --- | --- | --- |
+| Migration wave 2 | BI lead | Additional high-value workbooks moved to shared models. |
+| Consolidation | Analytics product owner | Duplicate models and reports retired or merged. |
+| Capacity operations | Fabric platform team | Monthly capacity health review with action log. |
+| Data products | Data engineering lead | Gold table contracts documented for insurance analytics. |
+| Rayfin exploration | App engineering lead | Claims Intake or ops app path evaluated for production fit. |
+| Community | Champions lead | Internal showcase featuring model reuse and app examples. |
+
+## Champion network
+
+| Champion type | Focus |
+| --- | --- |
+| Business champion | Validates definitions and encourages report adoption. |
+| Analyst champion | Helps translate Tableau patterns to Power BI patterns. |
+| Technical champion | Supports DAX, semantic model, and PBIP questions. |
+| Governance champion | Reinforces certification, labels, and workspace practices. |
+
+## Communication rhythm
 
 | Cadence | Meeting | Purpose |
 | --- | --- | --- |
-| Weekly | Migration wave standup | Track blockers, validation, and cutover status. |
-| Weekly | Office hours | Help authors and champions with Power BI and Fabric questions. |
-| Biweekly | Governance review | Review endorsement, access, labels, and exceptions. |
-| Monthly | Capacity and adoption review | Review Fabric metrics, usage, certified models, and active users. |
-| Quarterly | Roadmap planning | Prioritize domains, retire legacy content, and update standards. |
+| Weekly | Migration standup | Backlog, blockers, validation, and cutover status. |
+| Weekly | Office hours | Help authors and collect recurring issues. |
+| Biweekly | CoE review | Standards, certification candidates, and pattern updates. |
+| Monthly | Capacity review | Capacity health, adoption, and optimization actions. |
+| Quarterly | Executive readout | Migration progress, value delivered, and next priorities. |
 
-## Adoption risks and mitigations
+## Risks and mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| Authors recreate workbook sprawl | Certify shared models and train authors to connect to them. |
-| Users distrust numbers | Require tie-out evidence before cutover and publish metric definitions. |
-| Capacity issues hurt confidence | Monitor with the Fabric Capacity Metrics app and schedule heavy workloads. |
-| Ownership is unclear | Require owner and backup owner before endorsement. |
-| Copilot gives weak output | Improve model names, descriptions, relationships, and AI metadata. |
-| Migration feels like tool replacement only | Anchor every wave to a business decision and retirement plan. |
+| Users distrust numbers | Run parallel validation and publish tie-out evidence. |
+| Authors create private models | Certify shared models and require assessment mapping. |
+| Capacity issues appear during rollout | Monitor with Capacity Metrics app and tune high-use reports. |
+| Tableau logic is undocumented | Inventory calculations and validate with business owners. |
+| Copilot gives weak results | Improve model names, descriptions, and star schema quality. |
+| Governance slows delivery | Use clear gates and lightweight templates. |
+
+## Related workshop files
+
+- Workspace governance: workspace-governance.md
+- Certification: endorsement-certification.md
+- Migration worksheet: migration-assessment-worksheet.md
+- Reference apps: ../reference/reference-apps.md
+- Source list: ../reference/sources.md

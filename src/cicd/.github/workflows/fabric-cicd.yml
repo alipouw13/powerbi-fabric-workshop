@@ -1,6 +1,6 @@
 name: Deploy Fabric (PBIP) via fabric-cicd
 
-# Sample CI/CD workflow for the housing workshop - deploys the committed PBIP
+# Sample CI/CD workflow for the Contoso Insurance workshop - deploys the committed PBIP
 # semantic model + report to a Fabric workspace when changes merge. Adapt
 # branch/stage mapping to your branching strategy. Used in Lab 9.
 #
