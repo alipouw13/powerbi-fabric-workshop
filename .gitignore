@@ -1,0 +1,25 @@
+# Generated sample data (regenerate with data/generate_data.py)
+data/raw/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# PBIP local / cache artifacts (commit the project, not the cache)
+*.pbix
+.pbi/
+**/.pbi/localSettings.json
+**/cache.abf
+
+# Secrets / environment - NEVER commit
+.env
+*.secret
+**/parameter.local.yml
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

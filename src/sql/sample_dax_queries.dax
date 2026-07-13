@@ -1,0 +1,42 @@
+-- Sample DAX queries for the Housing-Market-Insights model.
+-- Use these to verify the model, and to demo the Power BI MCP server (remote):
+-- in VS Code, GitHub Copilot calls the "Execute Query" tool with a query like
+-- these against the semantic model. See labs/lab-09-mcp-github-copilot.
+
+-- 1. Homes sold and average median price by metro, latest full month
+EVALUATE
+SUMMARIZECOLUMNS(
+    dim_region[region],
+    "Homes Sold", [Homes Sold],
+    "Avg Median Sale Price", [Avg Median Sale Price]
+)
+ORDER BY [Homes Sold] DESC;
+
+-- 2. Homes sold YoY % by metro (tests the time-intelligence measure)
+EVALUATE
+SUMMARIZECOLUMNS(
+    dim_region[region],
+    "Homes Sold", [Homes Sold],
+    "Homes Sold YoY %", [Homes Sold YoY %]
+);
+
+-- 3. Months of supply trend for one metro (buyer vs seller market)
+EVALUATE
+CALCULATETABLE(
+    SUMMARIZECOLUMNS(
+        dim_date[period_begin],
+        "Months of Supply", [Months of Supply],
+        "Median Days on Market", [Median Days on Market]
+    ),
+    dim_region[region] = "Seattle, WA",
+    dim_property_type[property_type] = "All Residential"
+)
+ORDER BY dim_date[period_begin];
+
+-- 4. Competitiveness: share of homes sold above list, by property type
+EVALUATE
+SUMMARIZECOLUMNS(
+    dim_property_type[property_type],
+    "Sold Above List %", [Sold Above List %],
+    "Avg Sale to List %", [Avg Sale to List %]
+);

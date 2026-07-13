@@ -1,0 +1,76 @@
+name: Deploy Fabric (PBIP) via fabric-cicd
+
+# Sample CI/CD workflow for the housing workshop - deploys the committed PBIP
+# semantic model + report to a Fabric workspace when changes merge. Adapt
+# branch/stage mapping to your branching strategy. Used in Lab 9.
+#
+# Auth: uses a service principal (recommended) via OIDC or client secret stored
+# in GitHub Actions secrets. Never hardcode secrets in this file.
+
+on:
+  push:
+    branches: [ main ]          # main -> test ;  promote to prod via environment approval
+    paths:
+      - "src/pbip/**"
+      - "src/cicd/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write               # for OIDC federation to Entra (preferred over secrets)
+
+jobs:
+  deploy-test:
+    runs-on: ubuntu-latest
+    environment: schwab-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+
+      - name: Install fabric-cicd
+        run: pip install fabric-cicd
+
+      - name: Deploy PBIP to TEST workspace
+        env:
+          AZURE_CLIENT_ID:  ${{ secrets.FABRIC_SP_CLIENT_ID }}
+          AZURE_TENANT_ID:  ${{ secrets.FABRIC_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.FABRIC_SP_SECRET }}   # or use OIDC, drop this
+        run: |
+          python - <<'PY'
+          from fabric_cicd import FabricWorkspace, publish_all_items
+          ws = FabricWorkspace(
+              workspace_id="${{ vars.FABRIC_TEST_WORKSPACE_ID }}",
+              environment="schwab-test",
+              repository_directory="src/pbip",
+              item_type_in_scope=["SemanticModel", "Report"],
+          )
+          publish_all_items(ws)
+          PY
+
+  deploy-prod:
+    needs: deploy-test
+    runs-on: ubuntu-latest
+    environment: schwab-prod    # add required reviewers on this GitHub environment = approval gate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install fabric-cicd
+      - name: Deploy PBIP to PROD workspace
+        env:
+          AZURE_CLIENT_ID:  ${{ secrets.FABRIC_SP_CLIENT_ID }}
+          AZURE_TENANT_ID:  ${{ secrets.FABRIC_TENANT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.FABRIC_SP_SECRET }}
+        run: |
+          python - <<'PY'
+          from fabric_cicd import FabricWorkspace, publish_all_items
+          ws = FabricWorkspace(
+              workspace_id="${{ vars.FABRIC_PROD_WORKSPACE_ID }}",
+              environment="schwab-prod",
+              repository_directory="src/pbip",
+              item_type_in_scope=["SemanticModel", "Report"],
+          )
+          publish_all_items(ws)
+          PY
