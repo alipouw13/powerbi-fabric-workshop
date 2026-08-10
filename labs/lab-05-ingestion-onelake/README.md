@@ -30,7 +30,7 @@ Today most Power BI reports connect directly to SQL databases with an import mod
 - List the refresh schedule, credentials, and failure notification owner for one existing report.
 - Discuss where large Excel files are used as a source, and what breaks as they grow: refresh time, file locks, single-owner risk, and no lineage.
 - Write down which of your current sources could move behind a shared gateway connection instead of one per report.
-- Everything after this step is the target-state pattern, so treat it as a walkthrough of where this is going.
+- Everything after this step is the target-state pattern: land the raw files once, then layer them as Bronze, Silver, and Gold, which step 3 explains. Treat it as a walkthrough of where this is going.
 
 ### 2. Confirm raw file layout
 - Open lh_insurance.
