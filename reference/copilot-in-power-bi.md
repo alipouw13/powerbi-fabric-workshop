@@ -1,8 +1,14 @@
-# Copilot in Power BI for insurance report authors
+# Copilot options for insurance report authors
 
 Copilot is most useful when the semantic model is already clean. In this
 workshop, that means `sm_insurance` has a star schema, friendly names, governed
 measures, and descriptions that explain insurance terms.
+
+> **Availability for this audience:** Copilot embedded in Power BI is locked down
+> for most attendees and Copilot Studio is not available, so the embedded
+> experience is a facilitator demo. **Microsoft 365 Copilot** is the option some
+> attendees have today, and the section below covers what it can do for a report
+> author. See [schwab-environment-today.md](schwab-environment-today.md).
 
 ## Lab connection
 
@@ -21,6 +27,26 @@ measures, and descriptions that explain insurance terms.
 | Add a narrative visual | Generate explanatory text from report context. | "Explain why Loss Ratio changed by region this quarter." |
 | Write or refine DAX | Use Copilot in DAX query view for DAX queries and explanations. | "Show DAX to compare Written Premium to prior year by Product." |
 | Improve descriptions | Draft measure descriptions for model maintainers. | "Describe Loss Ratio for report authors in one sentence." |
+
+## Microsoft 365 Copilot as the alternative
+
+Microsoft 365 Copilot does not see your semantic model, so you give it the
+context. That still covers a lot of the author workload while embedded Copilot
+is unavailable.
+
+| Author task | How to do it with Microsoft 365 Copilot | Watch out for |
+| --- | --- | --- |
+| Understand a model | Paste the table, column, and measure list and ask for a plain-language summary. | It only knows what you paste; it cannot read `sm_insurance`. |
+| Document measures | Ask for one-sentence descriptions of Loss Ratio, Earned Premium, and Written Premium YoY %. | Review every description for insurance accuracy before adding it to the model. |
+| Draft DAX | Give the existing measure definitions as context and ask for a new measure, then test it in Power BI Desktop. | Generated DAX is a draft. Tie the numbers out before keeping it. |
+| Translate Tableau logic | Paste a Tableau calculated field or LOD expression and ask for the DAX equivalent. | Confirm the filter context matches what the workbook actually did. |
+| Plan a migration | Ask it to turn workbook notes into a page-by-page migration checklist. | Keep the checklist in the governed migration worksheet, not only in chat. |
+| Write the comms | Draft release notes, training summaries, or a community-of-practice update. | Do not paste real Schwab data, credentials, or restricted content into any prompt. |
+
+What Microsoft 365 Copilot cannot do: generate report pages on the canvas, add
+visuals from a prompt, produce a narrative visual, or query the semantic model.
+Those need Copilot in Power BI, which is why the demo is worth watching even
+though it is not enabled yet.
 
 ## Prerequisites to confirm
 
@@ -94,6 +120,9 @@ measure or validation query.
 
 ## Guardrails for workshop presenters
 
+- Be explicit about which Copilot you are showing, embedded or Microsoft 365.
+- Do not imply an enablement date for restricted features; route that to the
+  enablement conversation instead.
 - Do not demo Copilot against messy duplicate fields.
 - Do not accept generated DAX without testing it.
 - Do not use synthetic results as proof of production readiness.
@@ -102,6 +131,7 @@ measure or validation query.
 
 ## Related workshop files
 
+- Environment and availability: schwab-environment-today.md
 - Model guidance: tableau-to-powerbi.md
 - Direct Lake model: direct-lake.md
 - Certification: ../governance/endorsement-certification.md

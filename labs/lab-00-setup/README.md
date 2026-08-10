@@ -1,11 +1,13 @@
 # Lab 0 - Setup
 
-**Duration:** ~40 min - **Deck:** "Kickoff + goals"
+**Duration:** ~50 min - **Deck:** "Kickoff + goals"
 
 You will prepare the Fabric, Power BI, GitHub Copilot, and Rayfin toolchains used across the workshop. By the end, your team has the Contoso Insurance data landed in OneLake and the Rayfin prerequisite checked before Day 3.
 
 ## Schwab context
-Schwab teams moving from Tableau to Power BI need a consistent Fabric estate before any report migration starts. This setup lab gives every team the same P&C insurance data, the same workspace pattern, and the same Rayfin app foundation for operational claims intake.
+Schwab teams moving from Tableau to Power BI need a consistent estate before any report migration starts. This setup lab gives every team the same P&C insurance data, the same workspace pattern, and the same Rayfin app foundation for operational claims intake.
+
+Before anything else, read [reference/schwab-environment-today.md](../../reference/schwab-environment-today.md) with the room. It states what is available today (Power BI Desktop and Service, SQL through the on-premises data gateway, import models) and what is restricted (Copilot in Power BI, Copilot Studio, Data Agents, MCP, and full OneLake or Lakehouse approval), so nobody spends a lab fighting a locked-down feature.
 
 ## What you'll build
 - Three Fabric workspaces: Schwab-Analytics-Dev, Schwab-Analytics-Test, Schwab-Analytics-Prod
@@ -24,14 +26,21 @@ Schwab teams moving from Tableau to Power BI need a consistent Fabric estate bef
 - Reference docs: [architecture](../../reference/architecture.md), [Rayfin](../../reference/rayfin.md), and [sources](../../reference/sources.md)
 
 ## Steps
-### 1. Confirm Fabric capacity
+### 1. Set the current-state context
+- Walk through the feature availability table in [reference/schwab-environment-today.md](../../reference/schwab-environment-today.md).
+- Agree which sessions are hands-on and which are facilitator demos.
+- Note the current data architecture: flat tables, large Excel files, and SQL sources imported through the on-premises data gateway.
+- Note the development and gateway practices that constrain what a team can ship today.
+- Start a running list of capabilities the group wants enabled, to hand to the enablement discussion at the end of Day 3.
+
+### 2. Confirm Fabric capacity
 - Open the Fabric portal and confirm you can see a capacity assigned to your tenant.
 - If your administrator already created a workspace, verify it is backed by capacity.
 - If you do not see capacity, capture the issue for the facilitator before continuing.
 - Do not build the labs in My workspace.
 - Keep capacity, workspace, and deployment pipeline names consistent with this guide.
 
-### 2. Create the workshop workspaces
+### 3. Create the workshop workspaces
 - Create Schwab-Analytics-Dev for hands-on build work.
 - Create Schwab-Analytics-Test for deployment pipeline validation.
 - Create Schwab-Analytics-Prod for the final shared model and report pattern.
@@ -39,7 +48,7 @@ Schwab teams moving from Tableau to Power BI need a consistent Fabric estate bef
 - Leave viewer access for consumers until Lab 4, when you apply governance rules.
 - Record the workspace URLs in your team notes.
 
-### 3. Generate the Contoso Insurance files
+### 4. Generate the Contoso Insurance files
 - From the workshop root, run the synthetic data generator.
 
 ```powershell
@@ -51,7 +60,7 @@ python data\generate_data.py
 - Confirm data\raw\ops\claims_intake.csv exists.
 - Do not rename columns, because later labs depend on the exact names.
 
-### 4. Create lh_insurance and land raw files
+### 5. Create lh_insurance and land raw files
 - In Schwab-Analytics-Dev, create a Lakehouse named lh_insurance.
 - Open Files and create a raw folder if it is not already present.
 - Upload data/raw/** into Files/raw.
@@ -59,7 +68,7 @@ python data\generate_data.py
 - Keep Files/raw/ops/ for the operational claims feed.
 - Spot-check policy_claims_extract.csv and claims_intake.csv in the Lakehouse file explorer.
 
-### 5. Prepare the Rayfin prerequisite
+### 6. Prepare the Rayfin prerequisite
 - Rayfin is a Backend-as-a-Service that runs on Microsoft Fabric.
 - Confirm Node 20+ is active.
 
@@ -79,11 +88,11 @@ npm create @microsoft/rayfin@latest
 - Notice the entities Customer, Agent, Policy, and Claim.
 - Notice that Policy uses @role row-level security for an agent's book of business.
 
-### 6. Prepare Day 3 developer tools
+### 7. Prepare Day 3 developer tools
 - Install VS Code if it is not already installed.
 - Sign in to GitHub Copilot in VS Code.
 - Confirm you can open this workshop repository in VS Code.
-- You will use these tools in Lab 9 for Power BI MCP and Lab 11 for Rayfin.
+- You will use these tools in Lab 11 for Rayfin. Lab 9 uses them too, but that lab is a facilitator demo because MCP access is restricted.
 - Skim [reference/architecture.md](../../reference/architecture.md) to see how OneLake, Direct Lake, Power BI, MCP, and Rayfin fit together.
 
 ## You'll know it worked when

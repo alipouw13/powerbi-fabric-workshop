@@ -1,8 +1,11 @@
 # Lab 10 - Data Agent showcase
 
-**Duration:** ~45 min - **Deck:** "Data Agent showcase"
+**Duration:** ~30 min - **Deck:** "Data Agent showcase" - **Format:** facilitator demo
 
-You will create a Fabric Data Agent grounded on sm_insurance and ask insurance questions in natural language. The goal is to show how governed semantic models make conversational analytics safer and more useful.
+The facilitator creates a Fabric Data Agent grounded on sm_insurance and asks insurance questions in natural language. The goal is to show how governed semantic models make conversational analytics safer and more useful.
+
+## Feature availability
+Fabric Data Agents are not available to most attendees today, so this runs as a demo and a roadmap discussion, not a hands-on lab. The transferable lesson is the metadata work in step 2: descriptions, friendly names, and clear definitions improve report authoring and Microsoft 365 Copilot answers today, long before any agent is enabled. See [reference/schwab-environment-today.md](../../reference/schwab-environment-today.md).
 
 ## Schwab context
 Business users often ask the same questions they tried in Tableau Ask Data, but they expect governed definitions and security. A Fabric Data Agent can answer from sm_insurance while honoring the same model, measures, and RLS choices used by reports.
@@ -17,7 +20,7 @@ Business users often ask the same questions they tried in Tableau Ask Data, but 
 ## Prerequisites
 - Completed [Lab 9 - MCP and GitHub Copilot](../lab-09-mcp-github-copilot/README.md)
 - sm_insurance with AI instructions, descriptions, and verified answers
-- Access to create or configure a Fabric Data Agent in Schwab-Analytics-Dev
+- Facilitator access to create or configure a Fabric Data Agent in Schwab-Analytics-Dev
 - RLS test user or View as role setup if available
 - Reference docs: [Copilot in Power BI](../../reference/copilot-in-power-bi.md) and [Direct Lake](../../reference/direct-lake.md)
 
@@ -79,12 +82,13 @@ Business users often ask the same questions they tried in Tableau Ask Data, but 
 - Keep answers tied to the data visible in your workspace.
 
 ## You'll know it worked when
-- The Data Agent is grounded on sm_insurance.
+- The demo Data Agent is grounded on sm_insurance.
 - It can answer top products by Written Premium.
 - It can answer Loss Ratio by region YoY.
 - It can identify worst-performing agents using a defined measure.
 - RLS behavior is validated or documented for follow-up.
 - You can explain how Data Agent differs from Tableau Ask Data in this Fabric migration story.
+- The team captured the metadata improvements that pay off now, and whether Data Agent access is worth requesting.
 
 ## Next
 [Lab 11 - Rayfin insurance app](../lab-11-rayfin-insurance-app/README.md)

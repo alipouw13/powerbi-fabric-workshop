@@ -2,10 +2,10 @@
 
 **Duration:** ~75 min - **Deck:** "Data modeling best practices"
 
-You will replace the wide Tableau-style extract with an insurance star schema. This is the biggest quality lever for performance, governance, Copilot, MCP, and reusable reporting.
+You will replace the wide Tableau-style extract with an insurance star schema, and compare star, snowflake, and flat patterns. This is the biggest quality lever for performance, governance, and reusable reporting.
 
 ## Schwab context
-A Tableau workbook can hide a lot of business logic inside one extract. A Power BI and Fabric migration works best when the team agrees on a shared semantic model that separates customer, agent, policy, coverage, date, premium, and claim concepts.
+Reporting today is very flat: wide tables and large Excel files, with logic repeated per report or workbook. A snowflake pattern is planned but not implemented, and there is no medallion structure yet. This lab introduces the preferred pattern early, on purpose, so new Power BI content is built on it instead of being reworked later.
 
 ## What you'll build
 - A star model using dim_customer, dim_agent, dim_policy, dim_coverage, dim_date, fact_premium, and fact_claim
@@ -13,6 +13,7 @@ A Tableau workbook can hide a lot of business logic inside one extract. A Power 
 - A marked date table based on dim_date[period_begin]
 - Friendly names, hidden keys, and starter measures for insurance reporting
 - A list of modeling improvements to carry into sm_insurance in Lab 6
+- A team decision on the preferred pattern: flat, star, or snowflake
 
 ## Prerequisites
 - Completed [Lab 1 - Tableau to Power BI](../lab-01-tableau-to-powerbi/README.md)
@@ -79,7 +80,15 @@ A Tableau workbook can hide a lot of business logic inside one extract. A Power 
 - Compare Written Premium totals against the Lab 1 extract page.
 - Differences should be explainable by grain, date filters, or relationship filters.
 
-### 7. Document modeling decisions
+### 7. Compare star, snowflake, and flat
+- Flat, what you have today: one wide table per report or a large Excel file. Fast to start, but definitions drift, files grow, and refreshes get slower.
+- Star, the Power BI default: facts joined to denormalized dimensions. Best query performance, simplest field list, and the pattern the engine is optimized for.
+- Snowflake, the planned Schwab pattern: dimensions normalized into related tables, for example dim_policy referring to a separate product table. Supported by Power BI, and reasonable when the source is already normalized, but it adds joins and makes the field list harder to navigate.
+- Practical guidance: normalize in the source or the transformation layer, then present a star to report authors.
+- Note that the same layering idea appears again in Lab 5 as Bronze, Silver, and Gold, where Gold is the star that reporting consumes.
+- Write down which pattern your team will require for new content, and what happens to the existing flat assets.
+
+### 8. Document modeling decisions
 - Capture which fields are hidden.
 - Capture which relationships use single-direction filters.
 - Capture the measure names that should become standard in sm_insurance.
@@ -92,7 +101,8 @@ A Tableau workbook can hide a lot of business logic inside one extract. A Power 
 - dim_date is marked as the date table on period_begin.
 - Keys are hidden from report authors.
 - Written Premium, Earned Premium, Incurred Losses, Claim Count, and Loss Ratio return expected values.
-- You can explain why this star model will produce better Copilot and MCP results than the wide extract.
+- You can explain why this star model performs and governs better than the wide extract or a large Excel file.
+- Your team can state when a snowflake dimension is acceptable and when it should be flattened for reporting.
 
 ## Next
 [Lab 3 - Visualization](../lab-03-visualization/README.md)

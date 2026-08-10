@@ -4,6 +4,12 @@ Direct Lake is the storage mode used for `sm_insurance`. It lets Power BI load
 OneLake Delta data into memory on demand without importing a scheduled copy into
 the semantic model.
 
+> **Availability for this audience:** OneLake and Lakehouse are not fully
+> approved yet, so Direct Lake is the target state. Today the equivalent model is
+> an import semantic model over SQL sources, refreshed through the on-premises
+> data gateway. The star schema, measure names, and governance are identical
+> either way. See [schwab-environment-today.md](schwab-environment-today.md).
+
 ## Lab connection
 
 - Lab: ../labs/lab-06-semantic-model-directlake/README.md

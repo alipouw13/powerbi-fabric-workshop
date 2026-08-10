@@ -24,7 +24,7 @@ The workshop only matters if teams leave with repeatable patterns. Schwab can re
 ### 1. Prepare the team showcase
 - Pick one presenter for the data estate.
 - Pick one presenter for the semantic model and report.
-- Pick one presenter for Copilot, MCP, or Data Agent.
+- Pick one presenter for the migration work and what Microsoft 365 Copilot helped with.
 - Pick one presenter for the Rayfin app.
 - Keep each segment to three minutes.
 - Focus on what changed for you as you moved from Tableau to Power BI and Fabric.
@@ -49,13 +49,13 @@ The workshop only matters if teams leave with repeatable patterns. Schwab can re
 - Explain how a Tableau dashboard maps to a Power BI report page.
 - Explain why shared semantic models reduce duplicate calculations.
 
-### 4. Present AI and developer workflows
-- Show one Copilot-generated report improvement from Lab 7.
-- Show one Data Agent question and answer from Lab 10.
-- Show one MCP schema or DAX query result from Lab 9.
+### 4. Review AI and developer workflows as future state
+- Show one Microsoft 365 Copilot output from Lab 7, such as model documentation or a reviewed DAX draft.
+- Recap the Copilot in Power BI, Data Agent, and MCP demos from Labs 7, 9, and 10.
+- List which of those capabilities the group wants enabled, for whom, and why, so the request has a business case.
 - Mention that Execute Query enforces RLS and requires Build permission.
-- Show how PBIP and src/cicd/ support source control and deployment.
-- Explain when a team would use the remote Power BI MCP server and when it would use the local MCP server.
+- Show how PBIP and src/cicd/ support source control and deployment, which does not depend on Copilot access.
+- Agree the rule that AI-generated DAX and text get model-owner review before publishing.
 
 ### 5. Present the Rayfin app pattern
 - Show the running Contoso Claims Intake app if available.
@@ -94,7 +94,8 @@ The workshop only matters if teams leave with repeatable patterns. Schwab can re
 - Assign an owner for data engineering.
 - Assign an owner for semantic modeling.
 - Assign an owner for report migration.
-- Assign an owner for AI and MCP enablement.
+- Assign an owner for the AI and MCP enablement request.
+- Assign an owner for the visualization community of practice and center of excellence.
 - Assign an owner for Rayfin app evaluation.
 - Add target dates for the next 30, 60, and 90 days.
 
@@ -106,4 +107,4 @@ The workshop only matters if teams leave with repeatable patterns. Schwab can re
 - The group agrees which workbook, semantic model, and app pattern should be tackled next.
 
 ## Adoption close
-Use the Contoso Insurance work as the reference pattern. Start with governed data, build a clean star, certify shared measures, migrate reports onto the shared model, add AI only after metadata is ready, use MCP for a reviewable developer loop, and use Rayfin when the business needs a Fabric-backed operational app.
+Use the Contoso Insurance work as the reference pattern. Start with governed data, build a clean star, certify shared measures, migrate reports onto the shared model, and stand up the community of practice so the standards outlive the workshop. Add AI only after the metadata is ready and the features are enabled, use MCP for a reviewable developer loop when access allows, and use Rayfin when the business needs a Fabric-backed operational app.

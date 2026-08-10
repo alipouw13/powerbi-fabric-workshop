@@ -92,4 +92,4 @@ Schwab teams need more than a good-looking report. They need clear workspace rol
 - You know when to use Promoted and Certified endorsement for sm_insurance.
 
 ## Next
-[Lab 5 - Ingestion to OneLake](../lab-05-ingestion-onelake/README.md)
+[Lab 5 - Getting data in: SQL, gateway, and OneLake](../lab-05-ingestion-onelake/README.md)

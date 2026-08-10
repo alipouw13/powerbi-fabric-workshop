@@ -7,6 +7,12 @@ governed copy. This is the shift from a **Tableau + extracts** world (many
 `.hyper` extracts, many refresh schedules, logic trapped in workbooks) to **land
 once, model once, serve many**. This renders on GitHub.
 
+> This is the **target** state. Today the estate is flat, most reports import
+> from SQL through the on-premises data gateway, and OneLake, Lakehouse, Copilot,
+> the Data Agent, and MCP are not approved or enabled for this audience. See
+> [schwab-environment-today.md](schwab-environment-today.md) for what is in scope
+> hands-on and what is demonstrated.
+
 ```mermaid
 flowchart LR
   subgraph SRC[Sources]
@@ -68,15 +74,15 @@ flowchart LR
 | --- | --- |
 | Day 1 - Lab 0 Setup | Confirms the sandbox, lands the raw data, installs Rayfin |
 | Day 1 - Lab 1 Tableau to Power BI | The mental model: extracts/workbooks -> model + reports |
-| Day 1 - Lab 2 Data modeling | The **Silver star** (dims + facts) vs a flat extract |
+| Day 1 - Lab 2 Data modeling | The **Silver star** (dims + facts) vs a flat extract, and where snowflake fits |
 | Day 1 - Lab 3 Visualization | The **Power BI reports** serve box, viz design |
 | Day 1 - Lab 4 Governance foundations | Guardrails + RLS (the Rayfin `@role` parallel) |
-| Day 2 - Lab 5 Ingestion | The **source -> Bronze** arrows (Data Factory, gateways) |
-| Day 2 - Lab 6 Semantic model | **Gold -> sm_insurance** (Direct Lake) |
-| Day 2 - Lab 7 Copilot in reports | The **Copilot in Power BI** serve box |
+| Day 2 - Lab 5 Ingestion | The **gateway** boxes today, the **source -> Bronze** arrows as target |
+| Day 2 - Lab 6 Semantic model | **Gold -> sm_insurance** (Direct Lake target, import today) |
+| Day 2 - Lab 7 Copilot options | The **Copilot in Power BI** serve box (demo) plus Microsoft 365 Copilot |
 | Day 2 - Lab 8 Migrate a workbook | A full source-to-report slice, end to end |
-| Day 3 - Lab 9 MCP + GitHub Copilot | The **GitHub Copilot + MCP** dev box, PBIP + CI/CD |
-| Day 3 - Lab 10 Data Agent | The **Data Agent** serve box |
+| Day 3 - Lab 9 MCP + GitHub Copilot | The **GitHub Copilot + MCP** dev box, PBIP + CI/CD (demo) |
+| Day 3 - Lab 10 Data Agent | The **Data Agent** serve box (demo) |
 | Day 3 - Lab 11 Rayfin app | The **Rayfin app** box (build on the same estate) |
 | Day 3 - Lab 12 Showcase & next steps | The whole picture, plus the adoption roadmap |
 

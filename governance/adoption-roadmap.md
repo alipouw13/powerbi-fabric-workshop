@@ -17,7 +17,8 @@ operating plan.
 | Group | Responsibilities |
 | --- | --- |
 | Executive sponsor | Sets priority, removes blockers, and reinforces migration outcomes. |
-| Center of Excellence | Defines standards, certification criteria, enablement, and reusable patterns. |
+| Center of Excellence | Defines standards, certification criteria, enablement, and reusable patterns. For Schwab this starts as a data visualization center of excellence seeded by the workshop attendees. |
+| Community of practice | Cross-functional group that shares patterns, reviews new reports, and runs office hours. It is the first thing to stand up, because the attendees are not a single centralized reporting team. |
 | Fabric platform team | Manages capacity, tenant settings, workspace policy, gateways, and monitoring. |
 | Data engineering team | Owns Lakehouse, Warehouse, pipelines, and data quality. |
 | Semantic model owners | Own model design, DAX measures, descriptions, RLS, and certification evidence. |
@@ -30,7 +31,7 @@ operating plan.
 | --- | --- | --- |
 | Executives | What changed, where to find certified reports, how to subscribe. | 30 minute briefing. |
 | Analysts | Tableau to Power BI translation, DAX basics, model reuse. | Hands-on workshop. |
-| Report authors | Thin reports, field parameters, Copilot authoring, validation. | Lab plus office hours. |
+| Report authors | Thin reports, field parameters, validation, and Microsoft 365 Copilot for documentation and DAX drafts. | Lab plus office hours. |
 | Model owners | Star schema, measure definitions, RLS, endorsement. | Working session. |
 | Platform admins | Workspaces, capacity, labels, tenant settings, deployment. | Governance review. |
 

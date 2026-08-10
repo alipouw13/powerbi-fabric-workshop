@@ -1,8 +1,8 @@
 # Lab 8 - Migrate a workbook
 
-**Duration:** ~90 min - **Deck:** "Migration breakout"
+**Duration:** ~120 min - **Deck:** "Migration breakout"
 
-You will migrate a Tableau Insurance workbook pattern onto sm_insurance. The coached breakout focuses on preserving business intent, validating totals, and adding a second operational claims triage use case.
+This is the longest hands-on block of the workshop: the time released by running the Copilot, MCP, and Data Agent sessions as demos goes here. You will migrate a Tableau Insurance workbook pattern onto sm_insurance. The coached breakout focuses on preserving business intent, validating totals, and adding a second operational claims triage use case.
 
 ## Schwab context
 Real Tableau migrations are not copy and paste exercises. Schwab teams need to identify what each workbook is trying to answer, move calculations into a shared semantic model, and validate that business users can trust the Power BI version.
@@ -15,7 +15,7 @@ Real Tableau migrations are not copy and paste exercises. Schwab teams need to i
 - A validation checklist that proves the numbers tie out
 
 ## Prerequisites
-- Completed [Lab 7 - Copilot in reports](../lab-07-copilot-reports/README.md)
+- Completed [Lab 7 - Copilot options for report authors](../lab-07-copilot-reports/README.md)
 - sm_insurance in Schwab-Analytics-Dev
 - Core measures from Lab 6
 - Access to the Tableau workbook description from the facilitator

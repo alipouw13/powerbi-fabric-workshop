@@ -5,7 +5,7 @@
 You will create sm_insurance as a Direct Lake semantic model on Fabric gold and star tables. The model becomes the governed foundation for reports, Copilot, MCP, Data Agent, and migration validation.
 
 ## Schwab context
-The migration goal is not one report. The goal is a certified shared semantic model that Schwab teams can reuse across reports, Excel, Copilot, GitHub Copilot MCP workflows, and future Rayfin-connected operational analytics.
+The migration goal is not one report. The goal is a certified shared semantic model that Schwab teams can reuse across reports and Excel today, and Copilot, MCP, and Data Agent workloads when those are enabled. Direct Lake is the target: until OneLake and Lakehouse are approved, the same star, the same measure names, and the same governance apply to an import model refreshed through the on-premises data gateway, so the work carries over.
 
 ## What you'll build
 - A Direct Lake semantic model named sm_insurance
@@ -15,12 +15,12 @@ The migration goal is not one report. The goal is a certified shared semantic mo
 - A promoted semantic model ready for rpt_insurance_executive
 
 ## Prerequisites
-- Completed [Lab 5 - Ingestion to OneLake](../lab-05-ingestion-onelake/README.md)
+- Completed [Lab 5 - Getting data in: SQL, gateway, and OneLake](../lab-05-ingestion-onelake/README.md)
 - lh_insurance with Bronze, Silver, and Gold tables
 - Power BI Desktop or Fabric semantic model authoring access
 - Measure definitions in [src/pbip/README.md](../../src/pbip/README.md)
 - Sample DAX in [src/sql/sample_dax_queries.dax](../../src/sql/sample_dax_queries.dax)
-- Reference doc: [Direct Lake](../../reference/direct-lake.md)
+- Reference docs: [Direct Lake](../../reference/direct-lake.md) and [environment today](../../reference/schwab-environment-today.md)
 
 ## Steps
 ### 1. Create sm_insurance in Direct Lake mode
@@ -31,6 +31,7 @@ The migration goal is not one report. The goal is a certified shared semantic mo
 - Include gold_premium_summary, gold_loss_ratio, and gold_agent_scorecard if your facilitator wants aggregate views available for exploration.
 - Save the semantic model.
 - Remember that Direct Lake loads OneLake Delta data into memory on demand, with no import and no scheduled refresh.
+- If Direct Lake is not available to you, build the same star as an import model over the same tables and note where the refresh schedule and gateway would sit. Every later step in this lab applies either way.
 
 ### 2. Build the model relationships
 - Connect dim_policy[policy_id] to fact_premium[policy_id].
@@ -108,4 +109,4 @@ Loss Ratio = DIVIDE([Incurred Losses], [Earned Premium])
 - AI metadata, AI instructions, and verified answers are in place or documented for completion.
 
 ## Next
-[Lab 7 - Copilot in reports](../lab-07-copilot-reports/README.md)
+[Lab 7 - Copilot options for report authors](../lab-07-copilot-reports/README.md)

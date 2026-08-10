@@ -8,6 +8,12 @@ and `.png` renders (in `images/`) are for the deck and for quick viewing.
 
 ![Schwab current state](../images/schwab-current-state.png)
 
+At Schwab today this shows up as a very flat estate: wide tables, large Excel
+files used as sources, and most Power BI reports importing directly from SQL
+through the on-premises data gateway. A snowflake pattern is planned but not
+implemented, and there is no medallion structure yet. See
+[schwab-environment-today.md](schwab-environment-today.md).
+
 The pain a Tableau team feels at scale:
 
 - **One `.hyper` extract per workbook.** The same source data (policy admin,
@@ -27,7 +33,10 @@ The pain a Tableau team feels at scale:
 
 ![Schwab target state](../images/schwab-target-state.png)
 
-The estate the workshop builds toward:
+The estate the workshop builds toward. Parts of it, OneLake, Lakehouse, Direct
+Lake, Copilot in Power BI, the Data Agent, and MCP, are not approved or enabled
+for this audience yet, so treat them as the roadmap and adopt the modeling and
+layering ideas now:
 
 - **Land once, serve many.** Policy, claims, and on-prem/Snowflake sources cross a
   managed gateway (VNet data gateway for cloud, on-premises data gateway for

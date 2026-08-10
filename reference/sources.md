@@ -78,7 +78,7 @@ facts, presenter notes, or lab instructions.
 | Topic | Relative path |
 | --- | --- |
 | Direct Lake lab | ../labs/lab-06-semantic-model-directlake/README.md |
-| Copilot reports lab | ../labs/lab-07-copilot-reports/README.md |
+| Copilot options lab | ../labs/lab-07-copilot-reports/README.md |
 | MCP and GitHub Copilot lab | ../labs/lab-09-mcp-github-copilot/README.md |
 | Rayfin insurance app lab | ../labs/lab-11-rayfin-insurance-app/README.md |
 | Rayfin app skeleton | ../rayfin-app/README.md |

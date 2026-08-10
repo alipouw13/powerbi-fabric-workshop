@@ -4,6 +4,11 @@ Model Context Protocol, or MCP, gives an AI client a structured way to call a
 server that exposes tools. In the Power BI scenario, the host is VS Code, the
 client is GitHub Copilot, and the server is Power BI.
 
+> **Availability for this audience:** MCP servers are not available to most
+> attendees, so Lab 9 runs as a facilitator demo and a roadmap discussion. The
+> PBIP and CI/CD part of that lab does not depend on MCP and is worth adopting
+> now. See [schwab-environment-today.md](schwab-environment-today.md).
+
 ## Lab connection
 
 - Lab: ../labs/lab-09-mcp-github-copilot/README.md

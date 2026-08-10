@@ -1,8 +1,13 @@
 # Lab 9 - MCP and GitHub Copilot
 
-**Duration:** ~75 min - **Deck:** "MCP + GitHub Copilot"
+**Duration:** ~45 min - **Deck:** "MCP + GitHub Copilot" - **Format:** facilitator demo
 
-You will connect GitHub Copilot in VS Code to Power BI MCP servers, query sm_insurance, and review how PBIP plus CI/CD changes the developer loop. You will also see Rayfin's MCP package as the app-building parallel.
+The facilitator connects GitHub Copilot in VS Code to Power BI MCP servers, queries sm_insurance, and shows how PBIP plus CI/CD changes the developer loop. You will also see Rayfin's MCP package as the app-building parallel.
+
+## Feature availability
+MCP servers are not available to most attendees today, so this lab runs as a demo with discussion rather than a hands-on breakout. Follow along if you do have VS Code, GitHub Copilot, and Build permission on sm_insurance. Use the session to decide whether the MCP developer loop is worth requesting. See [reference/schwab-environment-today.md](../../reference/schwab-environment-today.md).
+
+The PBIP and CI/CD portion (step 7) is worth attention for everyone: source control for Power BI artifacts does not depend on MCP or Copilot access.
 
 ## Schwab context
 Power BI development is becoming more code-friendly. Schwab teams can use GitHub Copilot, MCP, PBIP, and Fabric CI/CD to inspect models, run DAX, modify artifacts, and keep least-privilege controls in place.
@@ -16,7 +21,7 @@ Power BI development is becoming more code-friendly. Schwab teams can use GitHub
 
 ## Prerequisites
 - Completed [Lab 8 - Migrate a workbook](../lab-08-migrate-a-workbook/README.md)
-- VS Code installed and signed in to GitHub Copilot
+- VS Code installed and signed in to GitHub Copilot (facilitator, and attendees who have it)
 - Node 20+ installed for local MCP workflows
 - Build permission on sm_insurance for DAX queries
 - Least-privilege access to Schwab-Analytics-Dev
@@ -91,11 +96,12 @@ Power BI development is becoming more code-friendly. Schwab teams can use GitHub
 - You will use the Rayfin app skeleton directly in Lab 11.
 
 ## You'll know it worked when
-- GitHub Copilot can access the Power BI remote MCP tools in VS Code.
+- You saw GitHub Copilot access the Power BI remote MCP tools in VS Code.
 - Get Semantic Model Schema returns sm_insurance tables and measures.
 - Execute Query runs a DAX query from src/sql/sample_dax_queries.dax and enforces RLS.
 - You understand when to use the remote MCP server and when to use the local MCP server.
 - You can explain how @microsoft/rayfin-mcp is analogous for Rayfin app development.
+- The team captured whether MCP access is worth requesting, and for whom.
 
 ## Next
 [Lab 10 - Data Agent showcase](../lab-10-data-agent-showcase/README.md)
