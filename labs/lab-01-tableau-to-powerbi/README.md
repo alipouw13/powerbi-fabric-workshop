@@ -1,6 +1,8 @@
 # Lab 1 - Tableau to Power BI
 
-**Duration:** ~60 min - **Deck:** "Power BI and Tableau mental model"
+**Duration:** ~60 min - **Deck:** "Power BI and Tableau mental model" - **Day 1**
+
+**Scope:** In scope.
 
 You will build the first Contoso Insurance report page from the wide Tableau-style extract. The goal is not a perfect model yet, it is to map familiar Tableau actions to Power BI Desktop and the Power BI Service.
 
@@ -96,4 +98,4 @@ Loss Ratio = DIVIDE([Incurred Losses], [Earned Premium])
 - You can explain why a shared semantic model is preferred for the production insurance story.
 
 ## Next
-[Lab 2 - Data modeling](../lab-02-data-modeling/README.md)
+[Lab 2 - Data modeling and architecture patterns](../lab-02-data-modeling/README.md)

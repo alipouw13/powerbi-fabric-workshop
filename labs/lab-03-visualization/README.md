@@ -1,6 +1,8 @@
 # Lab 3 - Visualization
 
-**Duration:** ~75 min - **Deck:** "Visualization best practices"
+**Duration:** ~75 min - **Deck:** "Visualization best practices" - **Day 1**
+
+**Scope:** In scope.
 
 You will rebuild the first executive-ready insurance view on the star model. The page focuses on premium production, loss ratio, product mix, and regional performance.
 

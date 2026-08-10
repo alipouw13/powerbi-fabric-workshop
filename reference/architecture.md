@@ -1,6 +1,15 @@
-# Target architecture (Contoso Insurance workshop)
+# Target architecture (appendix - not in scope)
 
-The workshop drives toward a **OneLake-centric** estate: the sources land once in
+> **Not available at Schwab today.** This page describes a OneLake-centric Fabric
+> estate. Schwab has no Lakehouse, no OneLake, and no Fabric capacity, so nothing
+> here is built or demoed in the workshop. Days 1-3 work entirely within Power BI
+> Desktop, Power Query, and Import or DirectQuery over the on-premises data
+> gateway. See [schwab-current-state.md](schwab-current-state.md).
+>
+> Keep this page for the roadmap conversation in
+> [Lab 12](../labs/lab-12-showcase-next-steps/README.md), not for the labs.
+
+The target picture is a **OneLake-centric** estate: the sources land once in
 OneLake, and every workload, Power BI, Copilot, the Data Agent, the GitHub
 Copilot + MCP developer loop, and even a Rayfin app, reads or writes that single
 governed copy. This is the shift from a **Tableau + extracts** world (many

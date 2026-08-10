@@ -1,6 +1,9 @@
 # Lab 8 - Migrate a workbook
 
-**Duration:** ~90 min - **Deck:** "Migration breakout"
+**Duration:** ~120 min - **Deck:** "Migration breakout" - **Day 2**
+
+**Scope:** In scope. This is the longest hands-on block in the workshop and the
+one that most closely matches Monday-morning work.
 
 You will migrate a Tableau Insurance workbook pattern onto sm_insurance. The coached breakout focuses on preserving business intent, validating totals, and adding a second operational claims triage use case.
 
@@ -15,8 +18,8 @@ Real Tableau migrations are not copy and paste exercises. Schwab teams need to i
 - A validation checklist that proves the numbers tie out
 
 ## Prerequisites
-- Completed [Lab 7 - Copilot in reports](../lab-07-copilot-reports/README.md)
-- sm_insurance in Schwab-Analytics-Dev
+- Completed [Lab 6 - The shared semantic model](../lab-06-semantic-model-directlake/README.md)
+- sm_insurance published to a workspace you can reach
 - Core measures from Lab 6
 - Access to the Tableau workbook description from the facilitator
 - Reference docs: [migration approaches](../../reference/migration-approaches.md) and [migration assessment worksheet](../../governance/migration-assessment-worksheet.md)
@@ -67,16 +70,18 @@ Real Tableau migrations are not copy and paste exercises. Schwab teams need to i
 - Add a slicer for region.
 - Sort agents by Loss Ratio descending for risk review, then by Written Premium for production review.
 - Discuss how Power BI RLS would limit an agent to their own book.
-- Note the same book-of-business rule appears in the Rayfin @role policy.
+- This is the same business rule you wrote down in Lab 4. Confirm the wording matches.
 
 ### 6. Add the claims triage use case
-- Review data/raw/ops/claims_intake.csv or the Bronze table bronze_claims_intake.
+- Bring data/raw/ops/claims_intake.csv into the model through Power Query, using
+  the shaping patterns from Lab 5.
 - The feed includes claim_number, policy_number, product, region, coverage, loss_type, loss_date, reported_date, status, reserve_amount, paid_amount, severity, and adjuster.
-- Add a Claims Triage page if your model exposes the feed.
+- Decide where it belongs: does it extend fact_claim, or is it a separate operational fact?
+- Add a Claims Triage page.
 - Show open claims by severity and status.
 - Show reserve_amount and paid_amount by region or adjuster.
 - Add a table of high-severity open claims.
-- Explain that this is the operational story Rayfin will support in Lab 11.
+- Use this to discuss what operational reporting needs that executive reporting does not.
 
 ### 7. Validate the migration
 - Validate Written Premium total.
@@ -95,7 +100,23 @@ Real Tableau migrations are not copy and paste exercises. Schwab teams need to i
 - List visuals redesigned rather than copied.
 - List validation gaps that need business owner input.
 - List opportunities to replace workbook-specific extracts with shared semantic models.
-- Save the report in Schwab-Analytics-Dev.
+- Save the report to your workspace.
+
+### 9. Performance and troubleshooting clinic
+This closes Day 2. Bring the problems you actually hit today.
+
+- Open Performance Analyzer on your slowest page. Record the slowest visual and
+  whether the time went to DAX query, visual display, or other.
+- Common causes, in the order you should check them: too many visuals on one page,
+  a measure that iterates a large table, a bidirectional relationship, a
+  calculated column that should be a measure, and an import that is far wider
+  than the report needs.
+- Compare against the Tableau version. Where Power BI is slower, it is usually a
+  model shape problem, not an engine problem.
+- Walk the refresh path: source, gateway, credentials, schedule. Write down which
+  hop you would check first for each failure symptom.
+- Add the fixes you found to your team's checklist. This checklist is a Lab 12
+  deliverable for the community of practice.
 
 ## You'll know it worked when
 - The report connects to sm_insurance, not a local extract.
@@ -105,4 +126,5 @@ Real Tableau migrations are not copy and paste exercises. Schwab teams need to i
 - You can explain which Tableau logic moved into the shared semantic model.
 
 ## Next
-[Lab 9 - MCP and GitHub Copilot](../lab-09-mcp-github-copilot/README.md)
+That closes Day 2. Day 3 starts with
+[Lab 7 - M365 Copilot for DAX and Power Query](../lab-07-copilot-reports/README.md).

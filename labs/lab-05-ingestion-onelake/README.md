@@ -1,101 +1,192 @@
-# Lab 5 - Ingestion to OneLake
+# Lab 5 - Connect and transform in Power Query
 
-**Duration:** ~90 min - **Deck:** "OneLake ingestion"
+**Duration:** ~120 min - **Deck:** "Connecting to data" - **Day 2**
 
-You will land Contoso Insurance data into OneLake, create Bronze tables, and run the notebooks that build Silver and Gold. The operational claims_intake feed is included because it has the same shape a Rayfin claims app would write.
+**Scope:** In scope. Everything here uses Power BI Desktop, Power Query, the
+on-premises data gateway, and Import or DirectQuery. Nothing else.
+
+This is the longest teaching lab in the workshop, and the most directly useful.
+Because there is no lake layer and no Dataflow to push work into, **Power Query
+is where all of Schwab's transformation logic lives**. Getting good at it is the
+single highest-leverage skill on offer here.
 
 ## Schwab context
-A Tableau migration often starts with extracts. A Fabric migration turns those extracts and operational feeds into governed Lakehouse and Warehouse assets so analytics, apps, and AI can reuse the same data estate.
+Most Power BI reports at Schwab connect straight to SQL databases in Import mode,
+brokered by the on-premises data gateway, and a lot of source data still arrives
+as large Excel files. There is no Lakehouse, no OneLake, and no Dataflow Gen2 -
+so every join, cleanup, and reshape happens by hand, in the model, in Power
+Query. That makes three things matter more than they would elsewhere: **query
+folding** (push work to the source), **reusable query structure** (so logic is
+written once), and **discipline about what you import** (because the model is
+the only place data lives).
 
 ## What you'll build
-- Raw files in lh_insurance Files/raw
-- Bronze tables bronze_policy_claims and bronze_claims_intake
-- Silver tables dim_customer, dim_agent, dim_policy, dim_coverage, dim_date, fact_premium, and fact_claim
-- Gold tables gold_premium_summary, gold_loss_ratio, and gold_agent_scorecard
-- A Warehouse named wh_insurance populated by src/sql/warehouse_gold.sql if your group chooses the Warehouse path
+- A documented map of the current connection path and who owns each hop
+- A reasoned Import vs DirectQuery decision for the insurance source
+- A folding-verified connection that pushes work back to SQL
+- A fact table shaped in Power Query from the wide source
+- Conformed dimension queries built with reference queries, not copy-paste
+- A parameterized, function-driven pattern for repeated transformations
+- A hardened Excel ingestion pattern that survives someone adding a column
+- A refresh and gateway troubleshooting checklist
 
 ## Prerequisites
 - Completed [Lab 4 - Governance foundations](../lab-04-governance-foundations/README.md)
-- lh_insurance in Schwab-Analytics-Dev
-- data/raw/contoso/ and data/raw/ops/ uploaded to Files/raw
-- Notebooks available: ../../src/notebooks/01_bronze_ingest.py, ../../src/notebooks/02_silver_transform.py, and ../../src/notebooks/03_gold_business.py
-- SQL available: ../../src/sql/warehouse_gold.sql
-- Reference docs: [architecture](../../reference/architecture.md), [sources](../../reference/sources.md), and [Rayfin](../../reference/rayfin.md)
+- Power BI Desktop
+- The generated files under data/raw/contoso/ (they stand in for the SQL source)
+- Reference docs: [current state](../../reference/schwab-current-state.md) and
+  [Tableau to Power BI](../../reference/tableau-to-powerbi.md)
 
 ## Steps
-### 1. Confirm raw file layout
-- Open lh_insurance.
-- Open Files/raw.
-- Confirm Files/raw/contoso/policy_claims_extract.csv exists.
-- Confirm Files/raw/contoso/dim_policy.csv exists.
-- Confirm Files/raw/contoso/dim_customer.csv exists.
-- Confirm Files/raw/contoso/dim_agent.csv exists.
-- Confirm Files/raw/contoso/dim_coverage.csv exists.
-- Confirm Files/raw/contoso/dim_date.csv exists.
-- Confirm Files/raw/contoso/fact_premium.csv exists.
-- Confirm Files/raw/contoso/fact_claim.csv exists.
-- Confirm Files/raw/ops/claims_intake.csv exists.
 
-### 2. Choose your ingestion pattern
-- For workshop speed, you can run the provided notebook ingestion.
-- For a production pattern, use a Data Factory pipeline or Dataflow Gen2 to land the same files.
-- If sources are on-premises, plan an on-premises data gateway.
-- If sources are private cloud resources, plan a VNet data gateway where appropriate.
-- Keep folder names stable, because the notebooks expect contoso/ and ops/ under raw.
-- Capture which pattern your team would use for real Tableau extract migration.
+### 1. Map the current Schwab pattern
+- Draw it on the whiteboard: source SQL -> on-premises data gateway -> semantic
+  model -> report.
+- Note who owns each hop. At Schwab the gateway and its data sources are centrally
+  managed, so an analyst usually cannot create or repoint a connection.
+- List what that means in practice: connection requests have lead time, credentials
+  are not yours to rotate, and a broken refresh is often a gateway conversation.
+- Compare to Tableau: the gateway plays the role Tableau Bridge or a published
+  data source connection plays for you today.
+- Note what is **not** in the picture: no lake, no staging layer, no pipeline. If
+  a transformation needs to happen, it happens in Power Query or in a view on the
+  source. There is no third option.
+- Write down the three sources your team would migrate first and who owns each.
 
-### 3. Run the Bronze ingest notebook
-- Open src/notebooks/01_bronze_ingest.py in Fabric.
-- Attach it to lh_insurance.
-- Run the notebook.
-- Confirm it reads policy_claims_extract.csv from Files/raw/contoso/.
-- Confirm it reads claims_intake.csv from Files/raw/ops/.
-- Confirm it writes bronze_policy_claims.
-- Confirm it writes bronze_claims_intake.
-- Review row counts for both tables.
+### 2. Choose Import or DirectQuery, deliberately
+These are the only two storage modes available. Decide per model, not by habit.
 
-### 4. Run the Silver transform notebook
-- Open src/notebooks/02_silver_transform.py.
-- Attach it to lh_insurance.
-- Run the notebook after Bronze completes.
-- Confirm the Silver dimension tables exist: dim_customer, dim_agent, dim_policy, dim_coverage, and dim_date.
-- Confirm the Silver fact tables exist: fact_premium and fact_claim.
-- Check that products include Auto, Home, Renters, Life, and Umbrella.
-- Check that regions include Northeast, Southeast, Midwest, Southwest, and West.
-- Check that channels include Independent Agent, Captive Agent, Direct, and Online.
+| | Import | DirectQuery |
+| --- | --- | --- |
+| Where data lives | Cached in the model | Stays in the source |
+| Query speed | Fast, in-memory | As fast as the source is |
+| Freshness | As of last refresh | Live |
+| Refresh | Scheduled, via gateway | Not needed |
+| Power Query | Full transformation library | **Only steps that fold** |
+| Source load | Periodic, heavy | Continuous, per interaction |
 
-### 5. Run the Gold business notebook
-- Open src/notebooks/03_gold_business.py.
-- Attach it to lh_insurance.
-- Run the notebook after Silver completes.
-- Confirm gold_premium_summary exists.
-- Confirm gold_loss_ratio exists.
-- Confirm gold_agent_scorecard exists.
-- Validate that gold_loss_ratio includes earned premium, incurred losses, and a loss ratio calculation.
-- Validate that gold_agent_scorecard can support agent performance review.
+- Load the insurance source in **Import** first. This is the default for a reason
+  and matches most of what Schwab runs today.
+- Now switch a copy to **DirectQuery** and notice what changes: transformation
+  options grey out, some DAX functions become unavailable, and every visual
+  interaction issues a query.
+- Discuss which of your real sources would justify DirectQuery. Usually it is
+  volume, volatility, or a policy that forbids caching - not preference.
+- Record the decision and the reason. "We chose Import because the source is
+  refreshed nightly and fits comfortably in memory" is a governance artifact.
 
-### 6. Optional: create wh_insurance
-- Create a Warehouse named wh_insurance in Schwab-Analytics-Dev.
-- Open src/sql/warehouse_gold.sql.
-- Run the SQL in the Warehouse editor if your facilitator includes the Warehouse path.
-- Confirm the Warehouse exposes the gold tables needed by downstream tools.
-- Keep the Lakehouse as the primary path for Direct Lake in Lab 6.
-- Use the Warehouse path to discuss SQL analyst access and governed sharing.
+### 3. Build the connection and verify folding
+- In Power BI Desktop, choose Get data and connect to the insurance source.
+- Use a **named view or query** on the source rather than a table with everything
+  in it. The cheapest transformation is the one the database does for you.
+- In Power Query, remove columns you will not use **before** any other step.
+  Column removal is the single biggest performance win available to you.
+- Filter rows to the reporting window the business actually needs.
+- Right-click the last applied step and choose **View Native Query**. If it is
+  available, your steps are folding back to SQL. If it is greyed out, find the
+  step that broke folding.
+- Folding-breakers to watch for: adding an index column, most custom columns
+  using M-only functions, merging on a non-folding query, and changing types
+  after a non-folding step.
+- Reorder steps so folding survives as long as possible. Put filters and column
+  removal first, custom logic last.
+- Note the model size before and after your cleanup pass. Report the difference
+  to your table.
 
-### 7. Connect the Rayfin claims story
-- Open Files/raw/ops/claims_intake.csv.
-- Review columns such as claim_number, policy_number, product, region, coverage, loss_type, loss_date, reported_date, reserve_amount, paid_amount, severity, and adjuster.
-- This file is shaped like the Rayfin Claim entity in the Contoso Claims Intake app.
-- In a real deployment, a Rayfin app can write operational data into the same Fabric estate that analytics uses.
-- In this workshop, claims_intake.csv represents that app-generated operational feed.
-- Keep this connection in mind for Lab 11.
+### 4. Shape the fact table by hand
+You are turning the wide extract into a proper fact table using only Power Query.
+
+- Start from the wide source and create a query named `fact_premium`.
+- Keep only the grain-defining keys and the additive measures: policy key, agent
+  key, date key, `written_premium`, `earned_premium`.
+- Remove descriptive attributes that belong in a dimension. If `product` and
+  `region` describe the policy, they do not belong on the fact.
+- Set explicit data types. Currency columns as Fixed decimal number, keys as
+  whole number or text consistently.
+- Confirm the grain in one sentence: "one row per policy, per agent, per period."
+  If you cannot say it in one sentence, the grain is wrong.
+- Repeat for `fact_claim`.
+- Check the row count against the source. A shaped fact table should not gain rows.
+
+### 5. Build conformed dimensions with reference queries
+This is where most teams accidentally create duplicate logic. Do it properly once.
+
+- Right-click your cleaned source query and choose **Reference** - not Duplicate.
+  Reference reuses the upstream steps; Duplicate copies them and they drift apart.
+- From the reference, build `dim_policy`: select the policy attributes, then
+  **Remove duplicates** on the policy key.
+- Repeat for `dim_customer`, `dim_agent`, and `dim_coverage`.
+- Build `dim_date` from the provided date file, or generate it in M if your
+  facilitator prefers. Every model needs exactly one date table.
+- Set the source query to **Enable load = off** so it stays a staging query and
+  does not become a table in the model. Right-click the query and untick
+  **Enable load**.
+- Group your queries in folders: `Staging`, `Dimensions`, `Facts`. A model with
+  twenty ungrouped queries is unmaintainable within a month.
+- Verify each dimension key is unique. A duplicate key here becomes a broken
+  relationship in Lab 6.
+
+### 6. Make the logic reusable: parameters and functions
+Without Dataflows, reuse has to come from query structure. This is how.
+
+- Create a **parameter** for the source server or file path. Manage Parameters ->
+  New. Point your source query at the parameter instead of a hardcoded value.
+- Explain why this matters at Schwab: promoting a model between environments, or
+  handing it to a colleague, should not require editing M in six places.
+- Create a second parameter for the reporting start date and use it in your row
+  filter. Confirm the filter still folds.
+- Turn a repeated cleanup into a **custom function**: right-click a query with
+  the transformation and choose **Create Function**. Invoke it against another
+  query.
+- Open the **Advanced Editor** on one query and read the M. You do not need to
+  write M fluently, but you must be able to read it - and in Lab 7 you will be
+  pasting M into this window.
+- Document the parameters and functions your team would standardize on. This is a
+  community-of-practice deliverable, not a personal preference.
+
+### 7. Tame the Excel sources
+- Large Excel files are the most common source of surprise refresh failures.
+- Connect to an Excel source and observe what happens when a column is renamed or
+  inserted: the query breaks on position or name.
+- Harden it: promote headers explicitly, reference columns by name, and set types
+  by name rather than position.
+- Add a guard step that fails loudly with a clear message rather than silently
+  producing nulls. A wrong number that looks right is worse than an error.
+- Where a folder of monthly workbooks exists, use **Get data > Folder** with a
+  single transform function instead of one query per file. This is the function
+  pattern from step 6, applied to a real problem.
+- Remember Excel sources rarely fold. Everything you do to them happens in the
+  mashup engine, so keep the steps few and the files small.
+- Decide as a group which Excel files are genuinely a system of record and which
+  are a symptom of a missing SQL source or a missing shared model. Capture the
+  list - it is a direct input to the Lab 12 roadmap.
+- Agree on a rule the community of practice can enforce: Excel is an input, not a
+  destination.
+
+### 8. Plan refresh and troubleshooting
+- Set a refresh schedule appropriate to the source, not the maximum allowed.
+- Know the three failure modes you will actually hit: expired gateway credentials,
+  a source schema change, and a timeout on an over-wide import.
+- Walk the path for each symptom: which hop do you check first, and who owns it?
+- Write a one-page checklist your team follows before escalating to the gateway
+  owners. Most escalations are avoidable with two minutes of triage.
+- Discuss incremental refresh as the next step for large fact tables, and what it
+  requires: a reliable date column, a folding query, and RangeStart/RangeEnd
+  parameters - which you now know how to create.
 
 ## You'll know it worked when
-- bronze_policy_claims and bronze_claims_intake exist in lh_insurance.
-- Silver dimension and fact tables exist with expected product, region, and channel values.
-- gold_premium_summary, gold_loss_ratio, and gold_agent_scorecard exist.
-- claims_intake.csv is included in the Bronze layer.
-- You can explain how app data and analytics data share one Fabric estate.
+- You can state your Import vs DirectQuery decision and the reason behind it.
+- Your query folds back to the source, or you know exactly which step broke it
+  and why you accepted that.
+- `fact_premium` and `fact_claim` have a stated grain and no descriptive columns.
+- Dimensions are built from **reference** queries with unique keys, and the
+  staging query has Enable load switched off.
+- Queries are grouped into folders and at least one parameter and one function
+  are in use.
+- The model is measurably smaller after the cleanup pass.
+- You have a hardened Excel pattern and a list of Excel files that should become
+  real sources.
+- You have a refresh troubleshooting checklist your team would actually use.
 
 ## Next
-[Lab 6 - Semantic model and Direct Lake](../lab-06-semantic-model-directlake/README.md)
+[Lab 6 - The shared semantic model](../lab-06-semantic-model-directlake/README.md)

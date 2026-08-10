@@ -1,4 +1,11 @@
-# Power BI MCP servers for GitHub Copilot workflows
+# Power BI MCP servers (appendix - not in scope)
+
+> **Not available at Schwab today.** MCP servers, GitHub Copilot in VS Code, and
+> PBIP-based CI/CD are not part of this audience's tooling. The only AI in this
+> workshop is M365 Copilot, used as a drafting tool with a copy-and-paste handoff
+> - see [Lab 7](../labs/lab-07-copilot-reports/README.md) and
+> [schwab-current-state.md](schwab-current-state.md). This page is background
+> reading only.
 
 Model Context Protocol, or MCP, gives an AI client a structured way to call a
 server that exposes tools. In the Power BI scenario, the host is VS Code, the

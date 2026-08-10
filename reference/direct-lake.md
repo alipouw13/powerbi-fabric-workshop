@@ -1,8 +1,17 @@
-# Direct Lake for the Contoso Insurance semantic model
+# Direct Lake (appendix - not in scope)
 
-Direct Lake is the storage mode used for `sm_insurance`. It lets Power BI load
-OneLake Delta data into memory on demand without importing a scheduled copy into
-the semantic model.
+> **Not available at Schwab today.** Direct Lake requires OneLake and a Fabric
+> capacity, neither of which this audience has. The workshop builds `sm_insurance`
+> in **Import** or **DirectQuery** mode instead - see
+> [Lab 6](../labs/lab-06-semantic-model-directlake/README.md) and
+> [schwab-current-state.md](schwab-current-state.md). This page is background
+> reading for a future roadmap conversation.
+>
+> The modeling work is unaffected: the star schema, measures, and metadata you
+> build in Import transfer to Direct Lake unchanged if it is ever enabled.
+
+Direct Lake lets Power BI load OneLake Delta data into memory on demand without
+importing a scheduled copy into the semantic model.
 
 ## Lab connection
 

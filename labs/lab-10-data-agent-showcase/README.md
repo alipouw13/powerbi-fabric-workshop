@@ -1,25 +1,32 @@
-# Lab 10 - Data Agent showcase
+# Lab 10 - Fabric Data Agent (appendix)
 
-**Duration:** ~45 min - **Deck:** "Data Agent showcase"
+**Deck:** "Data Agent showcase" - **Appendix reading, not run**
 
-You will create a Fabric Data Agent grounded on sm_insurance and ask insurance questions in natural language. The goal is to show how governed semantic models make conversational analytics safer and more useful.
+> **Not in scope for this workshop.** Fabric Data Agents and Copilot Studio are
+> not available to this audience, and neither is the Lakehouse this pattern
+> assumes. This page is kept as reference only. It is **not demoed and not a
+> prerequisite for anything**. See
+> [reference/schwab-current-state.md](../../reference/schwab-current-state.md).
+>
+> **The part you can act on today:** everything that would make a Data Agent good
+> is metadata work you can do right now - clear names, descriptions, governed
+> measures, and a star schema. That work is in
+> [Lab 6](../lab-06-semantic-model-directlake/README.md) and it pays off
+> immediately, whether or not an agent ever exists.
 
-## Schwab context
-Business users often ask the same questions they tried in Tableau Ask Data, but they expect governed definitions and security. A Fabric Data Agent can answer from sm_insurance while honoring the same model, measures, and RLS choices used by reports.
+A Fabric Data Agent grounded on a governed semantic model answers business
+questions in natural language while honoring the same measures and RLS used by
+reports - the successor to what Tableau Ask Data attempted.
 
-## What you'll build
+## What it would look like
 - A Fabric Data Agent grounded on sm_insurance
-- Reused Prep-for-AI metadata from Lab 6
+- Reused metadata and descriptions from Lab 6
 - A set of verified insurance questions and answers
 - RLS validation for agent-book access
-- A comparison between Data Agent and Tableau Ask Data
 
-## Prerequisites
-- Completed [Lab 9 - MCP and GitHub Copilot](../lab-09-mcp-github-copilot/README.md)
-- sm_insurance with AI instructions, descriptions, and verified answers
-- Access to create or configure a Fabric Data Agent in Schwab-Analytics-Dev
-- RLS test user or View as role setup if available
-- Reference docs: [Copilot in Power BI](../../reference/copilot-in-power-bi.md) and [Direct Lake](../../reference/direct-lake.md)
+## Reference docs
+[M365 Copilot for Power BI work](../../reference/copilot-in-power-bi.md),
+[current state](../../reference/schwab-current-state.md)
 
 ## Steps
 ### 1. Create the Data Agent
@@ -86,5 +93,5 @@ Business users often ask the same questions they tried in Tableau Ask Data, but 
 - RLS behavior is validated or documented for follow-up.
 - You can explain how Data Agent differs from Tableau Ask Data in this Fabric migration story.
 
-## Next
-[Lab 11 - Rayfin insurance app](../lab-11-rayfin-insurance-app/README.md)
+## Back to the workshop
+[Lab 12 - Community of practice and next steps](../lab-12-showcase-next-steps/README.md)

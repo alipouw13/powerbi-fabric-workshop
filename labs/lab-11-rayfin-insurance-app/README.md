@@ -1,26 +1,29 @@
-# Lab 11 - Rayfin insurance app
+# Lab 11 - Rayfin insurance app (appendix)
 
-**Duration:** ~75 min - **Deck:** "Build a data app on Fabric with Rayfin"
+**Deck:** "Build a data app on Fabric with Rayfin" - **Appendix reading, not run**
 
-You will build and run the Contoso Claims Intake app with Rayfin. This is the operational app counterpart to the analytics work you built with lh_insurance, sm_insurance, rpt_insurance_executive, MCP, and Data Agent.
+> **Not in scope for this workshop.** Rayfin runs on Microsoft Fabric, which is
+> not available to this audience. This page is kept as reference only. It is
+> **not demoed and not a prerequisite for anything**. See
+> [reference/schwab-current-state.md](../../reference/schwab-current-state.md).
+>
+> **The part you can act on today:** the idea worth taking from this page is that
+> a business rule - "an agent sees only their own book" - should be designed once
+> and applied consistently everywhere. You implement that rule as Power BI RLS in
+> [Lab 4](../lab-04-governance-foundations/README.md).
 
-## Schwab context
-A Power BI migration answers analytical questions, but Schwab teams also need secure operational apps that capture data at the source. Rayfin lets you build a Fabric-backed app where agents can file and track claims while row-level policies protect each agent's book.
+Rayfin is a Backend-as-a-Service on Fabric for building operational apps that
+capture data at the source, with row-level policies enforced in the app the same
+way RLS enforces them in analytics.
 
-## What you'll build
+## What it would look like
 - A running Rayfin app from the rayfin-app/ skeleton
-- A reviewed TypeScript data model with Customer, Agent, Policy, and Claim entities
-- A deployed Fabric-backed data service using rayfin.yml
-- A policy and claim entered through the app
+- A TypeScript data model with Customer, Agent, Policy, and Claim entities
+- A Fabric-backed data service configured through rayfin.yml
 - A security comparison between Rayfin @role and Power BI RLS
 
-## Prerequisites
-- Completed [Lab 10 - Data Agent showcase](../lab-10-data-agent-showcase/README.md)
-- Node 20+ installed
-- A Microsoft account that can sign in to Fabric
-- Access to the provided [rayfin-app/README.md](../../rayfin-app/README.md)
-- Reference doc: [Rayfin](../../reference/rayfin.md)
-- Optional: GitHub Copilot and @microsoft/rayfin-mcp for app-building assistance
+## Reference docs
+[Rayfin](../../reference/rayfin.md), [rayfin-app/README.md](../../rayfin-app/README.md)
 
 ## Steps
 ### 1. Review what Rayfin provides
@@ -121,5 +124,5 @@ npm run rayfin:db
 - You can show that the Claim shape matches ops/claims_intake.csv.
 - You can explain the Rayfin @role and Power BI RLS parallel.
 
-## Next
-[Lab 12 - Showcase and next steps](../lab-12-showcase-next-steps/README.md)
+## Back to the workshop
+[Lab 12 - Community of practice and next steps](../lab-12-showcase-next-steps/README.md)

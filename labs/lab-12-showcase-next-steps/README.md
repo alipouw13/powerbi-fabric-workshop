@@ -1,109 +1,152 @@
-# Lab 12 - Showcase and next steps
+# Lab 12 - Community of practice and next steps
 
-**Duration:** ~45 min - **Deck:** "Showcase + next steps"
+**Duration:** ~60 min - **Deck:** "Showcase + next steps" - **Day 3**
 
-You will present what your team built, connect the pieces into reusable patterns, and leave with owners for the next migration wave. This lab closes the workshop and replaces the old showcase-only ending.
+**Scope:** In scope. This is the most important session of the workshop.
+
+You will present what your team built, charter the **community of practice** for
+data visualization, and leave with named owners for the next migration wave. The
+workshop only pays off if this session produces commitments.
 
 ## Schwab context
-The workshop only matters if teams leave with repeatable patterns. Schwab can reuse the certified semantic model pattern, migration checklist, MCP developer loop, governance path, and Rayfin app template for the next set of Tableau and Fabric modernization work.
+The stated goal for this group is to form a community of practice and stand up a
+center of excellence for data visualization inside the infrastructure team. This
+room is cross-functional and decentralized - there is no shared naming standard,
+no shared certification process, and no shared release practice yet. That is the
+gap to close, and none of it requires a feature request. Reusable patterns from
+this workshop - the star schema, the shared model, the migration checklist, the
+governance path - are all available today.
 
 ## What you'll build
-- A team showcase that connects data, model, report, AI, MCP, and Rayfin
-- A reusable pattern inventory for future insurance and enterprise analytics work
-- An inspiration review using real example apps from reference/reference-apps.md
+- A team showcase of what you built on Days 1 and 2
+- A **community of practice charter**: purpose, membership, cadence, and standards
+- A reusable pattern inventory for future migration work
+- A ranked enablement request list for capabilities the team does not have
 - An adoption roadmap with owners, commitments, and dates
-- A closeout summary for the 3-day workshop
 
 ## Prerequisites
-- Completed [Lab 11 - Rayfin insurance app](../lab-11-rayfin-insurance-app/README.md)
-- Final or draft versions of lh_insurance, sm_insurance, rpt_insurance_executive, Data Agent, and rayfin-app/
-- Validation notes from Labs 6, 8, 9, 10, and 11
-- Reference docs: [reference apps](../../reference/reference-apps.md) and [adoption roadmap](../../governance/adoption-roadmap.md)
+- Completed Labs 0-8
+- Your team's model, report, Power Query patterns, and Lab 7 documentation
+- Reference docs: [current state](../../reference/schwab-current-state.md), [workspace governance](../../governance/workspace-governance.md), and [adoption roadmap](../../governance/adoption-roadmap.md)
 
 ## Steps
 ### 1. Prepare the team showcase
-- Pick one presenter for the data estate.
-- Pick one presenter for the semantic model and report.
-- Pick one presenter for Copilot, MCP, or Data Agent.
-- Pick one presenter for the Rayfin app.
+- Pick one presenter for how you connected to data.
+- Pick one presenter for the semantic model.
+- Pick one presenter for the migrated report.
 - Keep each segment to three minutes.
-- Focus on what changed for you as you moved from Tableau to Power BI and Fabric.
+- Focus on what changed for you as you moved from Tableau to Power BI.
 - Use exact object names when presenting.
 
-### 2. Present the Fabric data estate
-- Show Schwab-Analytics-Dev, Schwab-Analytics-Test, and Schwab-Analytics-Prod.
-- Show lh_insurance.
-- Show Files/raw/contoso/ and Files/raw/ops/.
-- Show bronze_policy_claims and bronze_claims_intake.
-- Show dim_customer, dim_agent, dim_policy, dim_coverage, dim_date, fact_premium, and fact_claim.
-- Show gold_premium_summary, gold_loss_ratio, and gold_agent_scorecard.
-- Explain why claims_intake.csv is the bridge between operational apps and analytics.
-
-### 3. Present the model and report pattern
-- Show sm_insurance in Direct Lake mode.
-- Show the star model relationships.
-- Show core measures such as Written Premium, Earned Premium, Incurred Losses, Claim Count, Loss Ratio, Written Premium PY, and Written Premium YoY %.
-- Show rpt_insurance_executive.
-- Show the Insurance Executive Overview page.
-- Show one migrated workbook page from Lab 8.
-- Explain how a Tableau dashboard maps to a Power BI report page.
+### 2. Present the connection and modeling decisions
+- Show how you connected, and state your Import vs DirectQuery decision and why.
+- Show your Power Query work: what folds, what you removed, how dimensions were
+  built from reference queries, and any parameter or function you standardized.
+- Show what you cut from the import and what that did to model size.
+- Show your star model relationships.
+- Say whether you snowflaked anything, and why or why not.
 - Explain why shared semantic models reduce duplicate calculations.
 
-### 4. Present AI and developer workflows
-- Show one Copilot-generated report improvement from Lab 7.
-- Show one Data Agent question and answer from Lab 10.
-- Show one MCP schema or DAX query result from Lab 9.
-- Mention that Execute Query enforces RLS and requires Build permission.
-- Show how PBIP and src/cicd/ support source control and deployment.
-- Explain when a team would use the remote Power BI MCP server and when it would use the local MCP server.
+### 3. Present the model and report pattern
+- Show sm_insurance.
+- Show core measures such as Written Premium, Earned Premium, Incurred Losses, Claim Count, Loss Ratio, Written Premium PY, and Written Premium YoY %.
+- Show rpt_insurance_executive and the Insurance Executive Overview page.
+- Show one migrated workbook page from Lab 8.
+- Explain how a Tableau dashboard maps to a Power BI report page.
+- Show the model documentation you drafted in Lab 7.
 
-### 5. Present the Rayfin app pattern
-- Show the running Contoso Claims Intake app if available.
-- Show the Customer, Agent, Policy, and Claim entities.
-- Show a saved policy and claim.
-- Explain how Claim matches the shape of ops/claims_intake.csv.
-- Explain the @role policy: an agent sees only their own book.
-- Tie that directly back to the Power BI RLS role from Lab 4.
-- Explain how Rayfin provides an operational app template on the same Fabric estate.
+### 4. Charter the community of practice
+This is the core of the session. Write it down, in the room.
+
+- **Purpose.** One sentence. What does this group exist to do that no individual
+  team can do alone?
+- **Membership.** Who is in it, from which teams, and who is the accountable lead?
+  Include the Austin and Phoenix split and how remote members participate.
+- **Cadence.** How often does it meet, for how long, and in what format? A short
+  recurring meeting that happens beats a long one that gets cancelled.
+- **Scope.** Start narrow. Suggested first three: naming standards, a certification
+  path, and a shared measure library.
+- **First deliverables.** Pick two things this group will publish within 30 days.
+  The model documentation template from Lab 7 and the naming standard are good
+  candidates.
+- **Escalation path.** How does the group raise a tooling or enablement request,
+  and to whom? Use the path in
+  [reference/schwab-current-state.md](../../reference/schwab-current-state.md).
+- **How new members join.** A community of practice that has no on-ramp becomes a
+  committee.
+
+### 5. Agree the standards you can set today
+None of these need a feature request. Decide as a group, and record the decision:
+
+| Standard | Decision to make now |
+| --- | --- |
+| Workspace naming and structure | Dev/Test/Prod? By domain? By team? |
+| Semantic model naming | Prefix convention, and who can create one |
+| Measure naming | Business language, and where the definition lives |
+| Certification | Who can certify, and what the bar is |
+| Excel sources | When is Excel acceptable as a source, and when is it a ticket |
+| Report review | What must be checked before a report is shared broadly |
+| Shared vs. personal models | When is a new model justified |
+
+- Compare your answers to
+  [governance/workspace-governance.md](../../governance/workspace-governance.md)
+  and [governance/endorsement-certification.md](../../governance/endorsement-certification.md).
+- Assign one owner per standard. A standard with no owner does not exist.
 
 ### 6. Review reusable patterns
-- Certified shared model: sm_insurance.
+**Built in this workshop, usable Monday:**
+- Shared, endorsed semantic model: sm_insurance, with live-connected reports.
 - Measure library: Written Premium, Earned Premium, Policies In Force, Policies Written, Incurred Losses, Paid Losses, Claim Count, Loss Ratio, Average Premium, Written Premium PY, and Written Premium YoY %.
+- Power Query patterns from [Lab 5](../lab-05-ingestion-onelake/README.md): folding checks, reference-query dimensions, staging queries with load disabled, parameters, custom functions, and the hardened Excel pattern.
+- The M snippet library in `src/powerquery/`.
 - Template report: rpt_insurance_executive.
-- Deployment pipeline: Schwab-Analytics-Dev to Schwab-Analytics-Test to Schwab-Analytics-Prod.
-- MCP developer loop: GitHub Copilot, Power BI MCP, PBIP, and Fabric CI/CD.
-- Rayfin app template: rayfin-app/ for Fabric-backed operational apps.
+- Migration checklist from [Lab 8](../lab-08-migrate-a-workbook/README.md) and [governance/migration-assessment-worksheet.md](../../governance/migration-assessment-worksheet.md).
 - Governance checklist: workspace roles, sensitivity, RLS, endorsement, and ownership.
+- The **M365 Copilot model context block** and the AI code review standard from [Lab 7](../lab-07-copilot-reports/README.md).
 
-### 7. Get inspired by reference apps
-- Open [reference/reference-apps.md](../../reference/reference-apps.md).
-- Review the Report Optimizer, a capacity-optimizer Rayfin Fabric-capacity app.
-- Review the Contoso Insurance end-to-end Fabric demo from fabric-test.
-- Review the Language app for Azure Language voice and text translation.
-- Review the AI Fitness Coach.
-- For each app, identify the reusable pattern rather than copying the app directly.
-- Decide which patterns fit Schwab's next migration or app modernization wave.
+**Not available today - roadmap only:**
+- Lakehouse, OneLake, medallion layering, Direct Lake, and Dataflows Gen2.
+- Copilot embedded in Power BI, and Fabric Data Agents.
+- MCP servers, PBIP source control, and CI/CD.
+
+### 7. Build the prioritized enablement ask
+- List the capabilities the team wants that it does not have.
+- For each: who benefits, what it replaces, and what it would save.
+- Rank them. A ranked list of three gets acted on; an unranked list of ten does not.
+- Note what modeling and metadata work must happen first regardless of enablement -
+  because that work is on you, not on the tenant admins. Almost everything that
+  would make Copilot or a Data Agent useful is work you already know how to do.
+- Name the owner who carries the ask forward.
 
 ### 8. Build the adoption roadmap
 - Open [governance/adoption-roadmap.md](../../governance/adoption-roadmap.md).
 - Pick the first Tableau workbook wave to assess.
 - Pick the first shared semantic model candidate.
 - Pick the first report template candidate.
-- Pick one operational app candidate where Rayfin could help.
-- Assign an owner for governance.
-- Assign an owner for data engineering.
+- Pick the Excel sources that should become real SQL sources or shared models.
+- Assign an owner for governance and standards.
+- Assign an owner for connections and gateway coordination.
+- Assign an owner for Power Query patterns and the M snippet library.
 - Assign an owner for semantic modeling.
 - Assign an owner for report migration.
-- Assign an owner for AI and MCP enablement.
-- Assign an owner for Rayfin app evaluation.
+- Assign an owner for the enablement asks.
+- Assign the community of practice lead.
 - Add target dates for the next 30, 60, and 90 days.
 
 ## You'll know it worked when
-- Each team can show at least one working artifact from the workshop.
-- The team can explain the end-to-end flow from raw files to reports, AI, MCP, and Rayfin.
-- Reusable patterns are captured with owners.
-- The adoption roadmap has concrete 30, 60, and 90 day commitments.
-- The group agrees which workbook, semantic model, and app pattern should be tackled next.
+- Each team showed at least one working artifact from Days 1 and 2.
+- The community of practice has a written charter with a named lead and a meeting
+  on the calendar before everyone leaves the room.
+- At least three standards are decided and each has an owner.
+- The enablement ask is a ranked list of three, with an owner.
+- The adoption roadmap has concrete 30, 60, and 90 day commitments with names on them.
+- **Nothing on the 30-day list is blocked by a feature Schwab does not have.**
 
 ## Adoption close
-Use the Contoso Insurance work as the reference pattern. Start with governed data, build a clean star, certify shared measures, migrate reports onto the shared model, add AI only after metadata is ready, use MCP for a reviewable developer loop, and use Rayfin when the business needs a Fabric-backed operational app.
+Everything that matters most here is already within reach. Shape the data in Power
+Query, model it as a star, certify shared measures, migrate reports onto the
+shared model, and set the standards the community of practice will enforce - none
+of that needs an approval or a new licence. Do the metadata and documentation work
+now, because it is both immediately useful and the prerequisite for anything that
+gets enabled later. Then make the enablement ask from a position of readiness
+rather than curiosity.

@@ -1,11 +1,20 @@
-# PBIP + the shared semantic model (Contoso Insurance workshop)
+# Measure definitions + PBIP reference (Contoso Insurance workshop)
 
-The `sm_insurance` model is stored as a **PBIP** (Power BI Project): plain-text
+> **How this is used in the workshop.** The **measure definitions** below are the
+> source of truth for [Lab 6](../../labs/lab-06-semantic-model-directlake/README.md)
+> and are fully in scope - you type them into Power BI Desktop.
+>
+> The **PBIP and source-control** sections are **appendix reading**. Schwab has no
+> shared source-control or CI/CD practice for Power BI content today, so nothing
+> here is run in a lab. See [schwab-current-state.md](../../reference/schwab-current-state.md).
+
+## Appendix: saving as PBIP
+
+The `sm_insurance` model can be stored as a **PBIP** (Power BI Project): plain-text
 **TMDL** and report JSON you can diff, review, and ship with Git and CI/CD,
 exactly like application code. This is the "DevOps for BI" story a Tableau team
 usually does not have (Tableau workbooks are opaque binaries).
 
-## Save as PBIP
 In Power BI Desktop: **File -> Options -> Preview features -> Power BI Project
 (.pbip) save option**, then **File -> Save as -> .pbip**. You get:
 

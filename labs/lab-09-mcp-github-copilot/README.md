@@ -1,26 +1,32 @@
-# Lab 9 - MCP and GitHub Copilot
+# Lab 9 - MCP and GitHub Copilot (appendix)
 
-**Duration:** ~75 min - **Deck:** "MCP + GitHub Copilot"
+**Deck:** "MCP + GitHub Copilot" - **Appendix reading, not run**
 
-You will connect GitHub Copilot in VS Code to Power BI MCP servers, query sm_insurance, and review how PBIP plus CI/CD changes the developer loop. You will also see Rayfin's MCP package as the app-building parallel.
+> **Not in scope for this workshop.** MCP servers, GitHub Copilot in VS Code, and
+> PBIP-based CI/CD are not available to this audience. This page is kept as
+> reference so the team can see what a code-first Power BI practice looks like and
+> make an informed request later. It is **not demoed and not a prerequisite for
+> anything**. See [reference/schwab-current-state.md](../../reference/schwab-current-state.md).
+>
+> **The part you can act on today:** the underlying problem this addresses is that
+> Power BI development at Schwab is decentralized with no shared review or release
+> practice. You do not need MCP to fix that - you need the standards the community
+> of practice sets in [Lab 12](../lab-12-showcase-next-steps/README.md).
 
-## Schwab context
-Power BI development is becoming more code-friendly. Schwab teams can use GitHub Copilot, MCP, PBIP, and Fabric CI/CD to inspect models, run DAX, modify artifacts, and keep least-privilege controls in place.
+GitHub Copilot in VS Code can connect to Power BI MCP servers to inspect models,
+run DAX, and modify artifacts, with PBIP and Fabric CI/CD providing the source
+control and deployment loop.
 
-## What you'll build
+## What it would look like
 - A VS Code MCP configuration for the Power BI remote MCP server
 - A schema inspection of sm_insurance
 - A DAX query against sm_insurance using src/sql/sample_dax_queries.dax
 - A local MCP workflow for build or model modification tasks
 - A PBIP source-control checkpoint tied to src/pbip/README.md and src/cicd/
 
-## Prerequisites
-- Completed [Lab 8 - Migrate a workbook](../lab-08-migrate-a-workbook/README.md)
-- VS Code installed and signed in to GitHub Copilot
-- Node 20+ installed for local MCP workflows
-- Build permission on sm_insurance for DAX queries
-- Least-privilege access to Schwab-Analytics-Dev
-- Reference docs: [MCP servers](../../reference/mcp-servers.md), [PBIP](../../src/pbip/README.md), and [Rayfin](../../reference/rayfin.md)
+## Reference docs
+[MCP servers](../../reference/mcp-servers.md), [PBIP](../../src/pbip/README.md),
+[current state](../../reference/schwab-current-state.md)
 
 ## Steps
 ### 1. Review the MCP architecture
@@ -97,5 +103,5 @@ Power BI development is becoming more code-friendly. Schwab teams can use GitHub
 - You understand when to use the remote MCP server and when to use the local MCP server.
 - You can explain how @microsoft/rayfin-mcp is analogous for Rayfin app development.
 
-## Next
-[Lab 10 - Data Agent showcase](../lab-10-data-agent-showcase/README.md)
+## Back to the workshop
+[Lab 12 - Community of practice and next steps](../lab-12-showcase-next-steps/README.md)
