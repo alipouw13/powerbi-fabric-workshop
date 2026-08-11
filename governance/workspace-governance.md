@@ -1,118 +1,177 @@
-# Workspace governance for Schwab Analytics
+# Workspace governance for I&O analytics
 
-Workspace governance keeps the workshop pattern production-ready. The goal is
-simple: separate environments, assign least-privilege roles, publish reusable
-content, and monitor capacity before users feel pain.
+Governance keeps the workshop pattern usable in production. The goal is simple:
+separate environments, assign least-privilege roles, publish reusable content,
+and agree names before five groups invent five conventions.
+
+Everything here works with Power BI Desktop, the Power BI Service, and the
+on-premises data gateway. Nothing on this page requires Fabric capacity, a
+Lakehouse, or a pipeline layer.
 
 ## Environment layout
 
 | Environment | Workspace | Purpose | Who gets write access |
 | --- | --- | --- | --- |
-| Development | `Schwab-Analytics-Dev` | Build Lakehouse, Warehouse, semantic model, reports, and Rayfin app changes. | Delivery squad and approved developers. |
-| Test | `Schwab-Analytics-Test` | Validate data, security, performance, and deployment steps. | Delivery squad plus test leads. |
-| Production | `Schwab-Analytics-Prod` | Serve certified content to business users. | Few admins, release owners, and controlled service principals. |
+| Development | `IO-Analytics-Dev` | Build and change semantic models and reports. | Domain builders and the CoE. |
+| Test | `IO-Analytics-Test` | Validate numbers, security, and performance before release. | Builders plus the domain owner. |
+| Production | `IO-Analytics-Prod` | Serve certified content to I&O and its stakeholders. | A small number of admins and release owners. |
 
-Use deployment pipelines or source-controlled deployment automation to promote
-content instead of manual recreation.
+Promote content with **deployment pipelines**, not by republishing a `.pbix` from
+a laptop. A pipeline gives you a repeatable Dev to Test to Prod movement and a
+record of what moved.
 
-## Workspace role guidance
+**Nobody publishes to My workspace.** Content in My workspace has no owner, no
+backup path, and disappears when the person leaves.
 
-| Role | Practical meaning | Workshop rule |
+## Workspace roles
+
+| Role | Practical meaning | Rule for I&O |
 | --- | --- | --- |
-| Admin | Full workspace management, access control, and item control. | Limit to platform owners and backup admins. |
-| Member | Can publish, manage content, and collaborate broadly. | Use for trusted delivery leads, not every report author. |
-| Contributor | Can create and edit workspace content. | Use in Dev for builders who do not manage access. |
-| Viewer | Can view content. | Use for most consumers in Test and Prod. |
+| Admin | Full workspace management, access control, item control. | Platform owners and one backup, no more. |
+| Member | Publish, manage content, and share broadly. | Domain owners, not every report author. |
+| Contributor | Create and edit workspace content. | The default for builders in Dev. |
+| Viewer | View content. | Most consumers in Test and Prod. |
 
-For semantic model reuse, grant Build permission deliberately. Viewer access to
-a workspace is not the same as permission to build new reports from a model.
+**Build permission is separate.** Viewer access to a workspace does not let
+someone create a new report from a semantic model. Grant Build deliberately, and
+grant it on the certified model so authors have an obvious right answer.
 
 ## Naming standards
 
 | Item type | Pattern | Example |
 | --- | --- | --- |
-| Workspace | `Schwab-Analytics-{Environment}` | `Schwab-Analytics-Prod` |
-| Lakehouse | `lh_{domain}` | `lh_insurance` |
-| Warehouse | `wh_{domain}` | `wh_insurance` |
-| Semantic model | `sm_{domain}` | `sm_insurance` |
-| Report | `rpt_{domain}_{audience}` | `rpt_insurance_executive` |
-| Data pipeline | `pl_{domain}_{purpose}` | `pl_insurance_gold_refresh` |
-| Notebook | `nb_{domain}_{layer}_{purpose}` | `nb_insurance_silver_transform` |
-| Rayfin app | `app_{domain}_{workflow}` | `app_insurance_claims_intake` |
+| Workspace | `IO-Analytics-{Environment}` | `IO-Analytics-Prod` |
+| Semantic model | `sm_io_{domain}` | `sm_io_itsm`, `sm_io_capacity` |
+| Report | `rpt_io_{domain}_{subject}` | `rpt_io_itsm_sla`, `rpt_io_assets_lifecycle` |
+| App | `app_io_{domain}` | `app_io_itsm` |
+| Dimension table | `dim_{entity}` | `dim_service` |
+| Fact table | `fact_{event}` | `fact_incident` |
+| Key column | `{entity}_key`, integer, hidden | `service_key` |
+| Measure | Business language, Title Case | `Total Incidents`, `SLA Met %` |
+| Measures table | `_Measures` | Sorts to the top of the field list |
 
-Names should make lineage obvious. Avoid personal names in production content.
+Names should make lineage obvious. Keep personal names out of production content.
 
 ## Item ownership
 
+Every production item needs a named business owner and a named technical owner
+before it can be certified.
+
 | Item | Business owner | Technical owner | Review cadence |
 | --- | --- | --- | --- |
-| `lh_insurance` | Analytics product owner | Data engineering lead | Monthly |
-| `wh_insurance` | Analytics product owner | Data engineering lead | Monthly |
-| `sm_insurance` | Insurance analytics owner | Semantic model owner | Monthly and before certification |
-| `rpt_insurance_executive` | Executive reporting owner | BI lead | Quarterly |
-| Rayfin Claims Intake | Claims operations owner | App engineering lead | Monthly |
+| `sm_io_itsm` | ITSM reporting owner | Semantic model owner | Monthly, and before certification |
+| `sm_io_capacity` | Capacity planning owner | Semantic model owner | Monthly |
+| `sm_io_mainframe` | Mainframe operations owner | Semantic model owner | Monthly |
+| `sm_io_servicedesk` | Service desk manager | Semantic model owner | Monthly |
+| `sm_io_assets` | Asset and CMDB owner | Semantic model owner | Monthly |
+| `rpt_io_{domain}_{subject}` | The domain's reporting owner | Report author | Quarterly |
+| Gateway data sources | I&O platform owner | Gateway admin | Quarterly |
+| Shared theme and measure library | CoE lead | CoE lead | Quarterly |
 
-Every production item needs an accountable owner before certification.
+Fill this table in with real names during the Day 3 roadmap session. An empty
+owner column is the most common reason a migration stalls.
 
 ## Sensitivity labels
 
-Use Microsoft Purview sensitivity labels consistently across reports, semantic
-models, and exported content.
+Apply Microsoft Purview sensitivity labels consistently across semantic models,
+reports, and exports.
 
-| Data class | Example workshop fields | Label guidance |
+| Data class | Example I&O fields | Label guidance |
 | --- | --- | --- |
-| Public | Product names and synthetic region labels | Public or internal policy default. |
-| Internal | Aggregated premium and claim trends | Internal analytics label. |
-| Confidential | Customer, policy, claim, agent, and reserve details | Confidential or regulated data label. |
-| Restricted | Real PII, claims notes, payment data | Restricted label and additional access review. |
+| Public | Nothing in this estate | Not applicable |
+| Internal | Aggregated incident trends, capacity utilization, MIPS totals | Internal analytics label |
+| Confidential | CI names, site and datacenter detail, asset costs, team and staffing detail | Confidential |
+| Restricted | Incident descriptions, security event detail, anything naming a person | Restricted, plus an access review |
 
-The workshop data is synthetic. Production governance should assume real
-insurance data is regulated and label accordingly.
+Two rules specific to I&O:
 
-## Key tenant settings to review
+- **Infrastructure detail is not low sensitivity.** A report that names every
+  production CI, its criticality and its site is a map of the estate. Label and
+  scope it accordingly.
+- Labels inherit downstream from the semantic model to the report and to
+  exported files, so label the model first.
+
+The workshop data is synthetic. Production governance should assume real I&O data
+is at least Confidential.
+
+## Row-level security
+
+Define RLS in the semantic model with a DAX filter, assign members to roles in
+the Service, and test both.
+
+| Pattern | Filter | Use when |
+| --- | --- | --- |
+| By region | `dim_location[region] = USERPRINCIPALNAME()` lookup | Regional operations leads see their own sites |
+| By business unit | `dim_service[business_unit]` lookup | Service owners see their own services |
+| By team | `dim_team[team_name]` lookup | Team leads see their own queue |
+
+Test RLS with **Model view -> View as** in Desktop, and again with a real test
+user in the Service. Desktop testing does not cover the Service role membership,
+which is where the mistakes usually are.
+
+Keep relationships single-direction. Bidirectional cross filtering can propagate
+around an RLS filter in ways that are difficult to reason about and to test.
+
+## Tenant settings to confirm
+
+Confirm these with the platform team before publishing anything to Prod. Answer
+each as a question, not as a default.
 
 | Setting area | Governance question |
 | --- | --- |
-| Copilot | Which security groups can use Copilot in Fabric and Power BI? |
-| Export data | Who can export summarized or underlying data? |
-| Publish to web | Is public publishing disabled except for approved groups? |
-| Service principals | Which service principals can use Fabric APIs? |
+| Export data | Who can export summarized data, and underlying data? |
+| Publish to web | Disabled, except for an explicitly approved group? |
+| External sharing | Can I&O content be shared outside the tenant? |
+| Sensitivity labels | Are labels required on new content, and enforced on export? |
+| Certified content | Which group is allowed to certify? |
+| Service principals | Which service principals can call Power BI APIs? |
 | XMLA endpoint | Which groups can read or write semantic models through XMLA? |
-| External sharing | Can content be shared outside the tenant? |
-| Certified content | Who can certify Power BI and Fabric items? |
-| Sensitivity labels | Are required labels enforced for production content? |
+| Gateway administration | Who administers the gateway cluster and its data sources? |
+| Workspace creation | Who can create a workspace? Uncontrolled creation is how sprawl starts. |
 
-Review tenant settings before moving migrated reports to production.
+## Refresh and gateway operations
 
-## Capacity monitoring
+| Item | Practice |
+| --- | --- |
+| Refresh schedule | Set it to the business need, not to the maximum allowed. Every refresh is load on the source. |
+| Refresh window | Stagger models so five domains do not hit the gateway at the same minute. |
+| Failure alerts | Send refresh failure notifications to a monitored group mailbox, never to one person. |
+| Credentials | Stored on the gateway data source, owned by the platform team, not by an individual. |
+| Incremental refresh | Use it on large fact tables, and verify the query folds first. |
+| Gateway capacity | Watch it. A single overloaded gateway node degrades every model behind it. |
 
-Use the Microsoft Fabric Capacity Metrics app to watch:
-
-- Capacity utilization.
-- CU consumption by item.
-- Throttling and overage indicators.
-- Refresh and query patterns.
-- Long-running reports.
-- Noisy development workloads.
-
-For the workshop, the Report Optimizer reference app in
-../reference/reference-apps.md provides a Day 3 example of building additional
-ops tooling around Fabric capacity data.
+Detail in [gateway-setup.md](../reference/gateway-setup.md).
 
 ## Dev to Test to Prod checklist
 
 | Gate | Required evidence |
 | --- | --- |
-| Dev complete | Model builds, report renders, and source control diff is reviewed. |
-| Test data | Written Premium, Earned Premium, Incurred Losses, and Claim Count tie out. |
-| Test security | RLS and workspace permissions are validated with test users. |
-| Test performance | Key pages meet target load expectations. |
-| Prod release | Owner approves release notes and support path. |
-| Post-release | Usage, refresh, query, and capacity metrics are reviewed. |
+| Dev complete | Model builds, refresh succeeds, report renders, naming standards met. |
+| Test data | Totals reconcile against the Tableau report being replaced, at the agreed grain. |
+| Test security | RLS validated with a real test user in the Service, not only in Desktop. |
+| Test performance | Key pages render within the agreed target with the gateway in the path. |
+| Labels | Sensitivity label applied to the model and to every report. |
+| Ownership | Business and technical owner named and recorded. |
+| Prod release | Owner approves, release note published, support path documented. |
+| Post-release | Usage and refresh history reviewed after the first two weeks. |
 
-## Related workshop files
+## Avoiding sprawl
 
-- Endorsement: endorsement-certification.md
-- Adoption roadmap: adoption-roadmap.md
-- Direct Lake reference: ../reference/direct-lake.md
-- Source list: ../reference/sources.md
+The failure mode for this migration is one semantic model per report, which is
+extract sprawl with a new name.
+
+- One certified semantic model per domain. Reports are thin and build on it.
+- A new model requires a stated reason, recorded in the assessment worksheet.
+- Changes to a certified measure go through the model owner as a request, not as
+  a fork.
+- Retire the Tableau workbook once the Power BI replacement is validated.
+  Parallel running forever is how you end up maintaining both.
+
+## Related
+
+- [Endorsement and certification](endorsement-certification.md)
+- [Migration assessment worksheet](migration-assessment-worksheet.md)
+- [Adoption roadmap](adoption-roadmap.md)
+- [Current state and constraints](../reference/schwab-current-state.md)
+- [Gateway setup](../reference/gateway-setup.md)
+- [Sources](../reference/sources.md)

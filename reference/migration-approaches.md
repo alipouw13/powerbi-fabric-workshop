@@ -1,139 +1,275 @@
 # Tableau to Power BI migration approaches
 
-Start migration work with inventory, not visuals. The fastest way to create a
-new mess is to rebuild every Tableau workbook as a separate Power BI report and
-semantic model.
+Deck slide 17. Four steps, in order: **Assess**, **Rationalize**, **Rebuild**,
+**Validate**.
 
-## Workshop outcome
+Start with inventory, not visuals. The fastest way to create a new mess is to
+rebuild every Tableau workbook as its own Power BI report and its own semantic
+model.
 
-By the end of this workshop, the team should know how to move from a Tableau
-extract-centered estate to a Fabric-centered estate:
+> **Rule of thumb: do not port a bad model.**
+>
+> If the Tableau workbook is a wide extract with forty calculated fields, do not
+> translate the calculated fields. Model the data properly and rewrite the
+> calculations as measures. Translation preserves the problem. Rebuilding removes
+> it, and usually takes less time.
 
-- Lakehouse: `lh_insurance`
-- Warehouse: `wh_insurance`
-- Semantic model: `sm_insurance`
-- Report: `rpt_insurance_executive`
-- Environments: `Schwab-Analytics-Dev`, `Schwab-Analytics-Test`,
-  `Schwab-Analytics-Prod`
+## Where this lands
 
-Microsoft migration guidance is listed in [sources.md](sources.md#migration-and-delivery).
+| | Today | After migration |
+| --- | --- | --- |
+| Logic | In each workbook | In `sm_io_<domain>` as DAX measures |
+| Data | One `.hyper` extract per workbook | One certified semantic model per domain, Import mode |
+| Prep | Baked into the extract | Power Query staging queries, named steps |
+| Reports | One workbook, many sheets | `rpt_io_<domain>_<subject>`, thin, on a shared model |
+| Environments | Ad hoc | `IO-Analytics-Dev`, `-Test`, `-Prod`, with a deployment pipeline |
 
-## Migration stages
+No Lakehouse, no Dataflow, no pipeline layer. Power Query, DAX, the gateway, and
+the Power BI Service.
 
-| Stage | Output | Owner | Workshop artifact |
-| --- | --- | --- | --- |
-| Inventory | Workbook list, owners, data sources, usage | BI lead | ../governance/migration-assessment-worksheet.md |
-| Assess | Complexity and value scoring | BI lead plus business owner | Worksheet rubric |
-| Prioritize | Ranked backlog | Sponsor plus CoE | Adoption roadmap |
-| Prove | POC with success criteria | Delivery squad | `rpt_insurance_executive` slice |
-| Rebuild | Shared model, report pages, validation | Delivery squad | `sm_insurance` and report |
-| Cut over | Published app, training, deprecation plan | Product owner | Governance checklist |
+---
 
-## Inventory fields to collect
+## Step 1: Assess
 
-Use the worksheet in ../governance/migration-assessment-worksheet.md. At a
-minimum, capture:
+Inventory what exists before deciding anything. Use
+[migration-assessment-worksheet.md](../governance/migration-assessment-worksheet.md).
 
-- Workbook name
-- Business owner
-- Report audience
+### Inventory the workbooks
+
+One row per Tableau workbook, including the ones you already intend to retire.
+Capture:
+
+- Workbook name and domain
+- Business owner, and whether they still exist in the org
 - Number of sheets and dashboards
-- Tableau data sources
-- Extract or live connection
-- Refresh cadence
-- Key metrics
-- Row-level security needs
+- Audience
 - Usage over the last 90 days
 - Known pain points
-- Target semantic model
 
-## Value x complexity prioritization
+### Inventory the data sources
 
-| Category | Business value | Technical complexity | Action |
+For every source behind every workbook:
+
+- Source system, view or file path
+- Extract or live connection
+- Refresh cadence, and the actual business requirement for it
+- Extract size
+- Credential owner and gateway requirement
+- Data classification
+- Known quality issues, including schema drift across monthly files
+
+Two I&O-specific things that come up every time:
+
+- **Monthly file folders.** Column names are rarely stable across months. Assume
+  a schema guard will be needed.
+- **Live connections that do not need to be live.** Most exist because someone
+  once asked for intraday data. Confirm the requirement before carrying
+  DirectQuery into the new estate.
+
+### Inventory the calculations
+
+Per workbook: calculated fields, LOD expressions, table calculations, parameters,
+sets, groups, custom fiscal calendars, security filters.
+
+**Anything used by more than one workbook is a shared DAX measure.** That list is
+the starting backlog for [the measure library](../src/pbip/README.md).
+Translation patterns are in [tableau-to-powerbi.md](tableau-to-powerbi.md).
+
+### Rank by usage and business value
+
+Score complexity 1 to 5 and business value 1 to 5, using the rubrics in the
+worksheet. Score value from usage and decision impact, not from build effort.
+Sunk cost is not business value.
+
+| Category | Value | Complexity | Action |
 | --- | --- | --- | --- |
-| Quick win | High | Low | Migrate early and use in enablement. |
-| Strategic | High | High | Run a POC before full rebuild. |
-| Commodity | Low | Low | Migrate only if still used. |
-| Retire candidate | Low | High | Archive or replace with a shared report. |
+| Quick win | High | Low | Migrate first, and use it for enablement |
+| Strategic | High | High | Prove the model on a slice, then rebuild |
+| Commodity | Low | Low | Migrate only if it is genuinely still used |
+| Retire candidate | Low | High | Archive, or fold into a shared report |
 
-For Contoso Insurance, the "Insurance Executive" workbook is a strategic early
-candidate because it validates Written Premium, Earned Premium, Loss Ratio, and
-Claim Count against executive expectations.
+For the workshop, the ITSM incident SLA workbook is the strategic early candidate:
+high usage, high complexity, and it exercises `Total Incidents`, `SLA Met %`, and
+`Avg Resolve Minutes` against real stakeholder expectations.
 
-## Rebuild vs re-platform
+---
 
-| Approach | Use when | Avoid when |
-| --- | --- | --- |
-| Rebuild in Power BI | Business logic is duplicated, extracts are wide, or the target is a shared semantic model. | The workbook is a temporary one-off. |
-| Re-platform layout first | The workbook is visually simple and already uses a clean governed source. | Tableau calculations are complex or undocumented. |
-| Replace with existing report | Usage overlaps with another migration candidate. | The report serves a unique regulated workflow. |
-| Retire | Usage is low and the owner agrees. | The workbook is tied to required reporting. |
+## Step 2: Rationalize
 
-## Model-based migration
+The step teams skip, and the one that decides whether the new estate is smaller
+than the old one.
 
-Model-based migration creates the reusable layer first.
+### Consolidate duplicates
 
-| Step | Contoso Insurance example |
+Three workbooks showing incident volume by service, one per audience, are one
+report with a slicer and possibly a bookmark. Look for:
+
+- The same measure computed in several workbooks, slightly differently
+- The same view filtered to different services, teams or sites
+- A "management version" and a "detailed version" of the same thing
+- Workbooks whose only difference is a date range
+
+### Retire the unused
+
+Anything with low usage and no owner comes out. This is easier during a migration
+than at any other time, because the default answer is "we are not rebuilding it".
+
+Get the retirement decision in writing from the owner, or from the absence of an
+owner. Record the retirement date.
+
+### Decide shared model versus report
+
+For every survivor, decide whether it needs anything new in the model, or whether
+it is a report on an existing one.
+
+| Situation | Decision |
 | --- | --- |
-| Identify facts | `fact_premium`, `fact_claim` |
-| Identify dimensions | `dim_policy`, `dim_customer`, `dim_agent`, `dim_coverage`, `dim_date` |
-| Define measures | Written Premium, Earned Premium, Incurred Losses, Loss Ratio |
-| Validate totals | Compare the wide `policy_claims_extract.csv` to model totals |
-| Build reports | Executive summary, product trends, agent scorecard |
+| Uses measures that already exist in a certified model | Thin report on the existing model |
+| Needs one or two new measures | Request them from the model owner, then thin report |
+| Needs a new fact table at a different grain | New model, with a written reason |
+| Needs a new conformed dimension | Add it to the existing model, do not fork |
 
-This is the preferred path for high-value shared reporting.
+**Default to reuse.** A new semantic model needs a stated reason recorded in the
+worksheet. Without that rule, five domains become fifteen models in a quarter.
 
-## Report-based migration
+### Output of this step
 
-Report-based migration starts with a workbook and rebuilds the user experience.
+A ranked backlog with, for each workbook: rebuild, re-platform, consolidate or
+retire, plus a named target semantic model. Nothing gets built until this exists.
 
-Use it when:
+---
 
-- The Tableau workbook has few calculations.
-- The data source is already governed.
-- The audience needs a like-for-like replacement.
-- The report is not a candidate for a new enterprise semantic model.
+## Step 3: Rebuild
 
-Still avoid creating one semantic model per workbook. If two reports use the
-same measures, they should share `sm_insurance` or another governed model.
+Model first, report second. Always.
 
-## POC success criteria
+### Model in a star schema
 
-The Microsoft proof-of-concept guidance recommends validating assumptions,
-understanding product differences, and testing with real data. For this
-workshop, a POC should prove:
+1. **State the grain.** "One row is one incident." If you cannot say it in a
+   short phrase, stop and fix the grain.
+2. **Separate facts from dimensions.** Numbers you aggregate go in the fact.
+   Attributes you slice by go in dimensions.
+3. **Build conformed dimensions.** `dim_date`, `dim_service`, `dim_location` are
+   shared across domains. One definition, used everywhere.
+4. **Single-column integer keys.** One-to-many relationships, single direction,
+   dimension filtering fact.
+5. **Mark the date table**, turn off auto date/time, set the sort columns.
+6. **Hide keys and raw numeric columns** that now have measures.
 
-| Area | Success criterion |
+Full detail in [star-schema.md](star-schema.md).
+
+### Shape in Power Query
+
+- One **staging query** per source, load disabled, referenced by everything else.
+- Filter and remove columns **first**, so the steps fold.
+- Build dimensions with **Reference**, never Duplicate.
+- Reference columns **by name**, never by position.
+- Set explicit data types on every column.
+- Add a **schema guard** on any file-based source.
+- Name the steps.
+
+Snippets in [`src/powerquery/README.md`](../src/powerquery/README.md).
+
+### Write measures once
+
+- Business language, Title Case: `Total Incidents`, not `count_inc`.
+- `DIVIDE`, never `/`.
+- Reuse base measures instead of re-aggregating columns.
+- Description and format string set in the model, not on the visual.
+
+Definitions in [`src/pbip/README.md`](../src/pbip/README.md).
+
+### Build the report
+
+Three to five visuals per page, one question per page, the shared theme applied,
+built from measures rather than raw columns. See
+[visual-design.md](visual-design.md).
+
+M365 Copilot can draft DAX and Power Query M during this step, given your schema.
+It cannot see your model, so verify everything. See
+[copilot-in-power-bi.md](copilot-in-power-bi.md).
+
+---
+
+## Step 4: Validate
+
+Nothing is done until it ties out, performs, and is endorsed.
+
+### Reconcile the numbers against Tableau
+
+Agree the grain and the tolerance with the business owner **before** you build.
+"Within 0.5 percent, explained" is workable. "Exact" usually is not, because the
+Tableau extract and the source have different cut-off times.
+
+| Check | Grain |
 | --- | --- |
-| Data | Written Premium ties to Tableau within agreed tolerance. |
-| Model | Loss Ratio uses one certified DAX measure. |
-| Performance | Executive page renders within the target service-level objective. |
-| Security | Region or book-of-business RLS works for test users. |
-| Delivery | Dev to Test to Prod movement is repeatable. |
-| Adoption | At least one business owner signs off on the replacement. |
+| Total incidents | Month, service, severity |
+| SLA attainment | Month, severity |
+| Average resolve time | Severity, team |
+| Capacity utilization | Month, environment |
+| Ticket volume | Month, team, location |
+| Asset count | Site, lifecycle status |
 
-## Validation checklist
+Run validation queries V1 to V9 in
+[`src/sql/sample_dax_queries.dax`](../src/sql/sample_dax_queries.dax). V1 to V4
+catch structural problems (orphaned keys, duplicate keys, date gaps). V5 to V9
+check every measure at three grains.
 
-- Reconcile total Written Premium by month.
-- Reconcile Earned Premium by product.
-- Reconcile Incurred Losses by region.
-- Reconcile Claim Count by severity and status.
-- Confirm Loss Ratio equals `DIVIDE([Incurred Losses], [Earned Premium])`.
-- Check blanks, zero denominators, and inactive policies.
-- Validate filters for Product, Region, Channel, and Agent.
-- Test RLS with a user who should see only one region or book.
+Where a number does not match, explain the difference before you change anything.
+A discrepancy is often the Tableau workbook being wrong, and finding that is part
+of the value.
 
-## Cutover pattern
+### Confirm performance
+
+- Key pages render within the agreed target, **with the gateway in the path**.
+  Testing on a laptop against a local file proves nothing.
+- Scheduled refresh completes inside its window.
+- Query folding survived where it matters. Check **View Native Query**.
+- Consider incremental refresh on large fact tables, and verify folding first.
+
+### Test security
+
+- RLS tested with **View as** in Desktop, and again with a real test user in the
+  Service. Desktop testing does not cover Service role membership, which is where
+  the mistakes are.
+- Sensitivity label applied to the model and to every report.
+
+### Endorse
+
+Certify the semantic model once the criteria in
+[endorsement-certification.md](../governance/endorsement-certification.md) are
+met. Certify the model, not the report: reports built on a certified model
+inherit the trust.
+
+### Then cut over
 
 | Step | Action |
 | --- | --- |
-| Announce | Tell users which Tableau workbook is being replaced and why. |
-| Parallel run | Keep both reports available for a defined validation window. |
-| Train | Run a short session on filters, drill, export, and subscriptions. |
-| Certify | Certify the semantic model after owner approval. |
+| Announce | Tell users which Tableau workbook is being replaced, and when |
+| Parallel run | Keep both available for a defined, dated window |
+| Train | A short session on slicers, drill, export and subscriptions |
+| Retire | Archive the Tableau workbook on the agreed date |
 
-## Related workshop files
+**Set the retirement date when the migration starts, not when it finishes.** An
+undated parallel run becomes permanent, and then you are maintaining both tools.
 
-- Translation guide: tableau-to-powerbi.md
-- Direct Lake reference: direct-lake.md
-- Governance worksheet: ../governance/migration-assessment-worksheet.md
+---
+
+## Rebuild versus re-platform
+
+| Approach | Use when | Avoid when |
+| --- | --- | --- |
+| Rebuild the model | Logic is duplicated, the extract is wide, or the target is a shared model | The workbook is a genuine one-off with a known end date |
+| Re-platform the layout | The workbook is simple and already sits on a clean governed source | The Tableau calculations are complex or undocumented |
+| Replace with an existing report | Usage overlaps another migration candidate | The report serves a unique regulated or audit workflow |
+| Retire | Low usage and the owner agrees | It feeds a required control or report |
+
+## Related
+
+- [Migration assessment worksheet](../governance/migration-assessment-worksheet.md)
+- [Tableau to Power BI](tableau-to-powerbi.md)
+- [Star schema](star-schema.md)
+- [Visual design](visual-design.md)
+- [Endorsement and certification](../governance/endorsement-certification.md)
+- [Adoption roadmap](../governance/adoption-roadmap.md)
+- [Sources](sources.md)

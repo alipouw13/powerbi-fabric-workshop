@@ -1,0 +1,109 @@
+{
+  "name": "Schwab I&O Workshop",
+  "dataColors": [
+    "#0F5C8C",
+    "#2E93C8",
+    "#7FB8DA",
+    "#5A6E7A",
+    "#8C9BA5",
+    "#C25E00",
+    "#E08A3C",
+    "#3F7A4D"
+  ],
+  "foreground": "#1B1F23",
+  "foregroundNeutralSecondary": "#5A6E7A",
+  "foregroundNeutralTertiary": "#8C9BA5",
+  "background": "#FFFFFF",
+  "backgroundLight": "#F4F6F8",
+  "backgroundNeutral": "#E4E9ED",
+  "tableAccent": "#0F5C8C",
+  "good": "#3F7A4D",
+  "neutral": "#C25E00",
+  "bad": "#B02A2A",
+  "maximum": "#0F5C8C",
+  "center": "#8C9BA5",
+  "minimum": "#E4E9ED",
+  "textClasses": {
+    "title": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 14,
+      "color": "#1B1F23"
+    },
+    "largeTitle": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 18,
+      "color": "#1B1F23"
+    },
+    "label": {
+      "fontFace": "Segoe UI",
+      "fontSize": 10,
+      "color": "#5A6E7A"
+    },
+    "callout": {
+      "fontFace": "Segoe UI Semibold",
+      "fontSize": 32,
+      "color": "#0F5C8C"
+    }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": false }],
+        "visualHeader": [{ "show": true, "background": { "solid": { "color": "#FFFFFF" } } }],
+        "title": [{ "show": true, "alignment": "left", "fontSize": 12 }],
+        "wordWrap": [{ "show": true }]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#F4F6F8" } }, "transparency": 0 }],
+        "outspace": [{ "color": { "solid": { "color": "#FFFFFF" } } }]
+      }
+    },
+    "card": {
+      "*": {
+        "labels": [{ "fontSize": 30, "color": { "solid": { "color": "#0F5C8C" } } }],
+        "categoryLabels": [{ "show": true, "fontSize": 10, "color": { "solid": { "color": "#5A6E7A" } } }]
+      }
+    },
+    "lineChart": {
+      "*": {
+        "lineStyles": [{ "strokeWidth": 2, "showMarker": false }],
+        "categoryAxis": [{ "showAxisTitle": true, "gridlineShow": false }],
+        "valueAxis": [{ "showAxisTitle": true, "gridlineShow": true, "gridlineColor": { "solid": { "color": "#E4E9ED" } } }]
+      }
+    },
+    "barChart": {
+      "*": {
+        "categoryAxis": [{ "showAxisTitle": false, "gridlineShow": false }],
+        "valueAxis": [{ "showAxisTitle": true, "gridlineShow": true, "gridlineColor": { "solid": { "color": "#E4E9ED" } } }],
+        "dataPoint": [{ "fill": { "solid": { "color": "#0F5C8C" } } }]
+      }
+    },
+    "columnChart": {
+      "*": {
+        "categoryAxis": [{ "showAxisTitle": false, "gridlineShow": false }],
+        "valueAxis": [{ "showAxisTitle": true, "gridlineShow": true, "gridlineColor": { "solid": { "color": "#E4E9ED" } } }]
+      }
+    },
+    "slicer": {
+      "*": {
+        "header": [{ "show": true, "fontColor": { "solid": { "color": "#5A6E7A" } }, "fontSize": 10 }],
+        "items": [{ "fontSize": 10 }]
+      }
+    },
+    "tableEx": {
+      "*": {
+        "grid": [{ "gridVertical": false, "gridHorizontal": true, "gridHorizontalColor": { "solid": { "color": "#E4E9ED" } } }],
+        "columnHeaders": [{ "fontColor": { "solid": { "color": "#1B1F23" } }, "backColor": { "solid": { "color": "#F4F6F8" } } }]
+      }
+    },
+    "pivotTable": {
+      "*": {
+        "grid": [{ "gridVertical": false, "gridHorizontal": true, "gridHorizontalColor": { "solid": { "color": "#E4E9ED" } } }],
+        "columnHeaders": [{ "fontColor": { "solid": { "color": "#1B1F23" } }, "backColor": { "solid": { "color": "#F4F6F8" } } }]
+      }
+    }
+  }
+}

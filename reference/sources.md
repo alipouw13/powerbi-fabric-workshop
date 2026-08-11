@@ -1,85 +1,48 @@
 # Workshop sources
 
-This page is the curated source list for the reference and governance docs in
-the Schwab Power BI and Fabric workshop. Use these links when updating product
-facts, presenter notes, or lab instructions.
+The Microsoft Learn pages this workshop is built on. Deck slide 35 cites the
+first four. Keep this list short: every link here should be one someone actually
+needs.
 
-## Copilot for Power BI
+## In scope
 
-| Topic | Microsoft Learn URL |
-| --- | --- |
-| Copilot for Power BI overview | https://learn.microsoft.com/power-bi/create-reports/copilot-introduction |
-| Copilot in Power BI integration overview | https://learn.microsoft.com/power-bi/create-reports/copilot-integration |
-| Use Copilot with semantic models | https://learn.microsoft.com/power-bi/create-reports/copilot-semantic-models |
-| Write DAX queries with Copilot | https://learn.microsoft.com/dax/dax-copilot |
-| Privacy, security, and responsible use for Copilot in Power BI | https://learn.microsoft.com/fabric/fundamentals/copilot-power-bi-privacy-security |
-
-## MCP and agent tooling
-
-| Topic | Microsoft Learn URL |
-| --- | --- |
-| Overview of the Power BI MCP servers | https://learn.microsoft.com/power-bi/developer/mcp/mcp-servers-overview |
-| Get started with remote Power BI MCP server | https://learn.microsoft.com/power-bi/developer/mcp/remote-mcp-server-get-started |
-| Power BI MCP server remote tools | https://learn.microsoft.com/power-bi/developer/mcp/remote-mcp-server-tools |
-
-## Power BI and Fabric modeling
-
-| Topic | Microsoft Learn URL |
-| --- | --- |
-| Direct Lake overview | https://learn.microsoft.com/fabric/fundamentals/direct-lake-overview |
-| Power BI semantic models in Microsoft Fabric | https://learn.microsoft.com/fabric/data-warehouse/semantic-models |
-| Understand star schema and the importance for Power BI | https://learn.microsoft.com/power-bi/guidance/star-schema |
-| Row-level security guidance in Power BI Desktop | https://learn.microsoft.com/power-bi/guidance/rls-guidance |
-
-## Migration and delivery
-
-| Topic | Microsoft Learn URL |
-| --- | --- |
-| Power BI migration overview | https://learn.microsoft.com/power-bi/guidance/powerbi-migration-overview |
-| Conduct proof of concept to migrate to Power BI | https://learn.microsoft.com/power-bi/guidance/powerbi-migration-proof-of-concept |
-| Introduction to deployment pipelines | https://learn.microsoft.com/fabric/cicd/deployment-pipelines/intro-to-deployment-pipelines |
-| Automate deployment pipelines for Power BI items by using APIs | https://learn.microsoft.com/fabric/cicd/deployment-pipelines/pipeline-automation |
-
-## Governance and security
-
-| Topic | Microsoft Learn URL |
-| --- | --- |
-| Sensitivity labels in Power BI | https://learn.microsoft.com/fabric/enterprise/powerbi/service-security-sensitivity-label-overview |
-| How to apply sensitivity labels in Power BI | https://learn.microsoft.com/fabric/enterprise/powerbi/service-security-apply-data-sensitivity-labels |
-| Data protection in Power BI | https://learn.microsoft.com/fabric/enterprise/powerbi/service-security-data-protection-overview |
-| Promote and certify Power BI content with endorsement | https://learn.microsoft.com/power-bi/collaborate-share/service-endorsement-overview |
-| Endorse your content | https://learn.microsoft.com/power-bi/collaborate-share/service-endorse-content |
-| Endorse Fabric and Power BI items | https://learn.microsoft.com/fabric/fundamentals/endorsement-promote-certify |
-| What is an on-premises data gateway? | https://learn.microsoft.com/power-bi/connect-data/service-gateway-onprem |
-| What is a virtual network data gateway? | https://learn.microsoft.com/data-integration/vnet/overview |
-
-## Fabric platform
-
-| Topic | Microsoft Learn URL |
-| --- | --- |
-| Microsoft Fabric overview | https://learn.microsoft.com/fabric/fundamentals/microsoft-fabric-overview |
-| Get started with Microsoft Fabric | https://learn.microsoft.com/training/paths/get-started-fabric/ |
-| Fabric data agent concepts | https://learn.microsoft.com/fabric/data-science/concept-data-agent |
-| Quickstart: Create your first Dataflow Gen2 | https://learn.microsoft.com/fabric/data-factory/create-first-dataflow-gen2 |
-| Dataflow Gen2 with CI/CD and Git integration | https://learn.microsoft.com/fabric/data-factory/dataflow-gen2-cicd-and-git-integration |
-| Microsoft Fabric Capacity Metrics app | https://learn.microsoft.com/fabric/enterprise/metrics-app |
-
-## Rayfin
+Everything below is usable with Power BI Desktop, Power Query, DAX, the
+on-premises data gateway, and the Power BI Service.
 
 | Topic | URL |
 | --- | --- |
-| Rayfin repository | https://github.com/microsoft/rayfin |
-| Rayfin documentation | https://aka.ms/rayfin/docs |
-| Awesome Rayfin | https://github.com/microsoft/awesome-rayfin |
-| Fabric apps analytic templates | https://github.com/microsoft/fabric-apps-analytic-templates |
+| Power Query best practices | https://learn.microsoft.com/power-query/best-practices |
+| Query folding guidance for Power BI | https://learn.microsoft.com/power-bi/guidance/power-query-folding |
+| Understand star schema and the importance for Power BI | https://learn.microsoft.com/power-bi/guidance/star-schema |
+| What is an on-premises data gateway? | https://learn.microsoft.com/power-bi/connect-data/service-gateway-onprem |
+
+## Future, approval-dependent
+
+These describe capabilities Schwab I&O **does not have today**. They are here so
+the Day 3 roadmap conversation has something to point at. Do not design a
+30-day plan around them, and do not demo them.
+
+| Topic | URL | Status |
+| --- | --- | --- |
+| OneLake medallion lakehouse architecture | https://learn.microsoft.com/fabric/onelake/onelake-medallion-lakehouse-architecture | Requires Fabric capacity. Not provisioned |
+| Enable Copilot in Power BI | https://learn.microsoft.com/power-bi/create-reports/copilot-enable-power-bi | Requires capacity and tenant approval. Not available |
 
 ## Workshop-local references
 
-| Topic | Relative path |
+| Topic | Path |
 | --- | --- |
-| Direct Lake lab | ../labs/lab-06-semantic-model-directlake/README.md |
-| Copilot reports lab | ../labs/lab-07-copilot-reports/README.md |
-| MCP and GitHub Copilot lab | ../labs/lab-09-mcp-github-copilot/README.md |
-| Rayfin insurance app lab | ../labs/lab-11-rayfin-insurance-app/README.md |
-| Rayfin app skeleton | ../rayfin-app/README.md |
-| PBIP reference | ../src/pbip/README.md |
+| Current state and constraints | schwab-current-state.md |
+| Star schema | star-schema.md |
+| Visual design | visual-design.md |
+| Tableau to Power BI | tableau-to-powerbi.md |
+| Migration approaches | migration-approaches.md |
+| M365 Copilot for Power BI work | copilot-in-power-bi.md |
+| Gateway setup | gateway-setup.md |
+| Workspace governance | ../governance/workspace-governance.md |
+| Endorsement and certification | ../governance/endorsement-certification.md |
+| Migration assessment worksheet | ../governance/migration-assessment-worksheet.md |
+| Adoption roadmap | ../governance/adoption-roadmap.md |
+| Measure definitions | ../src/pbip/README.md |
+| Power Query snippet library | ../src/powerquery/README.md |
+| Sample DAX and validation queries | ../src/sql/sample_dax_queries.dax |
+| Dataset documentation | ../data/README.md |

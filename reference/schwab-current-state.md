@@ -1,134 +1,167 @@
-# Schwab current state, constraints, and what that means for this workshop
+# Schwab I&O current state, constraints, and what that means for this workshop
 
-This page captures what the Schwab team told us in the pre-workshop agenda
-review. Every lab is written against these facts. Read this before facilitating,
-and cover it in the Day 1 kickoff so attendees know what is feasible **today**
-versus what is on the roadmap.
+What the Schwab team told us in the pre-workshop agenda review. Every lab is
+written against these facts. Cover this in the Day 1 kickoff so attendees know
+what is feasible **today** versus what is on the roadmap.
 
-> Treat this as a living document. Confirm each row with Anthony and Richard the
-> week of the workshop, because tenant settings and approvals can change.
+> Treat this as a living document. Confirm each row the week of the workshop,
+> because tenant settings and approvals change.
 
 ## Audience
 
 | Item | What we know |
 | --- | --- |
+| Group | Charles Schwab **Infrastructure & Operations (I&O)** |
 | Size | 15-18 attendees |
-| Locations | Mix of Austin and Phoenix; some Schwab Data team members may join virtually |
-| Background | Cross-functional. Most have **Tableau** experience. Not a centralized reporting group. |
+| Locations | Austin and Phoenix, some joining virtually |
+| Background | Cross-functional, not a centralized reporting team. Most have **Tableau** experience. |
 | Power BI experience | Assume none |
-| Goal | Form a **community of practice** and stand up a center of excellence for data visualization inside the infrastructure team |
+| Goal | **Retire Tableau in I&O** and form a **Community of Practice** for data visualization |
 
-Implication: draw explicit Tableau corollaries in every teaching block. Do not
-assume attendees share a common toolchain, naming standard, or release process.
+Implication: draw an explicit Tableau corollary in every teaching block. Do not
+assume a shared toolchain, naming standard, or release process.
+
+## The five I&O domains
+
+Five breakout groups, five fact tables, one shared set of conformed dimensions.
+
+| Group | Domain | Fact table | The flagship report answers |
+| --- | --- | --- | --- |
+| 1 | ITSM & Operational Reporting | `fact_incident` | Incident, change and problem trends with SLA attainment and MTTR |
+| 2 | Capacity & Forecasting | `fact_capacity` | Utilization, demand and headroom with a simple forecast view |
+| 3 | Mainframe Analytics | `fact_mainframe` | MIPS consumption, batch windows and throughput over time |
+| 4 | Service Desk & Workforce | `fact_service_desk` | Ticket volumes, first-contact resolution and staffing coverage |
+| 5 | Asset & Workplace Services | `fact_asset` | Inventory, configuration coverage and lifecycle status from the CMDB |
 
 ## Tooling and feature access
 
-| Capability | Status today | How the workshop handles it |
+### In scope
+
+| Capability | Status | Where it appears |
 | --- | --- | --- |
-| Power BI Desktop, Power Query, DAX | Available | Every hands-on lab |
-| Import and DirectQuery storage modes | Available - **the only two options** | [Lab 5](../labs/lab-05-ingestion-onelake/README.md), [Lab 6](../labs/lab-06-semantic-model-directlake/README.md) |
-| On-premises data gateway | Available, centrally managed | [Lab 5](../labs/lab-05-ingestion-onelake/README.md) |
-| Power BI Service: workspaces, RLS, endorsement, apps | Available | [Lab 4](../labs/lab-04-governance-foundations/README.md) |
-| **M365 Copilot** | Available to some attendees | [Lab 7](../labs/lab-07-copilot-reports/README.md). Draft in Copilot, review, **copy and paste** into Power Query or the DAX editor. Pair licensed and unlicensed attendees. |
-| Copilot **embedded in Power BI** | **Not available** | Not covered. Do not demo. |
-| **Copilot Studio** | **Not available** | Not covered |
-| **Fabric Data Agent** | **Not available** | Not covered. [Lab 10](../labs/lab-10-data-agent-showcase/README.md) is appendix reading only. |
-| **Lakehouse / OneLake / Direct Lake** | **Not available** | Not covered hands-on. Appendix reading only. |
-| **Dataflows Gen2, Data Factory pipelines, notebooks** | **Not available** | Not covered. All transformation is manual Power Query. |
-| **MCP servers** | **Not available** | [Lab 9](../labs/lab-09-mcp-github-copilot/README.md) is appendix reading only |
-| **GitHub Copilot / VS Code / PBIP / CI-CD** | Not part of current practice | Appendix reading only |
-| **Rayfin** | **Not available** - requires Fabric | [Lab 11](../labs/lab-11-rayfin-insurance-app/README.md) is appendix reading only |
+| Power BI Desktop | Available | Every lab |
+| Power Query | Available. **The only transformation layer.** | [Lab 4](../labs/lab-04-power-query/README.md) |
+| DAX | Available | [Lab 3](../labs/lab-03-dax-measures/README.md) |
+| **Import** storage mode | Available, and the default choice | [Lab 1](../labs/lab-01-semantic-model/README.md) |
+| **DirectQuery** storage mode | Available, discouraged | Covered as a decision, not a default |
+| On-premises data gateway | Available, centrally managed | [Lab 0](../labs/lab-00-setup-and-gateway/README.md), [gateway-setup.md](gateway-setup.md) |
+| Power BI Service workspaces | Available | [Lab 2](../labs/lab-02-report-page/README.md) onward |
+| Row-level security | Available | Governance sessions |
+| Endorsement (promoted, certified) | Available | [endorsement-certification.md](../governance/endorsement-certification.md) |
+| Microsoft Purview sensitivity labels | Available | [workspace-governance.md](../governance/workspace-governance.md) |
+| Deployment pipelines | Available | [workspace-governance.md](../governance/workspace-governance.md) |
+| **M365 Copilot** | Available to some attendees | External drafting assistant only, copy and paste into Power BI. Pair licensed with unlicensed attendees. [copilot-in-power-bi.md](copilot-in-power-bi.md) |
 
-**The practical consequence:** every transformation in this workshop is done by
+### Not available
+
+Do not demo any of these. A demo of something the team cannot use reads as a
+sales pitch, not enablement.
+
+| Capability | Status |
+| --- | --- |
+| Copilot **embedded in Power BI** Desktop or Service | Not available |
+| Copilot Studio | Not available |
+| Fabric Data Agent | Not available |
+| Lakehouse, OneLake, Direct Lake | Not available |
+| Medallion layering (bronze, silver, gold) | Not applicable, there is no lake layer |
+| Dataflows Gen2, Data Factory pipelines, notebooks | Not available |
+| Fabric capacity | Not provisioned |
+| MCP servers | Not available |
+| GitHub Copilot, PBIP source control, CI/CD for BI content | Not part of current practice |
+
+Anything on this list is **future and approval-dependent**. It belongs in the Day
+3 roadmap conversation, not in a lab. See
+[sessions/day-3-showcase.md](../sessions/day-3-showcase.md).
+
+**The practical consequence:** every transformation in this workshop happens by
 hand in **Power Query**, and every calculation is written in **DAX**. There is no
-lake layer to push work into, and no AI inside Power BI to generate it. The only
-AI assist available is M365 Copilot in a separate window, used as a drafting tool
-with a copy-and-paste handoff.
-
-Escalation path for enabling any of the above later: Hilary, Jeremy, Tim, and
-Richard coordinate. Keep that out of the workshop content itself, and capture
-requests in the Day 3 roadmap instead.
+lake layer to push work into and no AI inside Power BI to generate it. The only
+AI assist is M365 Copilot in a separate window, used as a drafting tool with a
+copy-and-paste handoff.
 
 ## Data architecture today
 
-- The architecture is **very flat**. There is no medallion layering and no
-  normalized dimensional structure in place.
-- Large **Excel files** are a common source and a common pain point.
-- Most Power BI reports connect **directly to SQL databases** through a semantic
-  model in **Import** mode. **DirectQuery** is the only other option.
-- The **on-premises data gateway** brokers those connections.
-- A move to a **snowflake pattern** is planned but not implemented.
-- OneLake and Lakehouse are **not available**, so there is no lake layer to push
-  transformation work into.
-- **All transformation happens in Power Query**, by hand, in the model.
+- The architecture is **very flat**. No layered refinement, no normalized
+  dimensional structure in place.
+- **Large Excel files** are a common source and a common pain point. Monthly
+  extracts arrive as a folder of files with inconsistent column names.
+- Most reports connect **directly to SQL databases** through a semantic model in
+  **Import** mode.
+- The **on-premises data gateway** brokers those connections. It is centrally
+  managed, so assume attendees cannot create or repoint a gateway data source
+  themselves. Detail in [gateway-setup.md](gateway-setup.md).
+- There is **no lake layer**, so **all transformation happens in Power Query**.
+- A move to a **snowflake** pattern is planned but not implemented. Covered
+  honestly in [star-schema.md](star-schema.md), including why the Power BI engine
+  prefers a star.
 
-Implication: the workshop must be useful to someone who will go back to a
-gateway-brokered Import model on Monday. Power Query skill is therefore the
-highest-leverage thing we can teach, alongside star-schema modeling. Introduce
-the architecture vocabulary so the team avoids rework as it modernizes, but do
-not teach a workflow that depends on tooling they cannot use.
+Implication: the workshop must be useful to someone who goes back to a
+gateway-brokered Import model on Monday. Power Query skill and star-schema
+modeling are the highest-leverage things we can teach.
 
-## The three modeling patterns we teach, and when each applies
+## Import versus DirectQuery
 
-| Pattern | What it is | Where Schwab is | Where we teach it |
-| --- | --- | --- | --- |
-| **Flat / wide extract** | One wide table per workbook, logic baked into the extract | Current state | [Lab 1](../labs/lab-01-tableau-to-powerbi/README.md) - built deliberately, then critiqued |
-| **Star schema** | Facts plus conformed dimensions, single-direction filters | The first move, and the highest-value one | [Lab 2](../labs/lab-02-data-modeling/README.md), shaped in Power Query in [Lab 5](../labs/lab-05-ingestion-onelake/README.md) |
-| **Snowflake** | Dimensions normalized into related sub-dimensions | Stated plan | [Lab 2](../labs/lab-02-data-modeling/README.md), with the tradeoffs called out |
-
-**Medallion (Bronze/Silver/Gold)** is mentioned once, as vocabulary, so the term
-does not cause confusion later. It is **not taught or built**, because it requires
-a lake layer Schwab does not have. Be explicit that medallion and star are not
-competing choices: medallion describes how data is refined on the way in, star
-describes how the model is shaped for analysis. A team can - and here, must -
-adopt a star schema with nothing but Power Query and gateway-brokered SQL.
-
-## Storage mode: the only two choices
+The only two storage modes available, and the decision is per model.
 
 | | Import | DirectQuery |
 | --- | --- | --- |
 | Where data lives | Cached in the model | Stays in the source |
-| Query speed | Fast | Depends on the source |
-| Data freshness | As of last refresh | Live |
+| Query speed | Fast | Depends entirely on the source and the gateway |
+| Data freshness | As of the last refresh | Live |
 | Refresh needed | Yes, scheduled | No |
-| Power Query transformations | Full library available | Only folding steps allowed |
-| Model size limits | Applies | Not applicable |
-| Best for | Most reporting at Schwab today | Large or highly volatile sources, or where caching is not permitted |
+| Power Query transformations | Full library available | Only steps that fold back to the source |
+| DAX available | All functions | A restricted subset |
+| Model size limit | Applies | Not applicable |
+| Load on the source system | Only at refresh | Every visual interaction |
+| Best for | Almost everything at Schwab today | Sources too large to cache, or where caching is not permitted |
 
-This tradeoff is taught in [Lab 5](../labs/lab-05-ingestion-onelake/README.md) and
-decided per model in [Lab 6](../labs/lab-06-semantic-model-directlake/README.md).
+**Default to Import.** Choose DirectQuery only when you can name the specific
+requirement that rules Import out, and only after testing page performance with
+the gateway in the path.
 
-## Development practice constraints to acknowledge
+## Development practice constraints
 
-- Gateway connections are centrally managed. Assume attendees cannot create or
-  repoint a gateway data source themselves.
-- Native tool features are enabled selectively at tenant and capacity level.
-  Do not demo anything outside the **In scope** list above - a demo of something
-  the team cannot use reads as a sales pitch, not enablement.
+- Gateway connections are centrally managed. Plan Lab 0 accordingly.
+- Tenant and workspace features are enabled selectively. Confirm before the
+  workshop, and stay inside the **In scope** list.
 - There is no shared source-control or CI/CD practice for Power BI content, and
-  PBIP is not in use. Standards and review discipline are the substitute, and
-  they are set by the community of practice in [Lab 12](../labs/lab-12-showcase-next-steps/README.md).
+  PBIP is not in use. Standards, naming, and review discipline are the substitute,
+  and the Community of Practice sets them.
 - Report development is decentralized. Naming, certification, and workspace
-  standards are part of what the community of practice needs to define.
-- No AI tool may receive real Schwab data, credentials, or customer information.
-  M365 Copilot is used for **code and prose only**, never source records.
+  standards are part of what the Community of Practice needs to define.
+- No AI tool may receive real Schwab data, credentials, or ticket contents. M365
+  Copilot is used for **schema, code and prose only**, never source records.
+
+## Naming conventions
+
+| Object | Pattern | Example |
+| --- | --- | --- |
+| Semantic model | `sm_io_<domain>` | `sm_io_itsm`, `sm_io_capacity` |
+| Report | `rpt_io_<domain>_<subject>` | `rpt_io_itsm_sla` |
+| Dimension table | `dim_<entity>` | `dim_service` |
+| Fact table | `fact_<event>` | `fact_incident` |
+| Key column | `<entity>_key`, integer, hidden | `service_key` |
+| Measure | Business language, Title Case | `Total Incidents`, `SLA Met %` |
+| Workspace | `IO-Analytics-<Environment>` | `IO-Analytics-Prod` |
 
 ## Facilitator labeling convention
 
-Every lab uses one of two badges so attendees always know what applies to them:
+Two badges, so attendees always know what applies to them:
 
-- **In scope** - attendees do this hands-on with the tools they have today.
-- **Appendix** - reference reading about a capability Schwab does not have.
-  Not run, not demoed, not a prerequisite for anything.
+- **In scope.** Attendees do this hands-on with the tools they have today.
+- **Future, approval-dependent.** Reference reading about a capability Schwab does
+  not have. Not run, not demoed, not a prerequisite for anything.
 
-If a question comes up about an appendix capability, answer it briefly and route
-the request to the Day 3 roadmap. Do not detour into a live demo.
+If a question comes up about a future capability, answer it briefly and route the
+request to the Day 3 roadmap. Do not detour into a live demo.
 
 ## Related
 
+- [Star schema](star-schema.md)
+- [Visual design](visual-design.md)
 - [Tableau to Power BI](tableau-to-powerbi.md)
-- [M365 Copilot for Power BI work](copilot-in-power-bi.md)
 - [Migration approaches](migration-approaches.md)
+- [M365 Copilot for Power BI work](copilot-in-power-bi.md)
+- [Gateway setup](gateway-setup.md)
 - [Workspace governance](../governance/workspace-governance.md)
 - [Adoption roadmap](../governance/adoption-roadmap.md)
-- [Architecture](architecture.md) - appendix, future state

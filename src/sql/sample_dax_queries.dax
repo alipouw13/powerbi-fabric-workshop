@@ -1,46 +1,506 @@
--- Sample DAX queries for the sm_insurance model.
--- Use these to verify the model, and to demo the Power BI MCP server (remote):
--- in VS Code, GitHub Copilot calls the "Execute Query" tool with a query like
--- these against the semantic model. See labs/lab-09-mcp-github-copilot.
+// =============================================================================
+// Sample DAX for the Schwab I&O semantic models
+// =============================================================================
+//
+// Two things live in this file:
+//   1. MEASURE DEFINITIONS   - paste into Power BI Desktop, one per measure.
+//   2. EVALUATE QUERIES      - run in DAX query view to validate the model.
+//                              Used by Lab 1 step 6 and Lab 3 step 7.
+//
+// Models:  sm_io_itsm, sm_io_capacity, sm_io_mainframe,
+//          sm_io_servicedesk, sm_io_assets
+//
+// Conventions:
+//   - Measures are named in business Title Case: Total Incidents, SLA Met %.
+//   - Every division uses DIVIDE. Never use "/". DIVIDE handles the zero
+//     denominator and returns BLANK instead of an error.
+//   - Reuse base measures. Do not re-aggregate the underlying column.
+//   - dim_date must be marked as the date table on dim_date[date] before any
+//     time intelligence below will behave correctly.
+// =============================================================================
 
--- 1. Written premium and loss ratio by product
+
+// =============================================================================
+// GROUP 1 - ITSM & OPERATIONAL REPORTING   (fact_incident, one row per incident)
+// =============================================================================
+
+// -- Base measures ------------------------------------------------------------
+
+// Every incident in the current filter context.
+// incident_count is 1 on every row, so SUM is a row count that survives being
+// filtered. Format: whole number, thousands separator.
+Total Incidents = SUM( fact_incident[incident_count] )
+
+// Incidents that reached a terminal state. Open incidents have no resolve time
+// and no SLA outcome, so most quality measures must exclude them.
+Resolved Incidents =
+CALCULATE(
+    [Total Incidents],
+    fact_incident[incident_state] IN { "Resolved", "Closed" }
+)
+
+// Mean time to resolve, in minutes. AVERAGE ignores blanks, so open incidents
+// drop out on their own. Format: whole number.
+Avg Resolve Minutes = AVERAGE( fact_incident[time_to_resolve_minutes] )
+
+// Share of resolved incidents that met the severity SLA target.
+// Denominator is resolved incidents, not all incidents: an open incident has
+// not met or missed its SLA yet. Format: percent, 1 decimal.
+SLA Met % =
+VAR MetSLA =
+    CALCULATE( [Total Incidents], fact_incident[sla_met_flag] = TRUE() )
+RETURN
+    DIVIDE( MetSLA, [Resolved Incidents] )
+
+// Incidents flagged as major. Drives the exception card on every ITSM page.
+Major Incidents =
+CALCULATE( [Total Incidents], fact_incident[major_incident_flag] = TRUE() )
+
+// Share of incidents that were reopened after resolution. A quality signal:
+// rising reopen rate usually means incidents are being closed, not fixed.
+// Format: percent, 1 decimal.
+Reopened Rate =
+VAR Reopened =
+    CALCULATE( [Total Incidents], fact_incident[reopened_flag] = TRUE() )
+RETURN
+    DIVIDE( Reopened, [Total Incidents] )
+
+
+// -- Time intelligence --------------------------------------------------------
+// All of these require dim_date marked as the date table.
+
+// Same measure, previous month. DATEADD shifts the whole date filter back one
+// month, so it works at any grain the visual happens to be at.
+Incidents PM =
+CALCULATE(
+    [Total Incidents],
+    DATEADD( dim_date[date], -1, MONTH )
+)
+
+// Month over month change. Blank in the first month, which is correct: there is
+// no prior period to compare against. Format: percent, 1 decimal.
+MoM Change % =
+DIVIDE( [Total Incidents] - [Incidents PM], [Incidents PM] )
+
+// Same period, prior year. SAMEPERIODLASTYEAR is clearer than DATEADD(-12,
+// MONTH) when the visual is at day or quarter grain.
+Incidents PY =
+CALCULATE(
+    [Total Incidents],
+    SAMEPERIODLASTYEAR( dim_date[date] )
+)
+
+// Year over year change. Format: percent, 1 decimal.
+YoY Change % =
+DIVIDE( [Total Incidents] - [Incidents PY], [Incidents PY] )
+
+// Cumulative incidents within the current year. Resets on 1 January.
+// This is the DAX equivalent of a Tableau RUNNING_SUM, except it accumulates
+// along the date rather than along the table layout, so re-sorting the visual
+// does not change the answer.
+Running Total Incidents =
+CALCULATE(
+    [Total Incidents],
+    DATESYTD( dim_date[date] )
+)
+
+// Cumulative across everything the reader has selected, without resetting each
+// year. Use this when the visual spans multiple years.
+Cumulative Incidents =
+VAR MaxDate = MAX( dim_date[date] )
+RETURN
+    CALCULATE(
+        [Total Incidents],
+        dim_date[date] <= MaxDate,
+        ALLSELECTED( dim_date )
+    )
+
+
+// -- Distribution -------------------------------------------------------------
+
+// Share of ALL incidents in the model. ALL ignores slicers, so if the reader
+// filters to Tier 0 the visible percentages will NOT sum to 100. That is
+// correct here: the question is "what share of the whole estate is this".
+// Format: percent, 1 decimal.
+Percent of Total Incidents =
+DIVIDE(
+    [Total Incidents],
+    CALCULATE( [Total Incidents], ALL( fact_incident ) )
+)
+
+// Share of what the reader has SELECTED. ALLSELECTED respects slicers and
+// external filters, so the column always sums to 100 within the current
+// selection. This is the closer match to Tableau's "Percent of Total" quick
+// table calculation.
+//
+// Pick one deliberately and put the choice in the measure description. Shipping
+// both without explaining the difference is how two pages end up disagreeing.
+Percent of Selected Incidents =
+DIVIDE(
+    [Total Incidents],
+    CALCULATE( [Total Incidents], ALLSELECTED() )
+)
+
+// Share within a single dimension only. Removes the service filter but keeps
+// severity, team and date. This is the DAX answer to a Tableau FIXED LOD.
+Percent of Service Incidents =
+DIVIDE(
+    [Total Incidents],
+    CALCULATE( [Total Incidents], REMOVEFILTERS( dim_service ) )
+)
+
+
+// =============================================================================
+// GROUP 2 - CAPACITY & FORECASTING     (fact_capacity, one row per CI per month)
+// =============================================================================
+
+// Mean CPU utilization across the CIs in context.
+// NEVER SUM a percentage. Summing utilization across 120 CIs returns a number
+// in the thousands and means nothing. Format: percent, 1 decimal.
+Avg CPU Utilization = AVERAGE( fact_capacity[cpu_utilization_pct] )
+
+Avg Memory Utilization = AVERAGE( fact_capacity[memory_utilization_pct] )
+
+// Count of distinct CIs running hot. Distinct, not row count: at monthly grain
+// one CI contributes many rows and a plain count would report months, not CIs.
+CIs Over 80% CPU =
+CALCULATE(
+    DISTINCTCOUNT( fact_capacity[ci_key] ),
+    fact_capacity[cpu_utilization_pct] > 80
+)
+
+// Mean remaining headroom. The forecasting group's headline number.
+// Format: percent, 1 decimal.
+Avg Headroom % = AVERAGE( fact_capacity[headroom_pct] )
+
+// Storage consumption as a share of what is allocated. Computed from the totals,
+// not as an average of per-row ratios, so large volumes weigh correctly.
+// Format: percent, 1 decimal.
+Storage Utilization % =
+DIVIDE(
+    SUM( fact_capacity[storage_used_gb] ),
+    SUM( fact_capacity[storage_allocated_gb] )
+)
+
+// How many CIs are in scope at all. Useful as a denominator and as a sanity
+// check that a filter has not silently emptied the visual.
+CI Count = DISTINCTCOUNT( fact_capacity[ci_key] )
+
+
+// =============================================================================
+// GROUP 3 - MAINFRAME ANALYTICS         (fact_mainframe, one row per LPAR per day)
+// =============================================================================
+
+// Total MIPS consumed. Additive across days and LPARs.
+Total MIPS Consumed = SUM( fact_mainframe[mips_consumed] )
+
+// Consumption against installed capacity.
+// mips_capacity repeats on every daily row for the same LPAR, so SUM of capacity
+// across a month multiplies the real capacity by the number of days. Divide the
+// two sums at the same grain and the repetition cancels out.
+// Format: percent, 1 decimal.
+MIPS Utilization % =
+DIVIDE(
+    SUM( fact_mainframe[mips_consumed] ),
+    SUM( fact_mainframe[mips_capacity] )
+)
+
+// Highest single-day consumption in context. Month-end batch peaks are what the
+// Mainframe group sizes against, not the average.
+Peak MIPS = MAX( fact_mainframe[mips_consumed] )
+
+// Share of batch jobs that failed. Format: percent, 2 decimals - failure rates
+// here are small and 1 decimal hides the movement.
+Batch Failure Rate =
+DIVIDE(
+    SUM( fact_mainframe[batch_jobs_failed] ),
+    SUM( fact_mainframe[batch_jobs_completed] ) + SUM( fact_mainframe[batch_jobs_failed] )
+)
+
+// Mean nightly batch window. Format: whole number.
+Avg Batch Window Minutes = AVERAGE( fact_mainframe[batch_window_minutes] )
+
+Total Transactions = SUM( fact_mainframe[transactions_processed] )
+
+
+// =============================================================================
+// GROUP 4 - SERVICE DESK & WORKFORCE
+//           (fact_service_desk, one row per team per location per day)
+// =============================================================================
+
+Tickets Received = SUM( fact_service_desk[tickets_received] )
+
+Tickets Resolved = SUM( fact_service_desk[tickets_resolved] )
+
+// Share of resolved tickets closed on first contact. The desk's primary quality
+// metric. Denominator is resolved, not received: a ticket still open cannot have
+// been resolved on first contact. Format: percent, 1 decimal.
+First Contact Resolution % =
+DIVIDE(
+    SUM( fact_service_desk[first_contact_resolved] ),
+    [Tickets Resolved]
+)
+
+// Mean handle time in minutes. Format: 1 decimal.
+Avg Handle Time = AVERAGE( fact_service_desk[avg_handle_time_minutes] )
+
+// Mean speed to answer in seconds. Format: whole number.
+Avg Speed to Answer = AVERAGE( fact_service_desk[avg_speed_to_answer_seconds] )
+
+// Share of calls abandoned before an agent answered. Format: percent, 1 decimal.
+Abandon Rate =
+DIVIDE(
+    SUM( fact_service_desk[calls_abandoned] ),
+    [Tickets Received]
+)
+
+// Staffing coverage: available against scheduled. Format: percent, 1 decimal.
+Coverage % =
+DIVIDE(
+    SUM( fact_service_desk[agents_available] ),
+    SUM( fact_service_desk[agents_scheduled] )
+)
+
+// Workload per available agent. Divides two sums rather than averaging a ratio,
+// so busy days weigh correctly. Format: 1 decimal.
+Tickets per Agent =
+DIVIDE( [Tickets Received], SUM( fact_service_desk[agents_available] ) )
+
+
+// =============================================================================
+// GROUP 5 - ASSET & WORKPLACE SERVICES        (fact_asset, one row per asset)
+// =============================================================================
+
+// Every asset in context. asset_count is 1 per row.
+Total Assets = SUM( fact_asset[asset_count] )
+
+// Assets whose warranty has lapsed. The renewal and risk conversation.
+Assets Out of Warranty =
+CALCULATE( [Total Assets], fact_asset[is_under_warranty] = FALSE() )
+
+// Share of the estate out of warranty. Format: percent, 1 decimal.
+Out of Warranty % =
+DIVIDE( [Assets Out of Warranty], [Total Assets] )
+
+// Share of assets with a complete CMDB record. The Asset group's headline
+// governance metric. Format: percent, 1 decimal.
+CMDB Completeness % =
+DIVIDE(
+    CALCULATE( [Total Assets], fact_asset[cmdb_complete_flag] = TRUE() ),
+    [Total Assets]
+)
+
+// Capital and run-rate cost. Format: currency, 0 decimals.
+Total Acquisition Cost = SUM( fact_asset[acquisition_cost_usd] )
+
+Annual Support Cost = SUM( fact_asset[annual_support_cost_usd] )
+
+// Mean asset value. Format: currency, 0 decimals.
+Avg Acquisition Cost = DIVIDE( [Total Acquisition Cost], [Total Assets] )
+
+// Assets whose warranty expires inside the next 90 days. Drives the renewal
+// worklist. TODAY() makes this measure non-deterministic, so it refreshes with
+// the report rather than being fixed at model refresh.
+Assets Expiring in 90 Days =
+CALCULATE(
+    [Total Assets],
+    fact_asset[warranty_end_date] >= TODAY(),
+    fact_asset[warranty_end_date] <= TODAY() + 90
+)
+
+
+// =============================================================================
+// VALIDATION QUERIES
+// Run these in Power BI Desktop: View -> DAX query view.
+// Lab 1 step 6 uses V1 to V4. Lab 3 step 7 uses V5 to V9.
+// =============================================================================
+
+
+// -- V1. Row counts. Do the tables match the source files? --------------------
+// Expect fact_incident and the wide extract to agree exactly. If they do not,
+// a Power Query step dropped rows.
+EVALUATE
+ROW(
+    "fact_incident rows",  COUNTROWS( fact_incident ),
+    "dim_service rows",    COUNTROWS( dim_service ),
+    "dim_ci rows",         COUNTROWS( dim_configuration_item ),
+    "dim_team rows",       COUNTROWS( dim_team ),
+    "dim_location rows",   COUNTROWS( dim_location ),
+    "dim_severity rows",   COUNTROWS( dim_severity ),
+    "dim_date rows",       COUNTROWS( dim_date )
+)
+
+
+// -- V2. Key uniqueness. Every dimension key must be unique. ------------------
+// Each pair must match. A mismatch means a duplicate key and a relationship
+// Power BI will refuse to create as one-to-many.
+EVALUATE
+ROW(
+    "service rows",      COUNTROWS( dim_service ),
+    "service keys",      DISTINCTCOUNT( dim_service[service_key] ),
+    "location rows",     COUNTROWS( dim_location ),
+    "location keys",     DISTINCTCOUNT( dim_location[location_key] ),
+    "ci rows",           COUNTROWS( dim_configuration_item ),
+    "ci keys",           DISTINCTCOUNT( dim_configuration_item[ci_key] ),
+    "date rows",         COUNTROWS( dim_date ),
+    "date keys",         DISTINCTCOUNT( dim_date[date_key] )
+)
+
+
+// -- V3. Orphaned facts. Fact keys with no matching dimension row. ------------
+// Every count must be 0. A non-zero result means those incidents land in the
+// blank member and vanish from every sliced total while still counting in the
+// grand total, which is the hardest kind of error to spot on a report.
+EVALUATE
+ROW(
+    "orphan service_key",  COUNTROWS( EXCEPT(
+                              VALUES( fact_incident[service_key] ),
+                              VALUES( dim_service[service_key] ) ) ) + 0,
+    "orphan ci_key",       COUNTROWS( EXCEPT(
+                              VALUES( fact_incident[ci_key] ),
+                              VALUES( dim_configuration_item[ci_key] ) ) ) + 0,
+    "orphan team_key",     COUNTROWS( EXCEPT(
+                              VALUES( fact_incident[team_key] ),
+                              VALUES( dim_team[team_key] ) ) ) + 0,
+    "orphan severity_key", COUNTROWS( EXCEPT(
+                              VALUES( fact_incident[severity_key] ),
+                              VALUES( dim_severity[severity_key] ) ) ) + 0,
+    "orphan date_key",     COUNTROWS( EXCEPT(
+                              VALUES( fact_incident[date_key] ),
+                              VALUES( dim_date[date_key] ) ) ) + 0
+)
+
+
+// -- V4. Date coverage. Does dim_date span the fact table? --------------------
+// dim_date must start on or before the first incident and end on or after the
+// last, with no gaps, or time intelligence will be wrong at the edges.
+EVALUATE
+ROW(
+    "first incident date", MIN( dim_date[date] ),
+    "last incident date",  MAX( dim_date[date] ),
+    "distinct dates",      DISTINCTCOUNT( dim_date[date] ),
+    "expected days",       DATEDIFF( MIN( dim_date[date] ), MAX( dim_date[date] ), DAY ) + 1
+)
+
+
+// -- V5. Grain 1 of 3: the total. ---------------------------------------------
+// Start here for every new measure. If the grand total is wrong, nothing below
+// it will be right.
+EVALUATE
+ROW(
+    "Total Incidents",     [Total Incidents],
+    "Resolved Incidents",  [Resolved Incidents],
+    "Avg Resolve Minutes", [Avg Resolve Minutes],
+    "SLA Met %",           [SLA Met %],
+    "Major Incidents",     [Major Incidents],
+    "Reopened Rate",       [Reopened Rate]
+)
+
+
+// -- V6. Grain 2 of 3: by dimension. ------------------------------------------
+// The Total Incidents column must sum back to V5. A measure that is right at the
+// total and wrong by service almost always has a misplaced filter.
 EVALUATE
 SUMMARIZECOLUMNS(
-    dim_policy[product],
-    "Written Premium", [Written Premium],
-    "Earned Premium", [Earned Premium],
-    "Loss Ratio", [Loss Ratio]
+    dim_service[service_name],
+    dim_service[service_tier],
+    "Total Incidents",     [Total Incidents],
+    "SLA Met %",           [SLA Met %],
+    "Avg Resolve Minutes", [Avg Resolve Minutes],
+    "Major Incidents",     [Major Incidents]
 )
-ORDER BY [Written Premium] DESC;
+ORDER BY [Total Incidents] DESC
 
--- 2. Loss ratio by region (find the worst-performing books)
+
+// -- V7. Grain 3 of 3: by month, with period comparisons. ---------------------
+// Incidents PM must be blank in the first month and must equal the previous
+// row's Total Incidents thereafter. If it does not, dim_date is not marked as
+// the date table, or it has gaps.
 EVALUATE
 SUMMARIZECOLUMNS(
-    dim_policy[region],
-    "Earned Premium", [Earned Premium],
-    "Incurred Losses", [Incurred Losses],
-    "Loss Ratio", [Loss Ratio]
+    dim_date[year],
+    dim_date[month],
+    dim_date[month_name],
+    "Total Incidents",         [Total Incidents],
+    "Incidents PM",            [Incidents PM],
+    "MoM Change %",            [MoM Change %],
+    "Running Total Incidents", [Running Total Incidents]
 )
-ORDER BY [Loss Ratio] DESC;
+ORDER BY dim_date[year], dim_date[month]
 
--- 3. Written premium trend and YoY for Auto
-EVALUATE
-CALCULATETABLE(
-    SUMMARIZECOLUMNS(
-        dim_date[period_begin],
-        "Written Premium", [Written Premium],
-        "Written Premium YoY %", [Written Premium YoY %]
-    ),
-    dim_policy[product] = "Auto"
-)
-ORDER BY dim_date[period_begin];
 
--- 4. Claim count and severity mix by loss type
+// -- V8. Percent of total: ALL against ALLSELECTED. ---------------------------
+// Run once with no slicer: the two columns agree.
+// Then apply a service tier slicer and run again: Percent of Total Incidents
+// keeps the full-model denominator, Percent of Selected Incidents re-bases to
+// the selection and sums to 100. Seeing them diverge is the point of Lab 3.
 EVALUATE
 SUMMARIZECOLUMNS(
-    fact_claim[loss_type],
-    "Claim Count", [Claim Count],
-    "Incurred Losses", [Incurred Losses],
-    "Paid Losses", [Paid Losses]
+    dim_severity[severity_name],
+    "Total Incidents",               [Total Incidents],
+    "Percent of Total Incidents",    [Percent of Total Incidents],
+    "Percent of Selected Incidents", [Percent of Selected Incidents]
 )
-ORDER BY [Incurred Losses] DESC;
+ORDER BY [Total Incidents] DESC
+
+
+// -- V9. SLA attainment by severity and team. ---------------------------------
+// The flagship ITSM question. Watch for severities where Resolved Incidents is
+// much lower than Total Incidents: a low SLA Met % there is a backlog problem,
+// not a performance problem.
+EVALUATE
+SUMMARIZECOLUMNS(
+    dim_severity[severity_name],
+    dim_team[team_name],
+    "Total Incidents",     [Total Incidents],
+    "Resolved Incidents",  [Resolved Incidents],
+    "SLA Met %",           [SLA Met %],
+    "Avg Resolve Minutes", [Avg Resolve Minutes]
+)
+ORDER BY dim_severity[severity_name], [Total Incidents] DESC
+
+
+// -- V10. Per-domain smoke test. ----------------------------------------------
+// Run the block that matches your group's model. Every number should be
+// plausible on sight. A utilization figure of 4,812% means a percentage was
+// summed instead of averaged.
+
+// Group 2, Capacity
+EVALUATE
+ROW(
+    "CI Count",              [CI Count],
+    "Avg CPU Utilization",   [Avg CPU Utilization],
+    "Avg Headroom %",        [Avg Headroom %],
+    "CIs Over 80% CPU",      [CIs Over 80% CPU],
+    "Storage Utilization %", [Storage Utilization %]
+)
+
+// Group 3, Mainframe
+EVALUATE
+ROW(
+    "Total MIPS Consumed",      [Total MIPS Consumed],
+    "MIPS Utilization %",       [MIPS Utilization %],
+    "Peak MIPS",                [Peak MIPS],
+    "Batch Failure Rate",       [Batch Failure Rate],
+    "Avg Batch Window Minutes", [Avg Batch Window Minutes]
+)
+
+// Group 4, Service Desk
+EVALUATE
+ROW(
+    "Tickets Received",           [Tickets Received],
+    "Tickets Resolved",           [Tickets Resolved],
+    "First Contact Resolution %", [First Contact Resolution %],
+    "Avg Handle Time",            [Avg Handle Time],
+    "Coverage %",                 [Coverage %]
+)
+
+// Group 5, Assets
+EVALUATE
+ROW(
+    "Total Assets",           [Total Assets],
+    "Assets Out of Warranty", [Assets Out of Warranty],
+    "Out of Warranty %",      [Out of Warranty %],
+    "CMDB Completeness %",    [CMDB Completeness %],
+    "Total Acquisition Cost", [Total Acquisition Cost]
+)
