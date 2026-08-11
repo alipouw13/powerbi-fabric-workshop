@@ -89,6 +89,8 @@ Run [Lab 0](../labs/lab-00-setup-and-gateway/README.md). By the end of it:
 - **The gateway proven with a test refresh**, or a request in flight with an owner
 - Five groups formed, each with a named flagship report and the question it answers
 - M365 Copilot pairs agreed for Day 2
+- Four M365 Copilot specialist agents set up, one per lab, primed with the
+  [model card](../reference/copilot-agents.md#step-2-the-model-card)
 
 ## Facilitator notes
 

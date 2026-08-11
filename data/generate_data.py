@@ -1,4 +1,4 @@
-"""Generate the synthetic Infrastructure & Operations dataset for the Schwab
+"""Generate synthetic Banking and Capital Markets I&O data for the Schwab
 Tableau-to-Power BI workshop.
 
 The workshop teaches a Tableau audience how to move to Power BI, using Schwab's
@@ -6,7 +6,8 @@ own **Infrastructure & Operations (I&O)** domains. The model follows the star
 schema on deck slides 9 and 10: one fact table per domain, all joining the same
 conformed dimensions.
 
-Everything here is SYNTHETIC. No real Schwab data.
+Every organization, service, identifier, event, and metric is SYNTHETIC. No real
+Schwab, customer, account, position, trade, or market data is used.
 
 Shapes written, on purpose, so the migration story lands:
 
@@ -42,20 +43,26 @@ RAW = os.path.join(HERE, "raw")
 
 # ---- conformed dimension vocabulary (synthetic) -----------------------------
 
-# (service_name, service_tier, business_unit, base daily incident rate)
+# The two business units are the workshop's explicit reporting scope. Domains
+# provide a useful second drill level without introducing a separate dimension.
+TARGET_BUSINESS_UNITS = {"Banking", "Capital Markets"}
+
+# (service_name, service_tier, business_unit, business_domain, base incident rate)
+# Tier 0 is mission-critical real-time or system-of-record, Tier 1 is customer-facing,
+# Tier 2 is important but tolerant of a short outage.
 SERVICES = [
-    ("Trading Platform", "Tier 0", "Trading", 14.0),
-    ("Client Web Portal", "Tier 1", "Retail", 11.0),
-    ("Mobile Banking", "Tier 1", "Retail", 9.0),
-    ("Core Banking Batch", "Tier 0", "Core Banking", 6.0),
-    ("Payments Gateway", "Tier 1", "Payments", 7.5),
-    ("Market Data Feed", "Tier 0", "Trading", 5.5),
-    ("Advisor Workstation", "Tier 2", "Advisory", 8.0),
-    ("Document Management", "Tier 3", "Corporate", 4.0),
-    ("Identity & Access", "Tier 1", "Security", 6.5),
-    ("Data Warehouse", "Tier 2", "Analytics", 5.0),
-    ("Email & Collaboration", "Tier 3", "Corporate", 7.0),
-    ("Network Backbone", "Tier 0", "Network", 4.5),
+    ("Digital Banking Portal", "Tier 1", "Banking", "Digital Banking", 11.0),
+    ("Mobile Banking", "Tier 1", "Banking", "Digital Banking", 9.0),
+    ("Core Deposits Platform", "Tier 0", "Banking", "Deposits", 7.0),
+    ("Payments Gateway", "Tier 0", "Banking", "Payments", 8.0),
+    ("Consumer Lending Platform", "Tier 2", "Banking", "Lending", 6.0),
+    ("Treasury Management", "Tier 2", "Banking", "Treasury Services", 5.0),
+    ("Electronic Trading Platform", "Tier 0", "Capital Markets", "Trading", 14.0),
+    ("Order Management System", "Tier 0", "Capital Markets", "Trading", 9.0),
+    ("Market Data Distribution", "Tier 0", "Capital Markets", "Market Data", 7.0),
+    ("Brokerage Account Platform", "Tier 1", "Capital Markets", "Brokerage", 8.0),
+    ("Clearing and Settlement", "Tier 1", "Capital Markets", "Post-Trade", 6.0),
+    ("Market Risk Analytics", "Tier 2", "Capital Markets", "Risk Management", 5.0),
 ]
 
 # (team_name, assignment_group, shift)
@@ -162,13 +169,14 @@ def build_dim_date(start: date, end: date) -> pd.DataFrame:
 
 def build_dim_service() -> pd.DataFrame:
     rows = []
-    for i, (name, tier, bu, rate) in enumerate(SERVICES, start=1):
+    for i, (name, tier, bu, domain, rate) in enumerate(SERVICES, start=1):
         rows.append({
             "service_key": i,
             "service_id": f"SVC{i:04d}",
             "service_name": name,
             "service_tier": tier,
             "business_unit": bu,
+            "business_domain": domain,
             "base_rate": rate,
         })
     return pd.DataFrame(rows)
@@ -371,6 +379,7 @@ def build_fact_mainframe(rng, dim_date, dim_ci):
             rows.append({
                 "date_key": int(drow.date_key),
                 "ci_key": int(lpar.ci_key),
+                "service_key": int(lpar.service_key),
                 "location_key": int(lpar.location_key),
                 "mips_consumed": round(max(10.0, mips), 2),
                 "mips_capacity": capacity,
@@ -382,34 +391,40 @@ def build_fact_mainframe(rng, dim_date, dim_ci):
     return pd.DataFrame(rows)
 
 
-def build_fact_service_desk(rng, dim_date, dim_team, dim_location):
+def build_fact_service_desk(rng, dim_date, dim_service, dim_team, dim_location):
     """Daily ticket and staffing metrics. Service Desk & Workforce domain."""
     desk_teams = dim_team[dim_team["assignment_group"].str.contains("Service Desk")]
     if desk_teams.empty:
         desk_teams = dim_team.head(2)
 
     rows = []
+    mean_service_rate = dim_service["base_rate"].mean()
     for drow in dim_date.itertuples(index=False):
         weekend_factor = 0.35 if drow.is_weekend else 1.0
         for team in desk_teams.itertuples(index=False):
             for loc_key in [1, 3, 6]:  # Westlake, Phoenix, Indianapolis staff the desk
-                received = int(max(0, rng.normal(210 * weekend_factor, 32)))
-                resolved = int(received * rng.uniform(0.82, 0.98))
-                fcr = int(resolved * rng.uniform(0.55, 0.78))
-                scheduled = int(max(2, rng.normal(18 * weekend_factor, 3)))
-                rows.append({
-                    "date_key": int(drow.date_key),
-                    "team_key": int(team.team_key),
-                    "location_key": loc_key,
-                    "tickets_received": received,
-                    "tickets_resolved": resolved,
-                    "first_contact_resolved": fcr,
-                    "calls_abandoned": int(max(0, rng.normal(received * 0.06, 4))),
-                    "agents_scheduled": scheduled,
-                    "agents_available": max(1, scheduled - int(rng.poisson(2))),
-                    "avg_handle_time_minutes": round(float(rng.normal(11.5, 2.2)), 2),
-                    "avg_speed_to_answer_seconds": round(float(max(5, rng.normal(48, 14))), 1),
-                })
+                for service in dim_service.itertuples(index=False):
+                    # Allocate workload by supported business service so every
+                    # service-desk metric can roll up to the two focus units.
+                    service_factor = service.base_rate / mean_service_rate
+                    received = int(max(0, rng.normal(18 * service_factor * weekend_factor, 5)))
+                    resolved = int(received * rng.uniform(0.82, 0.98))
+                    fcr = int(resolved * rng.uniform(0.55, 0.78))
+                    scheduled = int(max(1, rng.normal(2.2 * service_factor * weekend_factor, 0.7)))
+                    rows.append({
+                        "date_key": int(drow.date_key),
+                        "service_key": int(service.service_key),
+                        "team_key": int(team.team_key),
+                        "location_key": loc_key,
+                        "tickets_received": received,
+                        "tickets_resolved": resolved,
+                        "first_contact_resolved": fcr,
+                        "calls_abandoned": int(max(0, rng.normal(received * 0.06, 1.5))),
+                        "agents_scheduled": scheduled,
+                        "agents_available": max(1, scheduled - int(rng.poisson(0.3))),
+                        "avg_handle_time_minutes": round(float(max(1, rng.normal(11.5, 2.2))), 2),
+                        "avg_speed_to_answer_seconds": round(float(max(5, rng.normal(48, 14))), 1),
+                    })
     return pd.DataFrame(rows)
 
 
@@ -442,7 +457,9 @@ def build_tableau_extract(fact_incident, dim_date, dim_service, dim_ci, dim_team
     df = (
         fact_incident
         .merge(dim_date[["date_key", "date", "year", "quarter", "month_name", "month_year", "is_weekend"]], on="date_key")
-        .merge(dim_service[["service_key", "service_name", "service_tier", "business_unit"]], on="service_key")
+        .merge(dim_service[[
+            "service_key", "service_name", "service_tier", "business_unit", "business_domain"
+        ]], on="service_key")
         .merge(dim_ci[["ci_key", "ci_name", "ci_type", "environment", "criticality"]], on="ci_key")
         .merge(dim_team[["team_key", "team_name", "assignment_group", "shift_coverage"]], on="team_key")
         .merge(dim_location[["location_key", "site_name", "city", "state_province", "region", "datacenter"]], on="location_key")
@@ -453,7 +470,7 @@ def build_tableau_extract(fact_incident, dim_date, dim_service, dim_ci, dim_team
     df["is_breached"] = df["sla_met_flag"].apply(lambda v: None if pd.isna(v) else (not v))
     keep = [
         "incident_number", "date", "year", "quarter", "month_name", "month_year", "is_weekend",
-        "service_name", "service_tier", "business_unit",
+        "service_name", "service_tier", "business_unit", "business_domain",
         "ci_name", "ci_type", "environment", "criticality",
         "team_name", "assignment_group", "shift_coverage",
         "site_name", "city", "state_province", "region", "datacenter",
@@ -465,6 +482,32 @@ def build_tableau_extract(fact_incident, dim_date, dim_service, dim_ci, dim_team
     return df[keep]
 
 
+def validate_dataset(dim_service, outputs) -> None:
+    """Fail generation when focus-unit vocabulary or service relationships drift."""
+    actual_units = set(dim_service["business_unit"])
+    if actual_units != TARGET_BUSINESS_UNITS:
+        raise ValueError(
+            f"Expected business units {sorted(TARGET_BUSINESS_UNITS)}, got {sorted(actual_units)}"
+        )
+
+    service_keys = set(dim_service["service_key"])
+    unit_by_service = dim_service.set_index("service_key")["business_unit"]
+    for name, df in outputs.items():
+        if not name.startswith("fact_"):
+            continue
+        if "service_key" not in df.columns:
+            raise ValueError(f"{name} must include service_key for business-unit reporting")
+        missing = set(df["service_key"].dropna()) - service_keys
+        if missing:
+            raise ValueError(f"{name} contains unknown service keys: {sorted(missing)}")
+        represented_units = set(df["service_key"].map(unit_by_service))
+        if represented_units != TARGET_BUSINESS_UNITS:
+            raise ValueError(
+                f"{name} must cover {sorted(TARGET_BUSINESS_UNITS)}, "
+                f"got {sorted(represented_units)}"
+            )
+
+
 def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
     """A folder of monthly extracts - the 'large Excel files' pattern for Lab 4.
 
@@ -472,11 +515,19 @@ def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
     inconsistencies are what matter: the November file is deliberately different.
     """
     os.makedirs(out_dir, exist_ok=True)
+    for name in os.listdir(out_dir):
+        if name.startswith("capacity_") and name.endswith(".csv"):
+            os.remove(os.path.join(out_dir, name))
+
     merged = fact_capacity.merge(
         dim_date[["date_key", "month_year"]], on="date_key"
     ).merge(
         dim_ci[["ci_key", "ci_name", "environment"]], on="ci_key"
     )
+    november_months = sorted(
+        month for month in merged["month_year"].unique() if month.endswith("-11")
+    )
+    anomaly_month = november_months[-1] if november_months else None
     written = []
     for month_year, grp in merged.groupby("month_year"):
         out = grp[["ci_name", "environment", "cpu_utilization_pct", "memory_utilization_pct",
@@ -484,7 +535,7 @@ def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
         out.columns = ["CI Name", "Environment", "CPU %", "Memory %", "Storage Used GB", "Storage Allocated GB"]
         # One month ships with a renamed column and a stray total row, so Lab 4's
         # schema guard has something real to catch.
-        if month_year.endswith("-11"):
+        if month_year == anomaly_month:
             out = out.rename(columns={"CPU %": "CPU Utilisation %"})
             total = {c: None for c in out.columns}
             total["CI Name"] = "TOTAL"
@@ -497,16 +548,23 @@ def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Generate the synthetic I&O workshop dataset.")
+    ap = argparse.ArgumentParser(
+        description="Generate synthetic Banking and Capital Markets I&O workshop data."
+    )
     ap.add_argument("--months", type=int, default=24, help="Months of history to generate (default 24).")
     ap.add_argument("--ci-count", type=int, default=400, help="Number of configuration items (default 400).")
     args = ap.parse_args()
+    if args.months < 1:
+        ap.error("--months must be at least 1")
+    if args.ci_count < 1:
+        ap.error("--ci-count must be at least 1")
 
     random.seed(SEED)
     rng = np.random.default_rng(SEED)
 
     end = date.today().replace(day=1) - timedelta(days=1)
-    start = (end.replace(day=1) - timedelta(days=31 * (args.months - 1))).replace(day=1)
+    start_month_index = end.year * 12 + end.month - 1 - (args.months - 1)
+    start = date(start_month_index // 12, start_month_index % 12 + 1, 1)
 
     sql_dir = os.path.join(RAW, "sql")
     tableau_dir = os.path.join(RAW, "tableau_extract")
@@ -514,7 +572,10 @@ def main() -> None:
     for d in (sql_dir, tableau_dir, excel_dir):
         os.makedirs(d, exist_ok=True)
 
-    print(f"Generating {args.months} months of synthetic I&O data ({start} to {end})...")
+    print(
+        f"Generating {args.months} months of synthetic Banking and Capital Markets "
+        f"I&O data ({start} to {end})..."
+    )
 
     dim_date = build_dim_date(start, end)
     dim_service = build_dim_service()
@@ -526,7 +587,9 @@ def main() -> None:
     fact_incident = build_fact_incident(rng, dim_date, dim_service, dim_ci, dim_team, dim_location, dim_severity)
     fact_capacity = build_fact_capacity(rng, dim_date, dim_ci)
     fact_mainframe = build_fact_mainframe(rng, dim_date, dim_ci)
-    fact_service_desk = build_fact_service_desk(rng, dim_date, dim_team, dim_location)
+    fact_service_desk = build_fact_service_desk(
+        rng, dim_date, dim_service, dim_team, dim_location
+    )
     fact_asset = build_fact_asset(rng, dim_ci, end)
 
     dim_service_out = dim_service.drop(columns=["base_rate"])
@@ -544,6 +607,8 @@ def main() -> None:
         "fact_service_desk.csv": fact_service_desk,
         "fact_asset.csv": fact_asset,
     }
+    validate_dataset(dim_service_out, outputs)
+
     for name, df in outputs.items():
         df.to_csv(os.path.join(sql_dir, name), index=False)
         print(f"  raw/sql/{name:<32} {len(df):>8,} rows")

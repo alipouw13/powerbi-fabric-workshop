@@ -89,16 +89,22 @@ Full detail: [sessions/day-3-showcase.md](sessions/day-3-showcase.md)
 
 | Lab | Deck slide | Topic |
 | --- | --- | --- |
-| [0 - Setup and gateway](labs/lab-00-setup-and-gateway/README.md) | setup | Power BI Desktop, sample data, **gateway install, connection, test refresh** |
+| [0 - Setup and gateway](labs/lab-00-setup-and-gateway/README.md) | setup | Power BI Desktop, sample data, **gateway install and test refresh**, **build four M365 Copilot agents** |
 | [1 - Build the semantic model](labs/lab-01-semantic-model/README.md) | 19 | Import-mode star schema, relationships, date table, first measure |
-| [2 - Build your first report page](labs/lab-02-report-page/README.md) | 20 | Trend, breakdown, KPI cards, workshop theme |
-| [3 - Practice DAX measures](labs/lab-03-dax-measures/README.md) | 21 | Running total, percent of total, period over period, **M365 Copilot** |
-| [4 - Connect, shape, and load](labs/lab-04-power-query/README.md) | 22 | Folding, reference queries, parameters, Excel folder combine, **M365 Copilot** |
+| [2 - Build your first report page](labs/lab-02-report-page/README.md) | 20 | Trend, business-unit drill breakdown, KPI cards, workshop theme |
+| [3 - Practice DAX measures](labs/lab-03-dax-measures/README.md) | 21 | Percent of total, time intelligence, filter context, **M365 Copilot** |
+| [4 - Connect, shape, and load](labs/lab-04-power-query/README.md) | 22 | Folding, reference queries, folder combine, schema guard, **M365 Copilot** |
 
 ## Domain breakout groups
 
 Deck slide 23. Each group builds its own fact table onto the same conformed
 dimensions.
+
+All five groups analyze I&O outcomes for the same two fictional business units:
+**Banking** and **Capital Markets**. The shared `dim_service` dimension contains
+domain-specific services such as Digital Banking, Payments, Electronic Trading,
+Market Data, and Clearing and Settlement. Every fact carries `service_key`, so
+the same business-unit slicer works in every group's report.
 
 | Group | Domain | Fact table |
 | --- | --- | --- |
@@ -108,9 +114,11 @@ dimensions.
 | 4 | Service Desk & Workforce | `fact_service_desk` |
 | 5 | Asset & Workplace Services | `fact_asset` |
 
-Conformed dimensions shared by all five: `dim_date`,
-`dim_configuration_item`, `dim_service`, `dim_team`, `dim_location`,
-`dim_severity`.
+The six conformed dimensions are `dim_date`, `dim_service`, `dim_configuration_item`,
+`dim_team`, `dim_location` and `dim_severity`. `dim_service` and `dim_location` are
+shared by all five facts; the rest apply to the groups whose fact carries that key.
+`fact_asset` has no `date_key`, which gives group 5 a real modeling decision to make in
+Lab 1.
 
 ## Quick start
 
@@ -135,7 +143,8 @@ schwab-powerbi-fabric-workshop/
     pbip/          measure definitions, the source of truth for Lab 3
     theme/         schwab-io-theme.json, applied in Lab 2
   reference/       current state, gateway setup, star schema, visual design,
-                   Tableau mapping, M365 Copilot, migration approaches, sources
+                   Tableau mapping, M365 Copilot, Copilot agents, migration
+                   approaches, sources
   governance/      workspace governance, endorsement, migration assessment, adoption
   images/          diagrams
 ```
@@ -158,17 +167,28 @@ Copilot.
 ## Using M365 Copilot
 
 M365 Copilot is the only AI available for this work, and it **cannot see your
-semantic model**. The labs use it as a drafting assistant with a copy-and-paste
-handoff:
+semantic model**. Lab 0 turns that constraint into a setup step: attendees ask Copilot
+what it can genuinely do for Power BI, then build **four specialist agents** - one per
+lab - primed with the workshop's model card.
 
-1. Paste the [schema block](labs/lab-03-dax-measures/README.md#your-schema-block)
-2. Ask in business terms
-3. Read the output - if you cannot explain it, do not use it
-4. Paste into the DAX editor or the Power Query Advanced Editor
-5. **Verify** - DAX at three grains; M for rows, nulls, types and folding
+| Agent | Lab | Job |
+| --- | --- | --- |
+| Model Architect | 1 | Star schema, grain, relationships, date table |
+| Report Designer | 2 | One question per page, visual choice, KPI cards |
+| DAX Coach | 3 | Measures, filter context, Tableau calc translation |
+| Query Engineer | 4 | Power Query M, folding, folder combine, schema guards |
 
-**Never paste real Schwab data, credentials, connection strings or ticket
-contents into any AI tool.** Schema and code only.
+Briefs are in [reference/copilot-agents.md](reference/copilot-agents.md). From there every
+lab runs the same loop:
+
+1. Ask your lab's agent in business terms
+2. Read the output - if you cannot explain it, do not use it
+3. Paste into the DAX editor or the Power Query Advanced Editor
+4. **Verify** - DAX at three grains (total, business unit, month); M for rows, nulls,
+   types and folding
+
+**Never paste real data, credentials, connection strings or ticket contents into any AI
+tool.** Schema and code only.
 
 > **Note on deck slide 24.** The slide currently says M365 Copilot `Does not draft
 > DAX or write report visuals for you`. Labs 3 and 4 do use it to draft DAX and

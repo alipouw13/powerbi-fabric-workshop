@@ -150,7 +150,7 @@ Set the format string on the **measure**, in the model, not on each visual.
 
 | Measure type | Format | Example |
 | --- | --- | --- |
-| Counts | Whole number, thousands separator | `Total Incidents` -> `32,992` |
+| Counts | Whole number, thousands separator | `Total Incidents` -> `65,869` |
 | Percentages | Percent, 1 decimal | `SLA Met %` -> `94.2%` |
 | Durations | Whole number or 1 decimal, with the unit in the name | `Avg Resolve Minutes` -> `312` |
 | Currency | Currency, 0 decimals for totals | `Acquisition Cost` -> `$1,284,000` |
