@@ -96,8 +96,9 @@ reuses the upstream steps. Duplicate copies them, and they drift apart inside a
 month.
 
 This example carves `dim_location` out of the wide Tableau extract, which is the
-real Lab 4 exercise: the extract has site, city, state, region and datacenter
-repeated on all 32,992 incident rows, and you need 8 distinct rows.
+real Lab 4 exercise: the extract repeats site, city, state, region and datacenter
+on every incident row (65,869 of them at the 24-month default), and you need 8
+distinct rows.
 
 ```powerquery
 let
@@ -248,8 +249,8 @@ In the model: **Table tools -> Mark as date table** on `date`, and set
 One query for the whole folder, instead of one query per file. This is the
 custom-function pattern applied to the most common real problem at Schwab.
 
-The workshop folder is `data/raw/excel/`, thirteen monthly capacity extracts.
-Point `MonthlyExtractFolder` at it.
+The workshop folder is `data/raw/excel/`, one capacity extract per generated month
+(24 at the default). Point `MonthlyExtractFolder` at it.
 
 ```powerquery
 let

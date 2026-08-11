@@ -225,8 +225,13 @@ Total Transactions = SUM( fact_mainframe[transactions_processed] )
 
 // =============================================================================
 // GROUP 4 - SERVICE DESK & WORKFORCE
-//           (fact_service_desk, one row per team per location per day)
+//     (fact_service_desk, one row per service per team per location per day)
 // =============================================================================
+//
+// GRAIN WARNING. The staffing columns are allocations to a service on a day, not
+// distinct people. Summing agents_scheduled across the 12 services counts the same
+// physical agent up to 12 times. The measures below are named for what they
+// actually count - agent DAYS - so nobody reads them as headcount.
 
 Tickets Received = SUM( fact_service_desk[tickets_received] )
 
@@ -241,11 +246,28 @@ DIVIDE(
     [Tickets Resolved]
 )
 
-// Mean handle time in minutes. Format: 1 decimal.
-Avg Handle Time = AVERAGE( fact_service_desk[avg_handle_time_minutes] )
+// Handle time, weighted by the tickets each row actually resolved. A plain
+// AVERAGE would weight a quiet weekend row for a small service exactly the same
+// as a peak weekday row for Electronic Trading. Format: 1 decimal.
+Avg Handle Time =
+DIVIDE(
+    SUMX(
+        fact_service_desk,
+        fact_service_desk[avg_handle_time_minutes] * fact_service_desk[tickets_resolved]
+    ),
+    [Tickets Resolved]
+)
 
-// Mean speed to answer in seconds. Format: whole number.
-Avg Speed to Answer = AVERAGE( fact_service_desk[avg_speed_to_answer_seconds] )
+// Speed to answer, weighted by tickets received for the same reason.
+// Format: whole number.
+Avg Speed to Answer =
+DIVIDE(
+    SUMX(
+        fact_service_desk,
+        fact_service_desk[avg_speed_to_answer_seconds] * fact_service_desk[tickets_received]
+    ),
+    [Tickets Received]
+)
 
 // Share of calls abandoned before an agent answered. Format: percent, 1 decimal.
 Abandon Rate =
@@ -254,17 +276,22 @@ DIVIDE(
     [Tickets Received]
 )
 
-// Staffing coverage: available against scheduled. Format: percent, 1 decimal.
-Coverage % =
-DIVIDE(
-    SUM( fact_service_desk[agents_available] ),
-    SUM( fact_service_desk[agents_scheduled] )
-)
+// Agent days, not agents. One row contributes the agents allocated to one service,
+// on one team, at one location, on one day. Format: whole number.
+Agent Days Scheduled = SUM( fact_service_desk[agents_scheduled] )
 
-// Workload per available agent. Divides two sums rather than averaging a ratio,
-// so busy days weigh correctly. Format: 1 decimal.
-Tickets per Agent =
-DIVIDE( [Tickets Received], SUM( fact_service_desk[agents_available] ) )
+Agent Days Available = SUM( fact_service_desk[agents_available] )
+
+// Staffing coverage: available against scheduled. Both sides sit at the same
+// grain, so the service-level allocation cancels and this is safe to read as a
+// true percentage. Format: percent, 1 decimal.
+Coverage % =
+DIVIDE( [Agent Days Available], [Agent Days Scheduled] )
+
+// Workload per agent day. Divides two sums rather than averaging a ratio, so busy
+// days weigh correctly. Read it per agent DAY, not per person. Format: 1 decimal.
+Tickets per Agent Day =
+DIVIDE( [Tickets Received], [Agent Days Available] )
 
 
 // =============================================================================

@@ -69,7 +69,7 @@ Deck slide 29. What every group can lift so nobody starts from a blank page:
 | Report theme | [`src/theme/schwab-io-theme.json`](../src/theme/schwab-io-theme.json) |
 | Page templates - trend, breakdown, KPI | [Lab 2](../labs/lab-02-report-page/README.md) |
 | Power Query snippets - staging, reference dimensions, folder combine, schema guard | [`src/powerquery/README.md`](../src/powerquery/README.md) |
-| M365 Copilot schema block and prompt patterns | [Lab 3](../labs/lab-03-dax-measures/README.md#your-schema-block) |
+| M365 Copilot specialist agents and prompt patterns | [copilot-agents.md](../reference/copilot-agents.md) |
 | Gateway request template | [gateway-setup.md](../reference/gateway-setup.md#9-what-to-ask-for-if-you-cannot-do-this-yourself) |
 | Q&A synonyms - domain vocabulary | Per model, added in Lab 1 |
 | Deployment pipeline - dev to test to prod | [workspace governance](../governance/workspace-governance.md) |

@@ -177,7 +177,7 @@ DAX, share of the grand total in the model:
 Percent of Total Incidents =
 DIVIDE(
     [Total Incidents],
-    CALCULATE( [Total Incidents], REMOVEFILTERS( dim_service ) )
+    CALCULATE( [Total Incidents], ALL( fact_incident ) )
 )
 ```
 

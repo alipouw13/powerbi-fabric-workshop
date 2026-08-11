@@ -59,7 +59,7 @@ you write on top of it will be wrong in a way that is hard to see.
 | 1 | ITSM & Operational Reporting | `fact_incident` | incident |
 | 2 | Capacity & Forecasting | `fact_capacity` | configuration item, per month |
 | 3 | Mainframe Analytics | `fact_mainframe` | LPAR, per day |
-| 4 | Service Desk & Workforce | `fact_service_desk` | team, per location, per day |
+| 4 | Service Desk & Workforce | `fact_service_desk` | service, per team, per location, per day |
 | 5 | Asset & Workplace Services | `fact_asset` | asset |
 
 Grain drives what is additive. `incident_count` sums cleanly across any
@@ -67,6 +67,15 @@ dimension. `cpu_utilization_pct` does not: summing percentages is meaningless, s
 you average it, and you average it at the declared grain. `mips_capacity` is
 worse still, because it repeats on every daily row for the same LPAR, so summing
 it across a month multiplies capacity by 30.
+
+`fact_service_desk` is the sharpest example in the set. Its grain includes the
+**service**, so `agents_scheduled` is the staffing allocated to one service on one day,
+not a headcount. Sum it across the twelve services and you count the same agent twelve
+times. And because `avg_handle_time_minutes` is already an average, taking `AVERAGE` of
+it weights a quiet weekend row exactly the same as a peak trading morning. Both mistakes
+produce numbers that look entirely plausible, which is what makes them dangerous. The
+corrected, volume-weighted definitions are in
+[`src/pbip/README.md`](../src/pbip/README.md#group-4-service-desk-and-workforce).
 
 Write the grain into the table description in the model. It is the single most
 useful piece of documentation you can leave behind.
@@ -110,10 +119,10 @@ That is the point.
 A **conformed dimension** is one dimension table shared by more than one fact
 table, with the same keys and the same meaning in every one.
 
-`dim_service` is conformed across `fact_incident`, `fact_capacity`, and
-`fact_asset`. `dim_location` is conformed across all five facts. Because the keys
-and the meaning match, "Trading Platform" means the same thing on the ITSM report
-as it does on the Capacity report.
+`dim_service` and `dim_location` are conformed across all five facts, and
+`dim_service[business_unit]` therefore slices every domain report the same way. Because
+the keys and meaning match, "Electronic Trading Platform" means the same thing on
+the ITSM report as it does on the Capacity or Service Desk report.
 
 Why that matters in practice:
 
@@ -121,12 +130,15 @@ Why that matters in practice:
   services, because there is one definition of Tier 0.
 - **One slicer drives several facts.** Put `dim_service[service_name]` on the
   page and it filters incidents and capacity together.
+- **Business units reconcile.** `dim_service[business_unit]` contains Banking
+  and Capital Markets, so the same executive slice works across every domain.
 - **Definitions are maintained once.** A service renamed in `dim_service` is
   renamed everywhere.
 - **New domains cost less.** Group 4 does not build its own location list.
 
 The alternative, each domain shipping its own copy of the service list, is how
-you end up in a meeting arguing about whether there are 11 or 12 Tier 1 services.
+you end up in a meeting arguing about whether Clearing and Settlement is Tier 0 or
+Tier 1.
 
 ## Keys
 

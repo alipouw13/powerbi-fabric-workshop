@@ -24,6 +24,7 @@ quality of the context you supply.**
 | Draft measure and table descriptions | Yes | Review each one for I&O accuracy. |
 | Draft model documentation | Yes | Feed it your table and measure list. |
 | Draft report requirements from meeting notes | Yes | Deck slide 24 lists this as an in-scope use. |
+| Behave as a reusable specialist for a whole chat | Yes | Paste an [agent brief](copilot-agents.md) once, and everything after it inherits the behaviour. |
 | See your model schema | **No** | You describe it in every prompt. |
 | Run DAX and return real numbers | **No** | Every number it produces is invented. |
 | Build a report page or place visuals | **No** | You build the page. |
@@ -37,7 +38,9 @@ the condition on which the tool is used.
 
 ## The copy-paste loop
 
-1. **Context.** Paste the schema block below.
+1. **Context.** Paste the model card, or start the chat with one of the
+   [specialist agent briefs](copilot-agents.md#step-3-build-the-four-agents), which
+   carries the context for the whole conversation.
 2. **Ask.** State the business question and the single artifact you want back.
 3. **Read.** If you cannot explain the output line by line, do not use it.
 4. **Paste.** DAX into the measure editor or DAX query view. M into the Power
@@ -53,9 +56,16 @@ Write this once, save it where the team can reach it, and paste it at the top of
 every prompt. It is the difference between usable output and invented table
 names. This is the ITSM version; swap the fact table for your group's.
 
+> **Do this once, not once per prompt.** [copilot-agents.md](copilot-agents.md)
+> turns this block into four reusable specialist agents - Model Architect, Report
+> Designer, DAX Coach and Query Engineer - so the context is pasted at the start of a
+> conversation instead of at the top of every question. You build them in Lab 0.
+
+
 ```
 I am writing DAX for a Power BI semantic model in Import mode.
-The model is a star schema for Charles Schwab Infrastructure & Operations.
+The model is a star schema for Infrastructure & Operations at a financial services
+firm. The business has exactly two business units: Banking and Capital Markets.
 
 Fact table (grain: one row per incident):
   fact_incident(
@@ -68,7 +78,8 @@ Conformed dimensions:
   dim_date(date_key, date, year, quarter, month, month_name, month_year,
            day_of_month, day_of_week, day_name, is_weekend, week_of_year,
            fiscal_year, fiscal_quarter)
-  dim_service(service_key, service_id, service_name, service_tier, business_unit)
+  dim_service(service_key, service_id, service_name, service_tier, business_unit,
+              business_domain)
   dim_configuration_item(ci_key, ci_id, ci_name, ci_type, environment,
                          criticality, service_key, location_key, support_group)
   dim_team(team_key, team_id, team_name, assignment_group, shift_coverage)
@@ -98,14 +109,14 @@ fact_capacity(date_key, ci_key, service_key, location_key,
   cpu_utilization_pct, memory_utilization_pct, storage_allocated_gb,
   storage_used_gb, headroom_pct)                    -- one row per CI per month
 
-fact_mainframe(date_key, ci_key, location_key, mips_consumed, mips_capacity,
+fact_mainframe(date_key, ci_key, service_key, location_key, mips_consumed, mips_capacity,
   batch_jobs_completed, batch_jobs_failed, batch_window_minutes,
   transactions_processed)                           -- one row per LPAR per day
 
-fact_service_desk(date_key, team_key, location_key, tickets_received,
+fact_service_desk(date_key, service_key, team_key, location_key, tickets_received,
   tickets_resolved, first_contact_resolved, calls_abandoned, agents_scheduled,
   agents_available, avg_handle_time_minutes,
-  avg_speed_to_answer_seconds)          -- one row per team per location per day
+  avg_speed_to_answer_seconds)  -- one row per service, team, location, and day
 
 fact_asset(asset_key, asset_tag, ci_key, service_key, location_key,
   purchase_date, warranty_end_date, lifecycle_status, acquisition_cost_usd,
@@ -143,7 +154,15 @@ ROW(
     "SLA Met %",       [SLA Met %]
 )
 
-// 2. By service. Do the parts sum to the total?
+// 2. By business unit. Banking and Capital Markets should sum to the total.
+EVALUATE
+SUMMARIZECOLUMNS(
+    dim_service[business_unit],
+    "Total Incidents", [Total Incidents],
+    "SLA Met %",       [SLA Met %]
+)
+
+// 2b. By service within the unit. Do the parts sum to the total?
 EVALUATE
 SUMMARIZECOLUMNS(
     dim_service[service_name],

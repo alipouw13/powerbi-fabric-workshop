@@ -217,19 +217,27 @@ card as a SUM: across a 30 day month it reports 30 times the installed capacity.
 
 ## Group 4: Service Desk and Workforce
 
-Model `sm_io_servicedesk`, fact table `fact_service_desk`, one row per team per
-location per day.
+Model `sm_io_servicedesk`, fact table `fact_service_desk`, one row per service per
+team per location per day.
+
+> **Read the grain before you read the measures.** The staffing columns are
+> allocations to a service on a day, not distinct people. Summing `agents_scheduled`
+> across the twelve services counts the same physical agent up to twelve times. The
+> measures below are named for what they actually count - **agent days** - so nobody
+> puts a headcount on a card by accident.
 
 | Measure | Description | Format |
 | --- | --- | --- |
 | Tickets Received | Tickets received in context. | Whole number, thousands separator |
 | Tickets Resolved | Tickets resolved in context. | Whole number, thousands separator |
 | First Contact Resolution % | Share of resolved tickets closed on first contact. The desk's primary quality metric. | Percent, 1 decimal |
-| Avg Handle Time | Mean handle time in minutes. | 1 decimal |
-| Avg Speed to Answer | Mean speed to answer in seconds. | Whole number |
+| Avg Handle Time | Handle time weighted by tickets resolved, so a busy weekday drives the number rather than a quiet weekend. | 1 decimal |
+| Avg Speed to Answer | Speed to answer weighted by tickets received, for the same reason. | Whole number |
 | Abandon Rate | Calls abandoned before an agent answered, as a share of tickets received. | Percent, 1 decimal |
-| Coverage % | Agents available against agents scheduled. | Percent, 1 decimal |
-| Tickets per Agent | Workload per available agent. Divides two sums so busy days weigh correctly. | 1 decimal |
+| Agent Days Scheduled | Agent days allocated across services. Not a headcount. | Whole number |
+| Agent Days Available | Agent days actually available. Not a headcount. | Whole number |
+| Coverage % | Available against scheduled. Both sides sit at the same grain, so the allocation cancels and this reads as a true percentage. | Percent, 1 decimal |
+| Tickets per Agent Day | Workload per agent day. Divides two sums so busy days weigh correctly. | 1 decimal |
 
 ```dax
 Tickets Received = SUM( fact_service_desk[tickets_received] )
@@ -242,22 +250,44 @@ DIVIDE(
     [Tickets Resolved]
 )
 
-Avg Handle Time = AVERAGE( fact_service_desk[avg_handle_time_minutes] )
+Avg Handle Time =
+DIVIDE(
+    SUMX(
+        fact_service_desk,
+        fact_service_desk[avg_handle_time_minutes] * fact_service_desk[tickets_resolved]
+    ),
+    [Tickets Resolved]
+)
 
-Avg Speed to Answer = AVERAGE( fact_service_desk[avg_speed_to_answer_seconds] )
+Avg Speed to Answer =
+DIVIDE(
+    SUMX(
+        fact_service_desk,
+        fact_service_desk[avg_speed_to_answer_seconds] * fact_service_desk[tickets_received]
+    ),
+    [Tickets Received]
+)
 
 Abandon Rate =
 DIVIDE( SUM( fact_service_desk[calls_abandoned] ), [Tickets Received] )
 
-Coverage % =
-DIVIDE(
-    SUM( fact_service_desk[agents_available] ),
-    SUM( fact_service_desk[agents_scheduled] )
-)
+Agent Days Scheduled = SUM( fact_service_desk[agents_scheduled] )
 
-Tickets per Agent =
-DIVIDE( [Tickets Received], SUM( fact_service_desk[agents_available] ) )
+Agent Days Available = SUM( fact_service_desk[agents_available] )
+
+Coverage % =
+DIVIDE( [Agent Days Available], [Agent Days Scheduled] )
+
+Tickets per Agent Day =
+DIVIDE( [Tickets Received], [Agent Days Available] )
 ```
+
+`Avg Handle Time` and `Avg Speed to Answer` are worth reading twice. The source
+columns are **already averages**, so `AVERAGE` of them is an average of averages: it
+gives a near-idle service-day the same weight as a peak trading morning. The number
+still looks plausible, which is exactly what makes it dangerous. Weighting by volume
+is the same "ratio of totals, not average of ratios" rule that `MIPS Utilization %`
+and `Storage Utilization %` follow.
 
 ---
 
