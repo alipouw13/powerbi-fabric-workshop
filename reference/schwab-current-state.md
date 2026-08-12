@@ -40,12 +40,12 @@ Five breakout groups, five fact tables, one shared set of conformed dimensions.
 | Capability | Status | Where it appears |
 | --- | --- | --- |
 | Power BI Desktop | Available | Every lab |
-| Power Query | Available. **The only transformation layer.** | [Lab 4](../labs/lab-04-power-query/README.md) |
+| Power Query | Available. **The only transformation layer.** | [Lab 0](../labs/lab-00-connect-and-shape/README.md) |
 | DAX | Available | [Lab 3](../labs/lab-03-dax-measures/README.md) |
 | **Import** storage mode | Available, and the default choice | [Lab 1](../labs/lab-01-semantic-model/README.md) |
 | **DirectQuery** storage mode | Available, discouraged | Covered as a decision, not a default |
-| On-premises data gateway | Available, centrally managed | [Lab 0](../labs/lab-00-setup-and-gateway/README.md), [gateway-setup.md](gateway-setup.md) |
-| Power BI Service workspaces | Available | [Lab 2](../labs/lab-02-report-page/README.md) onward |
+| On-premises data gateway | Available, centrally managed | [Day 1 setup](../labs/day-1-setup/README.md), [gateway-setup.md](gateway-setup.md) |
+| Power BI Service workspaces | Available | [Lab 1](../labs/lab-01-semantic-model/README.md) onward |
 | Row-level security | Available | Governance sessions |
 | Endorsement (promoted, certified) | Available | [endorsement-certification.md](../governance/endorsement-certification.md) |
 | Microsoft Purview sensitivity labels | Available | [workspace-governance.md](../governance/workspace-governance.md) |
@@ -121,7 +121,7 @@ the gateway in the path.
 
 ## Development practice constraints
 
-- Gateway connections are centrally managed. Plan Lab 0 accordingly.
+- Gateway connections are centrally managed. Plan Day 1 setup accordingly.
 - Tenant and workspace features are enabled selectively. Confirm before the
   workshop, and stay inside the **In scope** list.
 - There is no shared source-control or CI/CD practice for Power BI content, and

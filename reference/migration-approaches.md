@@ -1,7 +1,7 @@
 # Tableau to Power BI migration approaches
 
-Deck slide 17. Four steps, in order: **Assess**, **Rationalize**, **Rebuild**,
-**Validate**.
+Deck slide 19, *A method, not a rewrite*. Four steps, in order: **Assess**,
+**Rationalize**, **Rebuild**, **Validate**.
 
 Start with inventory, not visuals. The fastest way to create a new mess is to
 rebuild every Tableau workbook as its own Power BI report and its own semantic

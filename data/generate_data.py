@@ -13,7 +13,7 @@ Shapes written, on purpose, so the migration story lands:
 
   1. raw/tableau_extract/incident_report_extract.csv
      One wide, denormalized table - the way a Tableau .hyper extract looks
-     today. This is the "before" that Lab 4 reshapes.
+     today. This is the "before" that Lab 0 reshapes.
 
   2. raw/sql/*.csv
      Normalized conformed dimensions plus a fact table per domain - the "after".
@@ -21,7 +21,7 @@ Shapes written, on purpose, so the migration story lands:
      on-premises data gateway.
 
   3. raw/excel/capacity_YYYY_MM.csv
-     A folder of monthly extracts, the "large Excel files" pain point. Lab 4
+     A folder of monthly extracts, the "large Excel files" pain point. Lab 0
      combines these with a single query and a custom function.
 
 Run:  python data/generate_data.py                 # default 24 months
@@ -255,7 +255,7 @@ def build_dim_configuration_item(rng, n_ci, dim_service, dim_location) -> pd.Dat
 
 
 def build_fact_incident(rng, dim_date, dim_service, dim_ci, dim_team, dim_location, dim_severity):
-    """One row per incident. This is the primary fact for Labs 1 to 4."""
+    """One row per incident. This is the primary fact for Labs 0 to 3."""
     sev_codes = [s[0] for s in SEVERITIES]
     sev_shares = np.array([s[4] for s in SEVERITIES])
     sev_shares = sev_shares / sev_shares.sum()
@@ -509,7 +509,7 @@ def validate_dataset(dim_service, outputs) -> None:
 
 
 def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
-    """A folder of monthly extracts - the 'large Excel files' pattern for Lab 4.
+    """A folder of monthly extracts - the 'large Excel files' pattern for Lab 0.
 
     Written as CSV so the generator has no Excel dependency. Column names and the
     inconsistencies are what matter: the November file is deliberately different.
@@ -533,7 +533,7 @@ def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
         out = grp[["ci_name", "environment", "cpu_utilization_pct", "memory_utilization_pct",
                    "storage_used_gb", "storage_allocated_gb"]].copy()
         out.columns = ["CI Name", "Environment", "CPU %", "Memory %", "Storage Used GB", "Storage Allocated GB"]
-        # One month ships with a renamed column and a stray total row, so Lab 4's
+        # One month ships with a renamed column and a stray total row, so Lab 0's
         # schema guard has something real to catch.
         if month_year == anomaly_month:
             out = out.rename(columns={"CPU %": "CPU Utilisation %"})
@@ -624,7 +624,7 @@ def main() -> None:
     monthly = write_monthly_excel_style(fact_capacity, dim_date, dim_ci, excel_dir)
     print(f"  raw/excel/capacity_YYYY_MM.csv                   {len(monthly):>8,} monthly files")
 
-    print("\nDone. Next: labs/lab-00-setup-and-gateway/README.md")
+    print("\nDone. Next: labs/day-1-setup/README.md")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 # Day 3 - Showcase, Lessons & Next Steps
 
-**August 20, 2026 · 9:00 to 3:00 · Deck slides 25 to 34**
+**August 20, 2026 · 9:00 to 3:00 · Deck slides 27 to 36**
 
 > **Outcome:** A committed 90-day adoption roadmap.
 
@@ -13,7 +13,7 @@ leave with.
 
 ## Run of show
 
-Deck slide 26.
+Deck slide 28.
 
 | Time | Session | Lead | Focus |
 | --- | --- | --- | --- |
@@ -41,7 +41,7 @@ it to look polished.
 
 ## 10:30 - Lessons learned
 
-Deck slide 28 lists the pitfalls to check yourselves against:
+Deck slide 30 lists the pitfalls to check yourselves against:
 
 | Pitfall | The fix |
 | --- | --- |
@@ -60,7 +60,7 @@ Add the ones this room actually hit. Two that usually surface here:
 
 ## 11:15 - Reusable patterns library
 
-Deck slide 29. What every group can lift so nobody starts from a blank page:
+Deck slide 31. What every group can lift so nobody starts from a blank page:
 
 | Pattern | Where it lives |
 | --- | --- |
@@ -79,7 +79,8 @@ updates.
 
 ## 11:45 - Art of the possible: Fabric, once approved
 
-Deck slides 30, 31 and 32. **Clearly future. Clearly approval-dependent.**
+Deck slide 32, with slides 15 and 16 as the callback. **Clearly future. Clearly
+approval-dependent.**
 
 The speaker notes on all three slides say the same thing: most attendees do not
 have embedded Copilot, Copilot Studio, MCP servers or Data Agent access, and
@@ -88,11 +89,14 @@ readiness path, not a capability.
 
 | Slide | Topic | Position it as |
 | --- | --- | --- |
-| 30 | Governed semantic models: what unlocks AI | The readiness checklist - and note how much of it Day 2 already delivered |
-| 31 | Embedded Copilot and natural-language assistance | What becomes possible once licensing and governance are approved |
-| 32 | Fabric, OneLake, and governed agents | The broader platform, once OneLake is approved |
+| 32 | Governed semantic models: what unlocks AI | The readiness checklist - and note how much of it Day 2 already delivered |
+| 15 | Embedded Copilot and natural-language assistance | What becomes possible once licensing and governance are approved |
+| 16 | Fabric, OneLake, and governed agents | The broader platform, once OneLake is approved |
 
-**The point to land:** slide 30's readiness list is almost entirely work this room
+Slides 15 and 16 were previewed on Day 1 afternoon. Returning to them here is
+deliberate: the room has now built the thing that makes them worth having.
+
+**The point to land:** slide 32's readiness list is almost entirely work this room
 did on Day 2. Certified models, documented logic, proven RLS, usage signal. The
 missing items are capacity and executive sign-off - and those are asks, not
 engineering.

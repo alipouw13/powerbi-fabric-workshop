@@ -2,26 +2,33 @@
 
 All hands-on work in this workshop happens on **Day 2**. Day 1 is teaching and
 alignment; Day 3 is showcase and roadmap. That mirrors the deck exactly - the
-four numbered labs appear on slides 19 to 22, and every one of them is a Day 2
-session on the slide 16 run of show.
+four numbered labs appear on slides 21 to 24, and every one of them is a Day 2
+session on the slide 18 run of show.
+
+**Lab 0 is the connection lab, and it comes first.** You cannot model data you have not
+connected to, so the deck opens Day 2 with Power Query at 10:30 - the same order Day 1
+teaches in. Setup and the gateway connection are done on Day 1 afternoon, which is why
+they are not a numbered lab.
 
 | Lab | Deck slide | Day 2 slot | Copilot agent | Applies the Day 1 session |
 | --- | --- | --- | --- | --- |
-| [Lab 0 - Setup and gateway](lab-00-setup-and-gateway/README.md) | n/a (setup) | Day 1, 3:30 | *builds all four* | Prep, not a numbered lab |
-| [Lab 1 - Build the semantic model](lab-01-semantic-model/README.md) | 19 | 10:30 | Model Architect | Data modeling and star schema |
-| [Lab 2 - Build your first report page](lab-02-report-page/README.md) | 20 | 10:30 | Report Designer | Visualization design and governance |
-| [Lab 3 - Practice DAX measures](lab-03-dax-measures/README.md) | 21 | 1:00 | DAX Coach | DAX foundations for Tableau users |
-| [Lab 4 - Connect, shape, and load with Power Query](lab-04-power-query/README.md) | 22 | 2:30 | Query Engineer | Power Query: connect, shape, combine, load |
+| [Day 1 setup](day-1-setup/README.md) | n/a (slide 5, 3:30) | Day 1, 3:30 | *builds all four* | Prep, not a numbered lab |
+| [Lab 0 - Connect, shape, and load](lab-00-connect-and-shape/README.md) | 21 | 10:30 | Query Engineer | Power Query: connect, shape, combine, load |
+| [Lab 1 - Build the semantic model](lab-01-semantic-model/README.md) | 22 | 1:00 | Model Architect | Data modeling and star schema |
+| [Lab 2 - Build your first report page](lab-02-report-page/README.md) | 23 | 1:00 | Report Designer | Visualization design and governance |
+| [Lab 3 - Practice DAX measures](lab-03-dax-measures/README.md) | 24 | 2:30 | DAX Coach | DAX foundations for Tableau users |
 
-Run them in order. Labs 1 and 2 build the thing; Labs 3 and 4 make it good.
+Run them in order. Lab 0 gets the data in and gives it a shape; Labs 1 to 3 turn it into
+something someone reads.
 
-> **Do Lab 0 on Day 1 afternoon.** It covers the gateway, and a gateway problem discovered
-> at 10:30 on Day 2 costs the room an hour. It also sets up the four Copilot agents, which
-> every lab after it assumes you have open.
+> **Do the Day 1 setup on Day 1 afternoon.** It covers the gateway, and a gateway problem
+> discovered at 10:30 on Day 2 costs the room an hour. It also sets up the four Copilot
+> agents, which every lab assumes you have open. Deck slide 18 says the same: *Lab 0 setup
+> and the gateway connection are completed on Day 1 afternoon.*
 
 ## Domain breakout groups
 
-Deck slide 23. Five I&O domain groups supporting two business units, one shared
+Deck slide 25. Five I&O domain groups supporting two business units, one shared
 modeling pattern.
 
 | Group | Domain | Fact table | The flagship report answers |
@@ -32,10 +39,11 @@ modeling pattern.
 | 4 | Service Desk & Workforce | `fact_service_desk` | Ticket volumes, first-contact resolution and staffing coverage per service |
 | 5 | Asset & Workplace Services | `fact_asset` | Inventory, lifecycle and where the out-of-warranty risk is concentrated |
 
-**Reuse, do not restart.** Every group builds on the same conformed dimensions, the same
-staging query patterns and the same workshop theme. A measure one group writes is a
-pattern the others lift straight into their report. That is the whole point of slide 10:
-*one model, many domains*.
+**Reuse, do not restart.** Slide 25 puts it in those words: *every group builds on the same
+source connections, staging queries, and workshop theme.* Same conformed dimensions, same
+staging patterns from Lab 0, same theme. A measure one group writes is a pattern the others
+lift straight into their report. That is the whole point of slide 10: *one model, many
+domains*.
 
 **Every fact carries `service_key`**, so `dim_service[business_unit]` slices all five the
 same way, and `business_unit` → `business_domain` → `service_name` is a drill hierarchy
@@ -50,6 +58,7 @@ they came from one team.
 | Thing | Convention |
 | --- | --- |
 | Semantic model | `sm_io_<domain>` - `sm_io_itsm`, `sm_io_capacity` |
+| Power Query practice file | `pq_lab_<domain>.pbix`, Lab 0 only - scratch, not shipped |
 | Report | `rpt_io_<domain>_<subject>` |
 | Measure names | Business language, title case: `Total Incidents`, not `count_inc` |
 | Dimension tables | `dim_<entity>`, singular entity name |
@@ -61,7 +70,7 @@ they came from one team.
 ## Using M365 Copilot in the labs
 
 M365 Copilot is the only AI available for this work, and it **cannot see your model**. So
-in [Lab 0](lab-00-setup-and-gateway/README.md#6-meet-m365-copilot-then-build-your-four-agents)
+during [Day 1 setup](day-1-setup/README.md#6-meet-m365-copilot-then-build-your-four-agents)
 you do two things: ask Copilot what it can genuinely do for Power BI, then set up four
 specialist agents - one per lab - primed with this workshop's model card.
 
@@ -91,8 +100,9 @@ Deliberately absent, because this environment does not have them today:
 - Dataflows Gen2, Data Factory pipelines
 - MCP servers, PBIP source control, CI/CD
 
-Deck slides 30 to 32 cover these as **future, approval-dependent** on Day 3. They are a
-readiness conversation, not an exercise. Publishing the Lab 0 agent briefs as *named,
-shared* M365 Copilot agents belongs in the same category - the briefs work today as
-pasted instructions, and turning them into published agents needs platform and security
-approval. See [sessions/day-3-showcase.md](../sessions/day-3-showcase.md).
+Deck slides 15, 16 and 32 cover these as **future, approval-dependent**. Slides 15 and 16
+preview them on Day 1 afternoon; slide 32 returns to them on Day 3. They are a readiness
+conversation, not an exercise. Publishing the Day 1 setup agent briefs as *named, shared*
+M365 Copilot agents belongs in the same category - the briefs work today as pasted
+instructions, and turning them into published agents needs platform and security approval.
+See [sessions/day-3-showcase.md](../sessions/day-3-showcase.md).

@@ -11,12 +11,12 @@ time sink in the labs — so you build it **once**, as four reusable specialist 
 
 | Agent | Used in | What it is good at |
 | --- | --- | --- |
+| **Query Engineer** | [Lab 0](../labs/lab-00-connect-and-shape/README.md) | Power Query M, folding, folder combine, schema guards |
 | **Model Architect** | [Lab 1](../labs/lab-01-semantic-model/README.md) | Star schema, grain, relationships, date table, naming |
 | **Report Designer** | [Lab 2](../labs/lab-02-report-page/README.md) | One question per page, visual choice, KPI cards |
 | **DAX Coach** | [Lab 3](../labs/lab-03-dax-measures/README.md) | Measures, filter context, Tableau calc translation |
-| **Query Engineer** | [Lab 4](../labs/lab-04-power-query/README.md) | Power Query M, folding, folder combine, schema guards |
 
-One agent per lab. You build all four in [Lab 0](../labs/lab-00-setup-and-gateway/README.md)
+One agent per lab. You build all four in [Day 1 setup](../labs/day-1-setup/README.md)
 in about fifteen minutes, and use them for the rest of the workshop.
 
 ---
@@ -178,7 +178,44 @@ source. Treat it as a Day 3 roadmap item, not a lab step — capture it in the
 > names and business definitions**. You never paste rows, credentials, connection
 > strings, ticket contents, incident descriptions or user names.
 
-### Agent 1: Model Architect
+### Agent 1: Query Engineer
+
+Used in [Lab 0](../labs/lab-00-connect-and-shape/README.md).
+
+```
+You are my Power Query M Engineer.
+
+Context: Power BI Desktop, Import mode, refreshing through an on-premises data gateway.
+There is no Lakehouse and no Dataflow, so Power Query is the only place my transformation
+logic can live. Sources are SQL Server views, one wide CSV extract, and a folder of
+monthly CSV files with inconsistent headers.
+
+How to behave:
+- Return ONE let expression I can paste straight into the Advanced Editor. No prose
+  inside the code block except M comments.
+- Order steps for query folding: filter rows first, remove columns second, set types
+  third, everything else after. Tell me the exact step where folding will stop and why.
+- Set explicit data types on every column you touch. Never leave a column as any.
+- Name every step in readable English. Never leave Custom1 or Changed Type2.
+- Prefer Reference over Duplicate when I am deriving a query, and say why.
+- If a source may have inconsistent columns between files, build a guard that raises a
+  clear error instead of silently producing nulls.
+- If the click-path in the UI would be shorter than the M you are about to write, tell me
+  to use the click-path instead.
+
+Format:
+- The M in one code block.
+- "Folding:" where it holds and where it stops.
+- "Verify it:" row count, new nulls, data types, folding, step names.
+
+Never include a real server name, database name, path or credential. Use parameters
+named ServerName, DatabaseName, SourceFolder and ReportingStartDate.
+```
+
+Good first questions: *"One file in my monthly folder names a column differently. Write
+the combine plus a schema guard."* · *"Here is my M and the exact error: [paste both]"*
+
+### Agent 2: Model Architect
 
 Used in [Lab 1](../labs/lab-01-semantic-model/README.md).
 
@@ -214,7 +251,7 @@ Good first questions: *"Which of my dimensions should I actually load, and which
 create an ambiguous path?"* · *"Restate my grain and tell me what that makes additive."*
 · *"Which columns should I hide before I build a single visual?"*
 
-### Agent 2: Report Designer
+### Agent 3: Report Designer
 
 Used in [Lab 2](../labs/lab-02-report-page/README.md).
 
@@ -250,7 +287,7 @@ Good first questions: *"Here are my notes from the report owner: [paste]. What i
 one question this page answers?"* · *"Give me three KPI cards for a Banking versus
 Capital Markets operations review."*
 
-### Agent 3: DAX Coach
+### Agent 4: DAX Coach
 
 Used in [Lab 3](../labs/lab-03-dax-measures/README.md).
 
@@ -287,43 +324,6 @@ you write anything.
 Good first questions: *"Convert this Tableau LOD to DAX: [paste]"* · *"Write a measure
 comparing SLA attainment for Banking against Capital Markets, and tell me what would make
 it wrong."* · *"Explain what this measure is doing, line by line: [paste]"*
-
-### Agent 4: Query Engineer
-
-Used in [Lab 4](../labs/lab-04-power-query/README.md).
-
-```
-You are my Power Query M Engineer.
-
-Context: Power BI Desktop, Import mode, refreshing through an on-premises data gateway.
-There is no Lakehouse and no Dataflow, so Power Query is the only place my transformation
-logic can live. Sources are SQL Server views, one wide CSV extract, and a folder of
-monthly CSV files with inconsistent headers.
-
-How to behave:
-- Return ONE let expression I can paste straight into the Advanced Editor. No prose
-  inside the code block except M comments.
-- Order steps for query folding: filter rows first, remove columns second, set types
-  third, everything else after. Tell me the exact step where folding will stop and why.
-- Set explicit data types on every column you touch. Never leave a column as any.
-- Name every step in readable English. Never leave Custom1 or Changed Type2.
-- Prefer Reference over Duplicate when I am deriving a query, and say why.
-- If a source may have inconsistent columns between files, build a guard that raises a
-  clear error instead of silently producing nulls.
-- If the click-path in the UI would be shorter than the M you are about to write, tell me
-  to use the click-path instead.
-
-Format:
-- The M in one code block.
-- "Folding:" where it holds and where it stops.
-- "Verify it:" row count, new nulls, data types, folding, step names.
-
-Never include a real server name, database name, path or credential. Use parameters
-named ServerName, DatabaseName, SourceFolder and ReportingStartDate.
-```
-
-Good first questions: *"One file in my monthly folder names a column differently. Write
-the combine plus a schema guard."* · *"Here is my M and the exact error: [paste both]"*
 
 ---
 

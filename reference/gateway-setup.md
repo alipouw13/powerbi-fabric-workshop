@@ -5,7 +5,7 @@ sources on-premises. Deck slide 7 puts it in the **Now** column, and slide 8 say
 `Import-mode refresh runs through the on-premises data gateway`. Every scheduled
 refresh in this workshop depends on it working.
 
-This page is the detail behind [Lab 0](../labs/lab-00-setup-and-gateway/README.md).
+This page is the detail behind [Day 1 setup](../labs/day-1-setup/README.md).
 
 > **Who does what.** At Schwab the gateway is centrally managed. Most attendees
 > will **not** install a gateway or create a data source themselves - they will
@@ -162,7 +162,7 @@ Done by the report author, after publishing.
 pulls the whole table across the wire and processes it in memory on the gateway
 server. That is the difference between a refresh that takes two minutes and one
 that takes an hour. Check **View Native Query** in Power Query before blaming the
-gateway - see [Lab 4](../labs/lab-04-power-query/README.md).
+gateway - see [Lab 0](../labs/lab-00-connect-and-shape/README.md).
 
 **Logs:** gateway app → **Diagnostics** → **Export logs**. Enable additional
 logging only while investigating; it is verbose and it costs performance.
@@ -202,7 +202,8 @@ you will usually get it back in one round trip:
 
 ## Related
 
-- [Lab 0 - Setup and gateway](../labs/lab-00-setup-and-gateway/README.md)
-- [Lab 4 - Power Query](../labs/lab-04-power-query/README.md) - folding, and why it decides refresh time
+- [Day 1 setup](../labs/day-1-setup/README.md)
+- [Lab 0 - Connect, shape, and load](../labs/lab-00-connect-and-shape/README.md) - folding, and why it decides refresh time
+- [Lab 1 - Build the semantic model](../labs/lab-01-semantic-model/README.md) - publish, bind, and prove the scheduled refresh
 - [Current state and constraints](schwab-current-state.md)
 - Microsoft Learn: `learn.microsoft.com/power-bi/connect-data/service-gateway-onprem`

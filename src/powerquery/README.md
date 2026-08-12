@@ -6,7 +6,7 @@ to inherit logic from, the practical substitute is a shared snippet library.
 
 This is that library. It is deliberately low-tech: paste into the **Advanced
 Editor**, adjust the names, verify the result. It is used in
-[Lab 4](../../labs/lab-04-power-query/README.md) and referenced by
+[Lab 0](../../labs/lab-00-connect-and-shape/README.md) and referenced by
 [Lab 1](../../labs/lab-01-semantic-model/README.md).
 
 > **Before you paste anything.** Check row count, new nulls, explicit data types,
@@ -96,7 +96,7 @@ reuses the upstream steps. Duplicate copies them, and they drift apart inside a
 month.
 
 This example carves `dim_location` out of the wide Tableau extract, which is the
-real Lab 4 exercise: the extract repeats site, city, state, region and datacenter
+real Lab 0 exercise: the extract repeats site, city, state, region and datacenter
 on every incident row (65,869 of them at the 24-month default), and you need 8
 distinct rows.
 
@@ -455,7 +455,7 @@ This library belongs to the Community of Practice. When you add a snippet:
 
 ## Related
 
-- [Lab 4 - Connect, shape, and load with Power Query](../../labs/lab-04-power-query/README.md)
+- [Lab 0 - Connect, shape, and load with Power Query](../../labs/lab-00-connect-and-shape/README.md)
 - [Lab 1 - Build the semantic model](../../labs/lab-01-semantic-model/README.md)
 - [Star schema](../../reference/star-schema.md)
 - [M365 Copilot for Power BI work](../../reference/copilot-in-power-bi.md)

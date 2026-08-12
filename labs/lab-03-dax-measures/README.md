@@ -1,8 +1,8 @@
 # Lab 3 - Practice DAX measures
 
-**Day 2, 1:00** (`Labs 3 and 4, DAX measures`) - **Deck slide 21**
+**Day 2, 2:30** (`Lab 3, DAX measures`) - **Deck slide 24**
 **Applies the Day 1 session:** `DAX foundations for Tableau users` (slide 5, 1:00)
-**Copilot agent:** DAX Coach (tab 3 from [Lab 0](../lab-00-setup-and-gateway/README.md#6-meet-m365-copilot-then-build-your-four-agents))
+**Copilot agent:** DAX Coach (tab 4 from [Day 1 setup](../day-1-setup/README.md#6-meet-m365-copilot-then-build-your-four-agents))
 
 **Scope:** In scope. Power BI Desktop plus M365 Copilot in a separate window.
 
@@ -71,7 +71,7 @@ Avg Resolve Minutes = AVERAGE(fact_incident[time_to_resolve_minutes])
   deck slide 12 tells you to learn first, and this is the simplest possible example.
 
 ### 2. Percent of total - and the choice Tableau made for you
-Deck slide 21's reference pattern:
+Deck slide 24's reference pattern:
 
 ```DAX
 Percent of Total Incidents =
@@ -213,7 +213,7 @@ daily repetition of `mips_capacity`. Averaging the per-row ratio would not.
 > [`src/pbip/README.md`](../../src/pbip/README.md#group-4-service-desk-and-workforce).
 
 ### 5. Review filter context together
-Deck slide 21: `Review the DAX and fix filter context together.`
+Deck slide 24: `Review the DAX and fix filter context together.`
 
 Build one matrix and put every measure in it:
 - Rows: `dim_service[Business Unit]`, then drill to `business_domain`
@@ -232,7 +232,7 @@ it, do not ship it.
 
 > **Two minutes, worth it:** run one prompt in a **fresh** Copilot chat without the agent
 > brief or the model card. It will invent table names. That contrast is the entire argument
-> for setting the agents up in Lab 0.
+> for setting the agents up on Day 1.
 
 ## You'll know it worked when
 - Base measures, percent of total, time intelligence and your card measures all return
@@ -245,4 +245,7 @@ it, do not ship it.
 - You can narrate what `CALCULATE` is doing in at least two of your measures.
 
 ## Next
-[Lab 4 - Connect, shape, and load with Power Query](../lab-04-power-query/README.md)
+Day 2 closes with the 4:00 stand-up. Bring: what you built, what broke, one thing you would
+tell the other groups, and your Lab 2 page for peer review.
+
+Day 3 is [showcase and next steps](../../sessions/day-3-showcase.md).
