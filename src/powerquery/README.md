@@ -1,12 +1,12 @@
 # Power Query M snippet library
 
 There is no lake layer and no Dataflow in this environment, so **every
-transformation at Schwab I&O happens in Power Query**. Without a shared Dataflow
+transformation in this workshop happens in Power Query**. Without a shared Dataflow
 to inherit logic from, the practical substitute is a shared snippet library.
 
 This is that library. It is deliberately low-tech: paste into the **Advanced
 Editor**, adjust the names, verify the result. It is used in
-[Lab 4](../../labs/lab-04-power-query/README.md) and referenced by
+[Lab 0](../../labs/lab-00-connect-and-shape/README.md) and referenced by
 [Lab 1](../../labs/lab-01-semantic-model/README.md).
 
 > **Before you paste anything.** Check row count, new nulls, explicit data types,
@@ -96,7 +96,7 @@ reuses the upstream steps. Duplicate copies them, and they drift apart inside a
 month.
 
 This example carves `dim_location` out of the wide Tableau extract, which is the
-real Lab 4 exercise: the extract repeats site, city, state, region and datacenter
+real Lab 0 exercise: the extract repeats site, city, state, region and datacenter
 on every incident row (65,869 of them at the 24-month default), and you need 8
 distinct rows.
 
@@ -229,7 +229,7 @@ let
     Weekend   = Table.AddColumn(DayName,   "is_weekend",   each Date.DayOfWeek([date], Day.Monday) >= 5, type logical),
     WeekOfYr  = Table.AddColumn(Weekend,   "week_of_year", each Date.WeekOfYear([date]), Int64.Type),
 
-    // Schwab fiscal year starts in January. Change the offset if that is wrong.
+    // This fiscal year starts in January. Change the offset if that is wrong.
     FiscalYr  = Table.AddColumn(WeekOfYr,  "fiscal_year",    each Date.Year([date]), Int64.Type),
     FiscalQtr = Table.AddColumn(FiscalYr,  "fiscal_quarter", each "FY" & Text.End(Text.From(Date.Year([date])), 2)
                                                                 & " Q" & Text.From(Date.QuarterOfYear([date])), type text)
@@ -247,7 +247,7 @@ In the model: **Table tools -> Mark as date table** on `date`, and set
 ## Excel folder combine
 
 One query for the whole folder, instead of one query per file. This is the
-custom-function pattern applied to the most common real problem at Schwab.
+custom-function pattern applied to the most common real problem in this environment.
 
 The workshop folder is `data/raw/excel/`, one capacity extract per generated month
 (24 at the default). Point `MonthlyExtractFolder` at it.
@@ -455,7 +455,7 @@ This library belongs to the Community of Practice. When you add a snippet:
 
 ## Related
 
-- [Lab 4 - Connect, shape, and load with Power Query](../../labs/lab-04-power-query/README.md)
+- [Lab 0 - Connect, shape, and load with Power Query](../../labs/lab-00-connect-and-shape/README.md)
 - [Lab 1 - Build the semantic model](../../labs/lab-01-semantic-model/README.md)
 - [Star schema](../../reference/star-schema.md)
 - [M365 Copilot for Power BI work](../../reference/copilot-in-power-bi.md)

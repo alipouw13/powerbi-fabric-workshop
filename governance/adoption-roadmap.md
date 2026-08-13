@@ -2,7 +2,7 @@
 
 Deck slide 33. Three horizons, and one rule that keeps the first one honest.
 
-> **The rule: nothing on the 30-day list may be blocked by a capability Schwab
+> **The rule: nothing on the 30-day list may be blocked by a capability the organization
 > does not have.**
 >
 > If an item needs Fabric capacity, a Lakehouse, OneLake, Direct Lake, embedded
@@ -44,7 +44,7 @@ possible.
 | Item | What done looks like | Owner |
 | --- | --- | --- |
 | **Migrate the next tier of Tableau reports** | The P1 rows from the [assessment worksheet](migration-assessment-worksheet.md) are rebuilt, validated and published. | Domain owners |
-| **Roll out the measure and theme library** | The [measure definitions](../src/pbip/README.md), the [Power Query snippets](../src/powerquery/README.md), and `schwab-io-theme.json` are in a shared location, and new reports use them by default. | CoE lead |
+| **Roll out the measure and theme library** | The [measure definitions](../src/pbip/README.md), the [Power Query snippets](../src/powerquery/README.md), and `io-workshop-theme.json` are in a shared location, and new reports use them by default. | CoE lead |
 | **Propose Fabric capacity for leadership approval** | A written proposal covering the business case, cost, what it unlocks, and what stays the same without it. A proposal, not a dependency. | I&O platform owner plus CoE lead |
 | **Run the first quarterly review** | Adoption, certification status, refresh health, migration progress, and a decision log. | CoE lead |
 
@@ -144,5 +144,5 @@ Track the first four monthly. The rest quarterly.
 - [Endorsement and certification](endorsement-certification.md)
 - [Migration assessment worksheet](migration-assessment-worksheet.md)
 - [Migration approaches](../reference/migration-approaches.md)
-- [Current state and constraints](../reference/schwab-current-state.md)
+- [Current state and constraints](../reference/current-state.md)
 - [Day 3 showcase](../sessions/day-3-showcase.md)

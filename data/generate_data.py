@@ -1,19 +1,19 @@
-"""Generate synthetic Banking and Capital Markets I&O data for the Schwab
+"""Generate synthetic Banking and Capital Markets I&O data for the
 Tableau-to-Power BI workshop.
 
-The workshop teaches a Tableau audience how to move to Power BI, using Schwab's
-own **Infrastructure & Operations (I&O)** domains. The model follows the star
+The workshop teaches a Tableau audience how to move to Power BI, using an
+enterprise **Infrastructure & Operations (I&O)** domain. The model follows the star
 schema on deck slides 9 and 10: one fact table per domain, all joining the same
 conformed dimensions.
 
 Every organization, service, identifier, event, and metric is SYNTHETIC. No real
-Schwab, customer, account, position, trade, or market data is used.
+customer, account, position, trade, or market data is used.
 
 Shapes written, on purpose, so the migration story lands:
 
   1. raw/tableau_extract/incident_report_extract.csv
      One wide, denormalized table - the way a Tableau .hyper extract looks
-     today. This is the "before" that Lab 4 reshapes.
+     today. This is the "before" that Lab 0 reshapes.
 
   2. raw/sql/*.csv
      Normalized conformed dimensions plus a fact table per domain - the "after".
@@ -21,7 +21,7 @@ Shapes written, on purpose, so the migration story lands:
      on-premises data gateway.
 
   3. raw/excel/capacity_YYYY_MM.csv
-     A folder of monthly extracts, the "large Excel files" pain point. Lab 4
+     A folder of monthly extracts, the "large Excel files" pain point. Lab 0
      combines these with a single query and a custom function.
 
 Run:  python data/generate_data.py                 # default 24 months
@@ -81,14 +81,14 @@ TEAMS = [
 
 # (site_name, city, state, region, datacenter)
 LOCATIONS = [
-    ("Westlake Campus", "Westlake", "TX", "Southwest", "DC-DFW-01"),
-    ("Austin Tech Center", "Austin", "TX", "Southwest", "DC-DFW-01"),
-    ("Phoenix Operations", "Phoenix", "AZ", "West", "DC-PHX-01"),
-    ("Denver Office", "Denver", "CO", "West", "DC-PHX-01"),
-    ("Lone Tree Campus", "Lone Tree", "CO", "West", "DC-PHX-01"),
-    ("Indianapolis Hub", "Indianapolis", "IN", "Midwest", "DC-CHI-01"),
-    ("Orlando Service Center", "Orlando", "FL", "Southeast", "DC-ATL-01"),
-    ("Richfield Office", "Richfield", "OH", "Midwest", "DC-CHI-01"),
+    ("North Campus", "Dallas", "TX", "Southwest", "DC-DFW-01"),
+    ("Central Tech Center", "Fort Worth", "TX", "Southwest", "DC-DFW-01"),
+    ("West Operations", "Las Vegas", "NV", "West", "DC-PHX-01"),
+    ("Summit Office", "Boulder", "CO", "West", "DC-PHX-01"),
+    ("Ridgeview Campus", "Colorado Springs", "CO", "West", "DC-PHX-01"),
+    ("Midwest Hub", "Columbus", "OH", "Midwest", "DC-CHI-01"),
+    ("Southeast Service Center", "Tampa", "FL", "Southeast", "DC-ATL-01"),
+    ("Lakeside Office", "Madison", "WI", "Midwest", "DC-CHI-01"),
 ]
 
 # (severity_code, severity_name, priority, sla_hours, share of incidents)
@@ -157,7 +157,7 @@ def build_dim_date(start: date, end: date) -> pd.DataFrame:
     df["day_name"] = df["date"].dt.day_name()
     df["is_weekend"] = df["day_of_week"].isin([6, 7])
     df["week_of_year"] = df["date"].dt.isocalendar().week.astype(int)
-    # Schwab-style fiscal year aligned to the calendar year for workshop simplicity.
+    # Fiscal year aligned to the calendar year for workshop simplicity.
     df["fiscal_year"] = df["year"]
     df["fiscal_quarter"] = df["quarter"]
     return df[[
@@ -255,7 +255,7 @@ def build_dim_configuration_item(rng, n_ci, dim_service, dim_location) -> pd.Dat
 
 
 def build_fact_incident(rng, dim_date, dim_service, dim_ci, dim_team, dim_location, dim_severity):
-    """One row per incident. This is the primary fact for Labs 1 to 4."""
+    """One row per incident. This is the primary fact for Labs 0 to 3."""
     sev_codes = [s[0] for s in SEVERITIES]
     sev_shares = np.array([s[4] for s in SEVERITIES])
     sev_shares = sev_shares / sev_shares.sum()
@@ -402,7 +402,7 @@ def build_fact_service_desk(rng, dim_date, dim_service, dim_team, dim_location):
     for drow in dim_date.itertuples(index=False):
         weekend_factor = 0.35 if drow.is_weekend else 1.0
         for team in desk_teams.itertuples(index=False):
-            for loc_key in [1, 3, 6]:  # Westlake, Phoenix, Indianapolis staff the desk
+            for loc_key in [1, 3, 6]:  # North Campus, West Operations, Midwest Hub staff the desk
                 for service in dim_service.itertuples(index=False):
                     # Allocate workload by supported business service so every
                     # service-desk metric can roll up to the two focus units.
@@ -509,7 +509,7 @@ def validate_dataset(dim_service, outputs) -> None:
 
 
 def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
-    """A folder of monthly extracts - the 'large Excel files' pattern for Lab 4.
+    """A folder of monthly extracts - the 'large Excel files' pattern for Lab 0.
 
     Written as CSV so the generator has no Excel dependency. Column names and the
     inconsistencies are what matter: the November file is deliberately different.
@@ -533,7 +533,7 @@ def write_monthly_excel_style(fact_capacity, dim_date, dim_ci, out_dir):
         out = grp[["ci_name", "environment", "cpu_utilization_pct", "memory_utilization_pct",
                    "storage_used_gb", "storage_allocated_gb"]].copy()
         out.columns = ["CI Name", "Environment", "CPU %", "Memory %", "Storage Used GB", "Storage Allocated GB"]
-        # One month ships with a renamed column and a stray total row, so Lab 4's
+        # One month ships with a renamed column and a stray total row, so Lab 0's
         # schema guard has something real to catch.
         if month_year == anomaly_month:
             out = out.rename(columns={"CPU %": "CPU Utilisation %"})
@@ -624,7 +624,7 @@ def main() -> None:
     monthly = write_monthly_excel_style(fact_capacity, dim_date, dim_ci, excel_dir)
     print(f"  raw/excel/capacity_YYYY_MM.csv                   {len(monthly):>8,} monthly files")
 
-    print("\nDone. Next: labs/lab-00-setup-and-gateway/README.md")
+    print("\nDone. Next: labs/day-1-setup/README.md")
 
 
 if __name__ == "__main__":

@@ -172,6 +172,6 @@ extract sprawl with a new name.
 - [Endorsement and certification](endorsement-certification.md)
 - [Migration assessment worksheet](migration-assessment-worksheet.md)
 - [Adoption roadmap](adoption-roadmap.md)
-- [Current state and constraints](../reference/schwab-current-state.md)
+- [Current state and constraints](../reference/current-state.md)
 - [Gateway setup](../reference/gateway-setup.md)
 - [Sources](../reference/sources.md)

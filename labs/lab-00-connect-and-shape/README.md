@@ -1,30 +1,44 @@
-# Lab 4 - Connect, shape, and load with Power Query
+# Lab 0 - Connect, shape, and load with Power Query
 
-**Day 2, 2:30** (`Labs 3 and 4 continued, Power Query practice`) - **Deck slide 22**
+**Day 2, 10:30** (`Lab 0, data source connection, Power Query`) - **Deck slide 21**
 **Applies the Day 1 session:** `Power Query: connect, shape, combine, load` (slide 5, 10:30)
-**Copilot agent:** Query Engineer (tab 4 from [Lab 0](../lab-00-setup-and-gateway/README.md#6-meet-m365-copilot-then-build-your-four-agents))
+**Copilot agent:** Query Engineer (tab 1 from [Day 1 setup](../day-1-setup/README.md#6-meet-m365-copilot-then-build-your-four-agents))
 
 **Scope:** In scope. Power BI Desktop, Power Query, the gateway, and M365 Copilot.
 
 > **Goal, from the deck.** Build a clean, reusable staging query from a flat file or SQL
 > source, ready to model.
 
-Deck slide 8 is blunt about why this matters: *Power Query is where migrations succeed or
-stall. Get the query right once, and every refresh benefits.* Because there is no
-Lakehouse and no Dataflow, **Power Query is the only place transformation logic can
-live** - which makes this the highest-leverage skill in the workshop.
+**This is Lab 0 because it is the first thing that happens.** Nothing can be modeled,
+charted or measured until it has been connected to and shaped, and the Day 1 running order
+says the same thing - Power Query at 10:30, star schema at 11:15. Deck slide 8 is blunt
+about why: *Power Query is where migrations succeed or stall. Get the query right once, and
+every refresh benefits.* Because there is no Lakehouse and no Dataflow, **Power Query is
+the only place transformation logic can live** - which makes this the highest-leverage
+skill in the workshop.
+
+Deck slide 25 says the same thing about the breakout groups: *every group builds on the
+same source connections, staging queries, and workshop theme.* Those connections and
+staging queries are what you build here.
 
 ## What you'll build
 - A staging query built in the order that lets it fold
 - Dimensions carved out by **reference**, not copy-paste
 - A hardened combine over the folder of monthly extracts, with a schema guard
-- A refresh you have proven works through the gateway
+- A set of queries loading only what a model will actually use
 
 ## Prerequisites
-- [Lab 1](../lab-01-semantic-model/README.md) complete
+- [Day 1 setup](../day-1-setup/README.md) complete, including your four Copilot tabs and
+  the gateway connection
 - `data\raw\tableau_extract\incident_report_extract.csv` and `data\raw\excel\` generated
 - Your Query Engineer tab open
 - Reference: [Power Query snippets](../../src/powerquery/README.md), [gateway setup](../../reference/gateway-setup.md)
+
+> **This lab is the practice file, not the model file.** Work in a scratch `.pbix` -
+> call it `pq_lab_<yourdomain>.pbix`. In [Lab 1](../lab-01-semantic-model/README.md) you
+> start a clean `sm_io_<yourdomain>.pbix` against the SQL-shaped tables and apply every
+> pattern you learn here as you load. Keeping them apart avoids ending up with two
+> competing versions of `dim_service` in one model.
 
 ---
 
@@ -42,11 +56,11 @@ live** - which makes this the highest-leverage skill in the workshop.
   repeated on every single row. That is the storage and refresh cost you are about to
   remove.
 
-Deck slide 28 names porting this shape as the number one migration pitfall: *Do not
+Deck slide 30 names porting this shape as the number one migration pitfall: *Do not
 recreate one wide table. Model the star first.*
 
 ### 2. Build the staging query in the right order
-Deck slide 22, step 1: `Connect, then filter rows and remove unused columns first`.
+Deck slide 21, step 1: `Connect, then filter rows and remove unused columns first`.
 
 Order matters enormously. Do exactly this sequence:
 
@@ -56,7 +70,7 @@ Order matters enormously. Do exactly this sequence:
    cheapest performance win available.
 3. **Set data types explicitly.** Dates as Date, keys as Whole Number, percentages as
    Decimal. Nothing left as `any`.
-4. **Rename to business-friendly labels** - deck slide 22, step 2.
+4. **Rename to business-friendly labels** - deck slide 21, step 2.
 
 Then:
 - Rename the query `Staging Incidents`.
@@ -64,7 +78,7 @@ Then:
 - Right-click → **Move to Group** → new group `Staging`.
 
 ### 3. Check query folding
-Deck slide 22, step 3: `Check query folding, then load only what the model needs`.
+Deck slide 21, step 3: `Check query folding, then load only what the model needs`.
 
 - Right-click the last applied step → **View Native Query**.
 - Against a **CSV** it is greyed out. CSVs cannot fold - there is no query engine behind
@@ -165,16 +179,17 @@ looks right is worse than an error** - that is the whole argument for this step.
 > than reading the docs. If the generated M is longer than the click-path would have been,
 > use the click-path - generated code nobody understands is a maintenance liability.
 
-### 6. Load only what the model needs, then prove the refresh
+### 6. Load only what a model will need
 - Review every query. **Enable load** off for staging and function queries, on only for the
-  dimensions and facts the model uses.
+  dimensions and facts a model would use.
 - Check the field list after loading. Anything there that no visual will use is memory and
   refresh time you are paying for.
-- Publish, bind to the gateway connection from
-  [Lab 0](../lab-00-setup-and-gateway/README.md#4-prove-the-gateway-path-end-to-end), and
-  **Refresh now**. Watch how long it takes.
-- Set the schedule after the upstream job lands, not on the hour out of habit. Send failure
-  notifications to a group mailbox, not a person.
+- Note how long **Refresh** takes in Desktop, and which query is the slow one. That number
+  is your baseline.
+- You will publish and prove a scheduled refresh through the gateway at the end of
+  [Lab 1](../lab-01-semantic-model/README.md#7-publish-and-prove-the-refresh-through-the-gateway),
+  once there is a model worth refreshing. The folding decisions you made in step 3 are what
+  that refresh time will be made of.
 
 ### 7. Save what worked
 Add the M snippets that worked to [`src/powerquery/`](../../src/powerquery/README.md), each
@@ -194,7 +209,7 @@ clock as a typed exercise on day one. Read them, watch them, come back to them n
 **Parameters.** Without Dataflows, reuse comes from query structure. **Home** → **Manage
 Parameters** → create `SourceFolder` and `ReportingStartDate`, then swap the hardcoded path
 and date filter in `Staging Incidents` for them. Promoting a model between environments
-should not require editing M in six places. Deck slide 22: `Use parameters for file paths
+should not require editing M in six places. Deck slide 21: `Use parameters for file paths
 or environments so the query is reusable.` The pattern is in
 [`src/powerquery/README.md`](../../src/powerquery/README.md).
 
@@ -213,10 +228,9 @@ use one, put the SQL in source control and comment why.
 - The schema guard throws a readable error when a column goes missing.
 - You used the Query Engineer to draft M and checked rows, nulls, types and step names
   afterwards.
-- A refresh has run successfully through the gateway.
+- Only the queries a model would use have **Enable load** on, and you know your Desktop
+  refresh baseline.
 
 ## Next
-Day 2 closes with the 4:00 stand-up. Bring: what you built, what broke, one thing you would
-tell the other groups, and your Lab 2 page for peer review.
-
-Day 3 is [showcase and next steps](../../sessions/day-3-showcase.md).
+[Lab 1 - Build the semantic model](../lab-01-semantic-model/README.md). You now know how to
+get data in and shape it; next you give it a shape a report can use.

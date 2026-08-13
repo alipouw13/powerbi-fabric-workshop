@@ -1,11 +1,11 @@
 // =============================================================================
-// Sample DAX for the Schwab I&O semantic models
+// Sample DAX for the I&O semantic models
 // =============================================================================
 //
 // Two things live in this file:
 //   1. MEASURE DEFINITIONS   - paste into Power BI Desktop, one per measure.
 //   2. EVALUATE QUERIES      - run in DAX query view to validate the model.
-//                              Used by Lab 1 step 6 and Lab 3 step 7.
+//                              Used by Lab 1 step 6 and Lab 3 step 5.
 //
 // Models:  sm_io_itsm, sm_io_capacity, sm_io_mainframe,
 //          sm_io_servicedesk, sm_io_assets
@@ -339,7 +339,7 @@ CALCULATE(
 // =============================================================================
 // VALIDATION QUERIES
 // Run these in Power BI Desktop: View -> DAX query view.
-// Lab 1 step 6 uses V1 to V4. Lab 3 step 7 uses V5 to V9.
+// Lab 1 step 6 uses V1 to V4. Lab 3 step 5 uses V5 to V9.
 // =============================================================================
 
 

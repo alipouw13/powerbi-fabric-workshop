@@ -13,7 +13,7 @@ says so.
 
 ## Workshop context
 
-- Domain: Charles Schwab **Infrastructure & Operations**.
+- Domain: An enterprise **Infrastructure & Operations** group.
 - Five domain groups: ITSM, Capacity & Forecasting, Mainframe, Service Desk &
   Workforce, Asset & Workplace Services.
 - Target model: `sm_io_<domain>`, for example `sm_io_itsm`, in **Import** mode.
@@ -263,7 +263,7 @@ boundaries.
 - [Star schema](star-schema.md)
 - [Visual design](visual-design.md)
 - [Migration approaches](migration-approaches.md)
-- [Current state and constraints](schwab-current-state.md)
+- [Current state and constraints](current-state.md)
 - [M365 Copilot for Power BI work](copilot-in-power-bi.md)
 - [Migration assessment worksheet](../governance/migration-assessment-worksheet.md)
 - [Measure definitions](../src/pbip/README.md)

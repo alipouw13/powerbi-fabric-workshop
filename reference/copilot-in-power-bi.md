@@ -5,7 +5,7 @@
 > Power BI Desktop. Copilot **inside Power BI Desktop or the Power BI Service**,
 > Copilot Studio, and Fabric Data Agents are **not available** to this audience.
 > They are not demoed and not required by any lab. See
-> [schwab-current-state.md](schwab-current-state.md).
+> [current-state.md](current-state.md).
 
 M365 Copilot cannot see your semantic model, your data, or your queries. Treat it
 as a fast colleague who knows DAX and Power Query M well but has never seen your
@@ -23,7 +23,7 @@ quality of the context you supply.**
 | Debug an M or DAX error | Yes | Paste the code and the exact error text together. |
 | Draft measure and table descriptions | Yes | Review each one for I&O accuracy. |
 | Draft model documentation | Yes | Feed it your table and measure list. |
-| Draft report requirements from meeting notes | Yes | Deck slide 24 lists this as an in-scope use. |
+| Draft report requirements from meeting notes | Yes | Deck slide 26 lists this as an in-scope use. |
 | Behave as a reusable specialist for a whole chat | Yes | Paste an [agent brief](copilot-agents.md) once, and everything after it inherits the behaviour. |
 | See your model schema | **No** | You describe it in every prompt. |
 | Run DAX and return real numbers | **No** | Every number it produces is invented. |
@@ -59,7 +59,7 @@ names. This is the ITSM version; swap the fact table for your group's.
 > **Do this once, not once per prompt.** [copilot-agents.md](copilot-agents.md)
 > turns this block into four reusable specialist agents - Model Architect, Report
 > Designer, DAX Coach and Query Engineer - so the context is pasted at the start of a
-> conversation instead of at the top of every question. You build them in Lab 0.
+> conversation instead of at the top of every question. You build them in Day 1 setup.
 
 
 ```
@@ -210,12 +210,12 @@ click-path.
 
 ## What this is for, and what it is not
 
-In scope, from deck slide 24:
+In scope, from deck slide 26:
 
 - **Draft requirements.** Turn meeting notes into a report requirements list.
 - **Summarize notes.** Condense a workshop or stakeholder session.
 - **Refine communications.** Tighten a rollout email or a change announcement.
-- **Draft DAX and M**, given your schema, then verified by you. Labs 3 and 4 both
+- **Draft DAX and M**, given your schema, then verified by you. Labs 0 and 3 both
   use this.
 
 Not in scope:
@@ -227,23 +227,23 @@ Not in scope:
 - It does not build report pages or place visuals.
 - It does not replace review. Code you cannot explain does not ship.
 
-## Note for the deck, slide 24
+## How the deck scopes this, slide 26
 
-Slide 24 currently lists this bullet under **What this is not**:
+Deck slide 26, **Where M365 Copilot can help today**, lists four columns: draft
+requirements, summarize notes, refine communications, and **draft DAX & M Query**.
+The fourth column is the one Labs 0 and 3 lean on, and the slide states the limit
+in the same breath:
 
-> Does not draft DAX or write report visuals for you
+> Draft Power Query M to paste into the Advanced Editor, but cannot see your model
+> or run queries
 
-The first half of that bullet is inaccurate. M365 Copilot drafts DAX and Power
-Query M well when you give it schema context, and **Labs 3 and 4 both rely on
-that**. The second half is correct: it does not build visuals.
+Its footer note is the rule these labs enforce:
 
-Suggested replacement bullets, ready to paste into the slide:
+> Always verify Copilot cannot see your model. Paste your schema in, then check every
+> result: DAX at three grains, M for row counts, nulls, types and folding.
 
-- Drafts DAX and M when you paste in your schema, but cannot see your model or
-  run queries
-- Not a substitute for Copilot inside Power BI Desktop or the service
-
-Keep the rest of the slide as it stands.
+That is exactly the loop in [copilot-agents.md](copilot-agents.md): ask, read, paste,
+verify.
 
 ## Guardrails
 
@@ -272,11 +272,11 @@ model is one Copilot can help with.
 
 ## Related
 
-- [Current state and constraints](schwab-current-state.md)
+- [Current state and constraints](current-state.md)
 - [Star schema](star-schema.md)
 - [Tableau to Power BI](tableau-to-powerbi.md)
 - [Power Query snippets](../src/powerquery/README.md)
 - [Sample DAX queries](../src/sql/sample_dax_queries.dax)
+- [Lab 0 - Connect, shape, and load](../labs/lab-00-connect-and-shape/README.md)
 - [Lab 3 - Practice DAX measures](../labs/lab-03-dax-measures/README.md)
-- [Lab 4 - Power Query](../labs/lab-04-power-query/README.md)
 - [Sources](sources.md)

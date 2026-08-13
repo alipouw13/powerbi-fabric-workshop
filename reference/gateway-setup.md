@@ -1,13 +1,13 @@
 # On-premises data gateway: install, configure, and operate
 
-The gateway is the bridge between Power BI in the cloud and Schwab's SQL Server
+The gateway is the bridge between Power BI in the cloud and the organization's SQL Server
 sources on-premises. Deck slide 7 puts it in the **Now** column, and slide 8 says
 `Import-mode refresh runs through the on-premises data gateway`. Every scheduled
 refresh in this workshop depends on it working.
 
-This page is the detail behind [Lab 0](../labs/lab-00-setup-and-gateway/README.md).
+This page is the detail behind [Day 1 setup](../labs/day-1-setup/README.md).
 
-> **Who does what.** At Schwab the gateway is centrally managed. Most attendees
+> **Who does what.** In this environment the gateway is centrally managed. Most attendees
 > will **not** install a gateway or create a data source themselves - they will
 > request one. Read this anyway: the fastest way to get an unblocked refresh is
 > to arrive at the conversation knowing exactly what to ask for.
@@ -22,7 +22,7 @@ This page is the detail behind [Lab 0](../labs/lab-00-setup-and-gateway/README.m
 | Runs as | A Windows service, survives sign-out | The user's session |
 | Supports | Power BI, Power Apps, Power Automate, Logic Apps, Analysis Services | Power BI only |
 | DirectQuery | Yes | **No - Import refresh only** |
-| Right answer for Schwab | **Yes, this one** | Never, for shared content |
+| Right answer here | **Yes, this one** | Never, for shared content |
 
 There is also a **virtual network (VNet) data gateway** - a managed gateway for
 Azure sources reachable over a VNet. It needs no installed machine, but it does
@@ -62,7 +62,7 @@ detail that unblocks a security review.
    who registered the gateway leaves, a personally-registered gateway leaves with
    them.
 4. Choose **Register a new gateway on this computer**.
-5. Name it to a convention: `SCHWAB-IO-GW-PROD-01`. The name appears in every
+5. Name it to a convention: `IO-GW-PROD-01`. The name appears in every
    dataset's settings, so make it say something.
 6. Set a **recovery key**. Store it in the team's secrets vault immediately.
    - You cannot recover it later.
@@ -88,7 +88,7 @@ Done once per source, in the Power BI service, by a gateway admin.
 
 | Field | Value for this workshop |
 | --- | --- |
-| Gateway cluster | `SCHWAB-IO-GW-PROD-01` |
+| Gateway cluster | `IO-GW-PROD-01` |
 | Connection name | `SQL-IO-ITSM-PROD` - name the source, not the report |
 | Connection type | SQL Server |
 | Server | The SQL instance, exactly as typed in Power BI Desktop |
@@ -100,7 +100,7 @@ Done once per source, in the Power BI service, by a gateway admin.
 
 > **The single most common failure.** The server and database strings must match
 > what is in the .pbix **character for character**. `SQLPROD01` and
-> `sqlprod01.schwab.com` are different data sources to the gateway, even though
+> `sqlprod01.contoso.com` are different data sources to the gateway, even though
 > they resolve to the same box. If the model says "you don't have access to this
 > gateway", check this first.
 
@@ -162,7 +162,7 @@ Done by the report author, after publishing.
 pulls the whole table across the wire and processes it in memory on the gateway
 server. That is the difference between a refresh that takes two minutes and one
 that takes an hour. Check **View Native Query** in Power Query before blaming the
-gateway - see [Lab 4](../labs/lab-04-power-query/README.md).
+gateway - see [Lab 0](../labs/lab-00-connect-and-shape/README.md).
 
 **Logs:** gateway app → **Diagnostics** → **Export logs**. Enable additional
 logging only while investigating; it is verbose and it costs performance.
@@ -202,7 +202,8 @@ you will usually get it back in one round trip:
 
 ## Related
 
-- [Lab 0 - Setup and gateway](../labs/lab-00-setup-and-gateway/README.md)
-- [Lab 4 - Power Query](../labs/lab-04-power-query/README.md) - folding, and why it decides refresh time
-- [Current state and constraints](schwab-current-state.md)
+- [Day 1 setup](../labs/day-1-setup/README.md)
+- [Lab 0 - Connect, shape, and load](../labs/lab-00-connect-and-shape/README.md) - folding, and why it decides refresh time
+- [Lab 1 - Build the semantic model](../labs/lab-01-semantic-model/README.md) - publish, bind, and prove the scheduled refresh
+- [Current state and constraints](current-state.md)
 - Microsoft Learn: `learn.microsoft.com/power-bi/connect-data/service-gateway-onprem`

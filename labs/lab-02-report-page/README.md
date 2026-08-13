@@ -1,8 +1,8 @@
 # Lab 2 - Build your first report page
 
-**Day 2, 10:30** (`Labs 1 and 2, model and report`) - **Deck slide 20**
+**Day 2, 1:00** (`Labs 1 and 2, model & report`) - **Deck slide 23**
 **Applies the Day 1 session:** `Visualization design and governance` (slide 5, 2:15)
-**Copilot agent:** Report Designer (tab 2 from [Lab 0](../lab-00-setup-and-gateway/README.md#6-meet-m365-copilot-then-build-your-four-agents))
+**Copilot agent:** Report Designer (tab 3 from [Day 1 setup](../day-1-setup/README.md#6-meet-m365-copilot-then-build-your-four-agents))
 
 **Scope:** In scope. Power BI Desktop, reading from the model you built in Lab 1.
 
@@ -26,7 +26,7 @@ is actually for, and to leave out everything that does not serve it.
 
 ## Prerequisites
 - [Lab 1](../lab-01-semantic-model/README.md) complete, with a validated measure
-- Your requirements draft from [Lab 0 step 6d](../lab-00-setup-and-gateway/README.md#6-meet-m365-copilot-then-build-your-four-agents)
+- Your requirements draft from [Day 1 setup step 6d](../day-1-setup/README.md#6-meet-m365-copilot-then-build-your-four-agents)
 - Reference: [visual design](../../reference/visual-design.md)
 
 ---
@@ -55,7 +55,8 @@ If a visual you are about to add does not help answer your sentence, it belongs 
 different page. This single habit does more for report quality than any formatting choice.
 
 > ### Report Designer assist
-> Switch to your Report Designer tab and paste your requirements draft from Lab 0:
+> Switch to your Report Designer tab and paste the requirements draft you wrote during
+> Day 1 setup:
 >
 > *"Here are my draft requirements: [paste]. Rewrite the core question this page answers
 > as a single sentence a director would recognise. Then give me the table of visuals that
@@ -134,11 +135,11 @@ Resist adding more. One or two slicers is plenty; the Filters pane is where filt
 should *not* change belong.
 
 ### 6. Apply the theme and tidy up
-Deck slide 20: `apply the workshop theme`. Slide 29 lists it as a reusable pattern: *One
+Deck slide 23: `apply the workshop theme`. Slide 31 lists it as a reusable pattern: *One
 JSON theme: colors, fonts, and spacing across every report.*
 
 - **View** → **Themes** → **Browse for themes** → select
-  [`src/theme/schwab-io-theme.json`](../../src/theme/schwab-io-theme.json).
+  [`src/theme/io-workshop-theme.json`](../../src/theme/io-workshop-theme.json).
 - Confirm the visuals repaint. Do not override theme colours on individual visuals - the
   moment one person does, the estate starts to drift.
 - Layout: cards along the top, slicer top-left, trend below-left, breakdown below-right.
@@ -148,7 +149,7 @@ JSON theme: colors, fonts, and spacing across every report.*
   tab to something meaningful.
 
 ### 7. Check it against the list
-Deck slide 20's design checklist:
+Deck slide 23's design checklist:
 
 - [ ] The page answers one operational question, and you can state it.
 - [ ] Three to five visuals, no more.

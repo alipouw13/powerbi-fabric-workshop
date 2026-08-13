@@ -1,13 +1,13 @@
-# Lab 0 - Setup, gateway, and your Copilot agents
+# Day 1 setup - environment, gateway, and your Copilot agents
 
-**When:** Day 1, 3:30 session (`Domain alignment and Day 2 setup`) - **Deck slide 5**
+**When:** Day 1, 3:30 session (`Future vision, domain alignment and Day 2 setup`) - **Deck slide 5**
 
 **Scope:** In scope. Power BI Desktop, the sample data, a workspace, the on-premises
 data gateway, and M365 Copilot.
 
-This is the only lab that is not a numbered lab on the deck, because it is setup rather
-than build. Do it before you leave on Day 1 so Day 2 starts at 10:30 with everyone
-building instead of installing.
+This is not a numbered lab. Deck slide 18 says it plainly: *Lab 0 setup and the gateway
+connection are completed on Day 1 afternoon.* Do it before you leave on Day 1 so Day 2
+starts at 10:30 with everyone connecting instead of installing.
 
 ## What you'll have at the end
 - Power BI Desktop installed and signed in
@@ -15,7 +15,7 @@ building instead of installing.
 - A workspace you can publish to
 - A working gateway connection, or a correctly-worded request for one
 - Your domain group and flagship report chosen
-- **Four M365 Copilot specialist agents ready to use in Labs 1 to 4**
+- **Four M365 Copilot specialist agents ready to use in Labs 0 to 3**
 
 ## Prerequisites
 - Power BI Desktop (latest)
@@ -46,9 +46,9 @@ This writes three shapes on purpose:
 
 | Path | What it is | Used in |
 | --- | --- | --- |
+| `data\raw\tableau_extract\incident_report_extract.csv` | One wide, denormalized table - what a Tableau `.hyper` extract looks like today | Lab 0 |
+| `data\raw\excel\capacity_YYYY_MM.csv` | A folder of monthly extracts, the "large Excel files" problem | Lab 0 |
 | `data\raw\sql\` | Conformed dimensions and one fact table per domain. Stands in for the SQL Server views you would reach through the gateway. | Labs 1, 2, 3 |
-| `data\raw\tableau_extract\incident_report_extract.csv` | One wide, denormalized table - what a Tableau `.hyper` extract looks like today | Lab 4 |
-| `data\raw\excel\capacity_YYYY_MM.csv` | A folder of monthly extracts, the "large Excel files" problem | Lab 4 |
 
 - Confirm `data\raw\sql\` contains your fact table and the six `dim_*.csv` files.
 - Open `dim_service.csv`. Two business units, **Banking** and **Capital Markets**, six
@@ -56,7 +56,7 @@ This writes three shapes on purpose:
 - The data is **synthetic**. It is shaped like I&O data for a financial services firm and
   contains nothing real - no customers, accounts, positions, orders or market data.
 
-> **Bringing your own data?** Slide 16 says groups `use their own current-state source
+> **Bringing your own data?** Slide 18 says groups `use their own current-state source
 > extracts and SQL data`. Do that where you can - the labs work either way. Keep the
 > sample data generated as a fallback so a source access problem cannot stall your table.
 
@@ -105,7 +105,7 @@ where the symptoms are listed in the order worth checking.
 > type that one.
 
 ### 5. Pick your domain and flagship report
-Deck slide 23 splits the room into five groups. Every group builds a different fact
+Deck slide 25 splits the room into five groups. Every group builds a different fact
 table onto the **same** conformed dimensions, and every group can slice by Banking
 versus Capital Markets.
 
@@ -163,12 +163,12 @@ Do this now, before you leave:
 
 | Tab | Agent | You will use it in |
 | --- | --- | --- |
-| 1 | Model Architect | Lab 1 |
-| 2 | Report Designer | Lab 2 |
-| 3 | DAX Coach | Lab 3 |
-| 4 | Query Engineer | Lab 4 |
+| 1 | Query Engineer | Lab 0 |
+| 2 | Model Architect | Lab 1 |
+| 3 | Report Designer | Lab 2 |
+| 4 | DAX Coach | Lab 3 |
 
-4. Test tab 1 with a real question: *"Restate my fact table's grain in one sentence, then
+4. Test tab 2 with a real question: *"Restate my fact table's grain in one sentence, then
    tell me which of my dimensions I should actually load and which would create an
    ambiguous filter path."* If the answer names your tables correctly, the setup worked.
 
@@ -186,7 +186,7 @@ Do this now, before you leave:
 Edit it for accuracy and bring it to Lab 2.
 
 ### 7. Pair up for Day 2
-Not everyone has an M365 Copilot licence. Labs 1 to 4 are designed for pairs: one person
+Not everyone has an M365 Copilot licence. Labs 0 to 3 are designed for pairs: one person
 drives Power BI Desktop, the other drives the Copilot tabs and hands code across. Swap
 halfway through each lab.
 
@@ -201,10 +201,10 @@ halfway through each lab.
 - A gateway test refresh **succeeded** - or a correctly worded request is in flight with a
   named owner and a due date.
 - Each group has named its flagship report and the question it answers.
-- **Four Copilot tabs are open, primed with the model card, and tab 1 answered a real
+- **Four Copilot tabs are open, primed with the model card, and tab 2 answered a real
   question using your actual table names.**
 - Copilot pairs are agreed, and every pair has a licence.
 
 ## Next
 Day 2 opens with migration methodology, then
-[Lab 1 - Build the semantic model](../lab-01-semantic-model/README.md).
+[Lab 0 - Connect, shape, and load with Power Query](../lab-00-connect-and-shape/README.md).

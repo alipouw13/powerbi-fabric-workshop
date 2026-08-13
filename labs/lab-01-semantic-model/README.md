@@ -1,15 +1,15 @@
 # Lab 1 - Build the semantic model
 
-**Day 2, 10:30** (`Labs 1 and 2, model and report`) - **Deck slide 19**
+**Day 2, 1:00** (`Labs 1 and 2, model & report`) - **Deck slide 22**
 **Applies the Day 1 session:** `Data modeling and star schema` (slide 5, 11:15)
-**Copilot agent:** Model Architect (tab 1 from [Lab 0](../lab-00-setup-and-gateway/README.md#6-meet-m365-copilot-then-build-your-four-agents))
+**Copilot agent:** Model Architect (tab 2 from [Day 1 setup](../day-1-setup/README.md#6-meet-m365-copilot-then-build-your-four-agents))
 
 **Scope:** In scope. Power BI Desktop, Import mode. No Lakehouse, no Direct Lake.
 
 > **Goal, from the deck.** Turn your current source extract into a star-schema semantic
 > model with relationships and a first measure.
 
-Get this lab right and Labs 2, 3 and 4 are straightforward. Get it wrong and you will
+Get this lab right and Labs 2 and 3 are straightforward. Get it wrong and you will
 spend Day 3 explaining why two reports disagree.
 
 ## Why this matters
@@ -22,11 +22,19 @@ yet - you are building the thing every report will sit on.
 - A marked date table
 - A clean field list with the keys hidden
 - Your first measure, validated against the source
+- A published model that refreshes through the gateway
 
 ## Prerequisites
-- [Lab 0](../lab-00-setup-and-gateway/README.md) complete, including your four Copilot tabs
+- [Lab 0](../lab-00-connect-and-shape/README.md) complete - you will reuse its habits on
+  every query you load here
 - `data\raw\sql\` generated, or access to your own source
 - Reference: [star schema patterns](../../reference/star-schema.md), [Copilot agents](../../reference/copilot-agents.md)
+
+> **Start a clean file.** Lab 0 was the Power Query practice file. This is the model, and
+> it reads the already-conformed tables in `data\raw\sql\` rather than the wide Tableau
+> extract. What carries over from Lab 0 is the discipline: filter and remove columns first,
+> set every data type explicitly, and turn **Enable load** off for anything that is
+> scaffolding.
 
 ---
 
@@ -89,7 +97,10 @@ this lab.
 > common and this is the right conversation to have about them.
 
 > **Do not** load `incident_report_extract.csv` here. That wide file is the Tableau
-> "before", and it is Lab 4's raw material.
+> "before" you took apart in [Lab 0](../lab-00-connect-and-shape/README.md), and its
+> carved-out dimensions live in that practice file. Loading them alongside the
+> `data\raw\sql\` dimensions would give you two `dim_service` tables and an argument about
+> which is right.
 
 ### 2. Create the relationships, then hide the keys
 Model view → drag key to key, or **Manage relationships** → **New**.
@@ -120,7 +131,7 @@ Rules, from deck slide 11:
 > filter and it will refuse, or worse, pick one. This is the snowflake-versus-star
 > tradeoff from Day 1, and here the answer is star.
 
-Now hide the plumbing, while you are still in Model view. Deck slide 19: `Hide keys and
+Now hide the plumbing, while you are still in Model view. Deck slide 22: `Hide keys and
 technical columns immediately, before you build a single visual.`
 
 - Right-click each `_key` column → **Hide in report view**, on both sides.
@@ -152,7 +163,7 @@ sorts Critical, High, Moderate, Low instead of alphabetically. Do this in the mo
 and every visual in every report inherits it.
 
 ### 5. Add your first measure
-One measure, now, before any calculated columns. Deck slide 19: `Create your first
+One measure, now, before any calculated columns. Deck slide 22: `Create your first
 measure before adding any calculated columns.`
 
 ```DAX
@@ -180,7 +191,8 @@ Total Assets = COUNTROWS(fact_asset)
 - Drop it on a card and sanity-check the number against the source.
 
 > ### Model Architect assist
-> Switch to your Model Architect tab. You already pasted the model card in Lab 0, so ask
+> Switch to your Model Architect tab. You already pasted the model card during
+> [Day 1 setup](../day-1-setup/README.md), so ask
 > directly:
 >
 > *"Restate my fact table's grain in one sentence. Then tell me which measures are safe to
@@ -210,6 +222,25 @@ Five minutes here saves an hour on Day 3.
 > in the business-unit table, then switch it back. Understanding why it is wrong beats
 > being told. Skip this if the room is still working - it is a bonus, not a step.
 
+### 7. Publish and prove the refresh through the gateway
+Lab 0 left you with a Desktop refresh time. Now prove the same thing happens unattended,
+because a model that only refreshes on your laptop has not been migrated.
+
+- **Publish** to the workspace you confirmed in
+  [Day 1 setup step 3](../day-1-setup/README.md#3-confirm-your-workspace).
+- In the service, open the semantic model → **Settings** → **Gateway and cloud
+  connections**, and bind it to the connection you proved in
+  [Day 1 setup step 4](../day-1-setup/README.md#4-prove-the-gateway-path-end-to-end).
+- **Refresh now.** Time it, and compare with the Desktop baseline from
+  [Lab 0 step 6](../lab-00-connect-and-shape/README.md#6-load-only-what-a-model-will-need).
+  If it is dramatically slower, a fold you were relying on is breaking on the gateway.
+- Set the schedule **after** the upstream job lands, not on the hour out of habit. Send
+  failure notifications to a group mailbox, not a person.
+
+> **CSV-sourced groups:** the gateway needs a path it can reach, so a file on your desktop
+> will fail here. Either point at a share the gateway machine can see, or note the failure,
+> read the reason in the error, and move on - understanding *why* it fails is the learning.
+
 ## You'll know it worked when
 - The model diagram is a star: one fact in the middle, dimensions around it, no
   dimension-to-dimension joins.
@@ -219,6 +250,8 @@ Five minutes here saves an hour on Day 3.
 - Slicing by `Business Unit` gives exactly two rows that sum to the total.
 - Your first measure returns a number you have checked against the source.
 - You can state your fact table's grain in one sentence.
+- The model is published, bound to the gateway, and has refreshed - or you can say
+  precisely why it did not.
 
 ## Next
 [Lab 2 - Build your first report page](../lab-02-report-page/README.md)

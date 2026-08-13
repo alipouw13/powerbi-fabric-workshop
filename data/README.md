@@ -1,7 +1,7 @@
 # Synthetic Banking and Capital Markets I&O dataset
 
-The data behind every lab in this workshop. It models Charles Schwab
-**Infrastructure & Operations**: incidents, capacity, mainframe throughput,
+The data behind every lab in this workshop. It models an enterprise
+**Infrastructure & Operations** group: incidents, capacity, mainframe throughput,
 service desk workload, and the asset estate for two fictional focus units:
 **Banking** and **Capital Markets**.
 
@@ -10,7 +10,7 @@ service desk workload, and the asset estate for two fictional focus units:
 Everything here is generated. Service names, CI names, incident numbers, sites,
 teams, costs, and every metric are synthetic. There are no customers, account
 balances, positions, orders, trades, or real market observations. **This is not
-Schwab data.** Do not treat it as production, customer, or regulated data.
+customer data.** Do not treat it as production, customer, or regulated data.
 
 Groups are welcome to substitute their own sources. The labs are written against
 this dataset because it is safe and consistent across five breakout groups, not
@@ -133,7 +133,7 @@ Columns: `incident_number`, `date`, `year`, `quarter`, `month_name`,
 `resolved_at`, `time_to_resolve_minutes`, `resolve_hours`, `reassignment_count`,
 `reopened_flag`, `sla_met_flag`, `is_breached`, `major_incident_flag`.
 
-This is the "before". It is what Lab 4 reshapes into dimensions and a fact table,
+This is the "before". It is what Lab 0 reshapes into dimensions and a fact table,
 and it is what the star-schema conversation is about. `site_name` appears once
 per incident here and only 8 times in `dim_location`.
 
@@ -165,7 +165,7 @@ The most recent generated November file is different on purpose. Two changes:
 
 The file has 121 rows instead of 120 for that reason.
 
-This is not a bug in the generator. It is the exercise. Lab 4 builds a schema
+This is not a bug in the generator. It is the exercise. Lab 0 builds a schema
 guard that normalises the renamed column, strips the total row, and errors loudly
 on a column that is genuinely missing. The pattern is in
 [`src/powerquery/README.md`](../src/powerquery/README.md#schema-guard).
@@ -174,11 +174,11 @@ on a column that is genuinely missing. The pattern is in
 
 | Lab | Uses | Why |
 | --- | --- | --- |
-| [Lab 0 - Setup and gateway](../labs/lab-00-setup-and-gateway/README.md) | Nothing, or one small file to test a connection | Gateway and environment check |
+| [Day 1 setup](../labs/day-1-setup/README.md) | Nothing, or one small file to test a connection | Gateway and environment check |
+| [Lab 0 - Connect, shape, and load](../labs/lab-00-connect-and-shape/README.md) | `tableau_extract/incident_report_extract.csv` and `excel/` | Reshape the wide extract, combine the folder, guard the schema |
 | [Lab 1 - Build the semantic model](../labs/lab-01-semantic-model/README.md) | `data/raw/sql/` dims plus your group's fact table | Build the star, set relationships, mark the date table |
 | [Lab 2 - Build your first report page](../labs/lab-02-report-page/README.md) | The model from Lab 1 | No new data |
 | [Lab 3 - Practice DAX measures](../labs/lab-03-dax-measures/README.md) | The model from Lab 1 | Measures and validation queries |
-| [Lab 4 - Power Query](../labs/lab-04-power-query/README.md) | `tableau_extract/incident_report_extract.csv` and `excel/` | Reshape the wide extract, combine the folder, guard the schema |
 
 Groups 2 to 5 swap their own fact table into Labs 1 to 3. The dimensions are
 shared, which is the point of conformed dimensions.
