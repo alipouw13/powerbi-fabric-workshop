@@ -1,7 +1,7 @@
 # Synthetic Banking and Capital Markets I&O dataset
 
-The data behind every lab in this workshop. It models Charles Schwab
-**Infrastructure & Operations**: incidents, capacity, mainframe throughput,
+The data behind every lab in this workshop. It models an enterprise
+**Infrastructure & Operations** group: incidents, capacity, mainframe throughput,
 service desk workload, and the asset estate for two fictional focus units:
 **Banking** and **Capital Markets**.
 
@@ -10,7 +10,7 @@ service desk workload, and the asset estate for two fictional focus units:
 Everything here is generated. Service names, CI names, incident numbers, sites,
 teams, costs, and every metric are synthetic. There are no customers, account
 balances, positions, orders, trades, or real market observations. **This is not
-Schwab data.** Do not treat it as production, customer, or regulated data.
+customer data.** Do not treat it as production, customer, or regulated data.
 
 Groups are welcome to substitute their own sources. The labs are written against
 this dataset because it is safe and consistent across five breakout groups, not

@@ -139,7 +139,7 @@ Deck slide 23: `apply the workshop theme`. Slide 31 lists it as a reusable patte
 JSON theme: colors, fonts, and spacing across every report.*
 
 - **View** → **Themes** → **Browse for themes** → select
-  [`src/theme/schwab-io-theme.json`](../../src/theme/schwab-io-theme.json).
+  [`src/theme/io-workshop-theme.json`](../../src/theme/io-workshop-theme.json).
 - Confirm the visuals repaint. Do not override theme colours on individual visuals - the
   moment one person does, the estate starts to drift.
 - Layout: cards along the top, slicer top-left, trend below-left, breakdown below-right.

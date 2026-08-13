@@ -5,7 +5,7 @@
 > Power BI Desktop. Copilot **inside Power BI Desktop or the Power BI Service**,
 > Copilot Studio, and Fabric Data Agents are **not available** to this audience.
 > They are not demoed and not required by any lab. See
-> [schwab-current-state.md](schwab-current-state.md).
+> [current-state.md](current-state.md).
 
 M365 Copilot cannot see your semantic model, your data, or your queries. Treat it
 as a fast colleague who knows DAX and Power Query M well but has never seen your
@@ -272,7 +272,7 @@ model is one Copilot can help with.
 
 ## Related
 
-- [Current state and constraints](schwab-current-state.md)
+- [Current state and constraints](current-state.md)
 - [Star schema](star-schema.md)
 - [Tableau to Power BI](tableau-to-powerbi.md)
 - [Power Query snippets](../src/powerquery/README.md)

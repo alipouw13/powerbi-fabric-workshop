@@ -1,6 +1,6 @@
 # Day 1 - Foundation & Alignment
 
-**August 18, 2026 · 9:00 to 4:30 · Deck slides 4 to 16**
+**Day 1 · 9:00 to 4:30 · Deck slides 4 to 16**
 
 > **Outcome:** A shared blueprint for how I&O models data.
 
@@ -14,13 +14,13 @@ Deck slide 5. Times are indicative and adjust to the room.
 
 | Time | Session | Lead | Focus | Material |
 | --- | --- | --- | --- | --- |
-| 9:00 | Welcome, goals, and the Tableau to Power BI mindset | Ricky | Why we are moving, what good looks like | Slides 2, 3, 6 · [Tableau to Power BI](../reference/tableau-to-powerbi.md) |
-| 9:45 | Architecture: now, next, and later | Microsoft | Today's platform, and a realistic path to Fabric | Slide 7 · [current state](../reference/schwab-current-state.md) |
+| 9:00 | Welcome, goals, and the Tableau to Power BI mindset | Customer lead | Why we are moving, what good looks like | Slides 2, 3, 6 · [Tableau to Power BI](../reference/tableau-to-powerbi.md) |
+| 9:45 | Architecture: now, next, and later | Microsoft | Today's platform, and a realistic path to Fabric | Slide 7 · [current state](../reference/current-state.md) |
 | 10:30 | Power Query: connect, shape, combine, load | Microsoft | Best practices for clean, fast-refreshing queries | Slide 8 · [Power Query snippets](../src/powerquery/README.md) |
 | 11:15 | Data modeling and star schema | Microsoft | Relationships, keys, storage modes | Slides 9, 10, 11 · [star schema](../reference/star-schema.md) |
 | 1:00 | DAX foundations for Tableau users | Microsoft | Calculated fields to measures | Slide 12 · [DAX patterns](../src/sql/sample_dax_queries.dax) |
 | 2:15 | Visualization design and governance | Microsoft | Show Me to visuals, ownership, Purview | Slides 13, 14 · [visual design](../reference/visual-design.md), [governance](../governance/workspace-governance.md) |
-| 3:30 | Future vision, domain alignment and Day 2 setup | Ricky, BRIT | Pick flagship reports by LOB, confirm the gateway connection | Slides 15, 16 · [Day 1 setup](../labs/day-1-setup/README.md) |
+| 3:30 | Future vision, domain alignment and Day 2 setup | Customer lead, platform team | Pick flagship reports by LOB, confirm the gateway connection | Slides 15, 16 · [Day 1 setup](../labs/day-1-setup/README.md) |
 
 ## What each session needs to land
 

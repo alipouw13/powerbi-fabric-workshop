@@ -18,7 +18,7 @@ on-premises data gateway, and the Power BI Service.
 
 ## Future, approval-dependent
 
-These describe capabilities Schwab I&O **does not have today**. They are here so
+These describe capabilities this team **does not have today**. They are here so
 the Day 3 roadmap conversation has something to point at. Do not design a
 30-day plan around them, and do not demo them.
 
@@ -31,7 +31,7 @@ the Day 3 roadmap conversation has something to point at. Do not design a
 
 | Topic | Path |
 | --- | --- |
-| Current state and constraints | schwab-current-state.md |
+| Current state and constraints | current-state.md |
 | Star schema | star-schema.md |
 | Visual design | visual-design.md |
 | Tableau to Power BI | tableau-to-powerbi.md |

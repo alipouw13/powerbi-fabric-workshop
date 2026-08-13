@@ -84,7 +84,7 @@ A theme file sets the colour palette, fonts, and default visual formatting for
 the whole report. Apply it first, then build, so you are not restyling twenty
 visuals later.
 
-Use [`src/theme/schwab-io-theme.json`](../src/theme/schwab-io-theme.json) on
+Use [`src/theme/io-workshop-theme.json`](../src/theme/io-workshop-theme.json) on
 every report in this workshop. **View -> Themes -> Browse for themes**.
 
 Five reports built by five groups with one theme look like one product. Five
@@ -238,7 +238,7 @@ Not optional, and mostly cheap.
 
 - [Star schema](star-schema.md)
 - [Tableau to Power BI](tableau-to-powerbi.md)
-- [Workshop theme](../src/theme/schwab-io-theme.json)
+- [Workshop theme](../src/theme/io-workshop-theme.json)
 - [Measure definitions](../src/pbip/README.md)
 - [Lab 2 - Build your first report page](../labs/lab-02-report-page/README.md)
 - [Workspace governance](../governance/workspace-governance.md)

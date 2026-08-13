@@ -64,7 +64,7 @@ they came from one team.
 | Dimension tables | `dim_<entity>`, singular entity name |
 | Fact tables | `fact_<event>`, singular event name |
 | Keys | `<entity>_key`, integer, hidden in report view |
-| Theme | [`src/theme/schwab-io-theme.json`](../src/theme/schwab-io-theme.json) on every report |
+| Theme | [`src/theme/io-workshop-theme.json`](../src/theme/io-workshop-theme.json) on every report |
 | Workspace | Never My workspace |
 
 ## Using M365 Copilot in the labs

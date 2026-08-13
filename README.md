@@ -1,14 +1,13 @@
-# Schwab - From Tableau to Power BI on Microsoft Fabric
+# From Tableau to Power BI on Microsoft Fabric
 
-Workshop companion repo for **Charles Schwab, Infrastructure & Operations
-Analytics Data Platforms Engineering**. Three days, August 18-20 2026.
+Workshop companion repo for an enterprise **Infrastructure & Operations (I&O)
+analytics** team moving off Tableau. Three days, hands-on.
 
-This repo is the hands-on half of the deck
-*"From Tableau to Power BI on Microsoft Fabric - Revised 2026-08-10"*. Every lab
-maps to a numbered lab slide, and the agenda below mirrors the deck's run of show
-exactly.
+This repo is the hands-on half of the workshop deck
+*"From Tableau to Power BI on Microsoft Fabric"*. Every lab maps to a numbered lab
+slide, and the agenda below mirrors the deck's run of show exactly.
 
-> **Scope.** Built for the tooling I&O has **today**: Power BI Desktop, Power
+> **Scope.** Built for the tooling this team has **today**: Power BI Desktop, Power
 > Query, Import mode, the on-premises data gateway, and **M365 Copilot** as a
 > drafting assistant. There is no Lakehouse, no OneLake, no Direct Lake, no
 > Copilot inside Power BI, and no Fabric Data Agent. Those appear on Day 3 as
@@ -35,7 +34,7 @@ Later, approval-dependent (Day 3 preview only):
 
 ## Who it's for
 
-- **Audience:** Infrastructure & Operations, across Austin and Phoenix.
+- **Audience:** Infrastructure & Operations, spread across several sites.
   Cross-functional rather than a centralized reporting group. Most have Tableau
   experience. No Power BI experience assumed.
 - **Format:** teaching blocks, then Day 2 breakouts where five domain groups build
@@ -54,7 +53,7 @@ Full detail: [sessions/day-1-foundations.md](sessions/day-1-foundations.md)
 | Time | Session | Material |
 | --- | --- | --- |
 | 9:00 | Welcome, goals, and the Tableau to Power BI mindset | [Tableau to Power BI](reference/tableau-to-powerbi.md) |
-| 9:45 | Architecture: now, next, and later | [current state](reference/schwab-current-state.md) |
+| 9:45 | Architecture: now, next, and later | [current state](reference/current-state.md) |
 | 10:30 | Power Query: connect, shape, combine, load | [Power Query snippets](src/powerquery/README.md) |
 | 11:15 | Data modeling and star schema | [star schema](reference/star-schema.md) |
 | 1:00 | DAX foundations for Tableau users | [DAX patterns](src/sql/sample_dax_queries.dax) |
@@ -140,7 +139,7 @@ python data\generate_data.py
 ## What's in here
 
 ```
-schwab-powerbi-fabric-workshop/
+powerbi-fabric-workshop/
   data/            synthetic I&O data generator (CSV output, gitignored)
   labs/            day-1-setup, then lab-00 .. lab-03 - all hands-on, all Day 2
   sessions/        Day 1 and Day 3 facilitator guides
@@ -148,7 +147,7 @@ schwab-powerbi-fabric-workshop/
     powerquery/    reusable Power Query M snippets
     sql/           sample DAX measures and validation queries
     pbip/          measure definitions, the source of truth for Lab 3
-    theme/         schwab-io-theme.json, applied in Lab 2
+    theme/         io-workshop-theme.json, applied in Lab 2
   reference/       current state, gateway setup, star schema, visual design,
                    Tableau mapping, M365 Copilot, Copilot agents, migration
                    approaches, sources
@@ -206,7 +205,7 @@ and 3 use it. See
 
 - Technical guidance is grounded in Microsoft Learn - see
   [reference/sources.md](reference/sources.md).
-- The dataset is **synthetic and fictional**. Do not commit real Schwab data,
+- The dataset is **synthetic and fictional**. Do not commit real customer data,
   credentials, workspace GUIDs, server names, or connection secrets.
 
 ## License / trademark

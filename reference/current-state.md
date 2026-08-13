@@ -1,6 +1,6 @@
-# Schwab I&O current state, constraints, and what that means for this workshop
+# I&O current state, constraints, and what that means for this workshop
 
-What the Schwab team told us in the pre-workshop agenda review. Every lab is
+What the customer team told us in the pre-workshop agenda review. Every lab is
 written against these facts. Cover this in the Day 1 kickoff so attendees know
 what is feasible **today** versus what is on the roadmap.
 
@@ -11,9 +11,9 @@ what is feasible **today** versus what is on the roadmap.
 
 | Item | What we know |
 | --- | --- |
-| Group | Charles Schwab **Infrastructure & Operations (I&O)** |
+| Group | An enterprise **Infrastructure & Operations (I&O)** group |
 | Size | 15-18 attendees |
-| Locations | Austin and Phoenix, some joining virtually |
+| Locations | Two primary sites, some joining virtually |
 | Background | Cross-functional, not a centralized reporting team. Most have **Tableau** experience. |
 | Power BI experience | Assume none |
 | Goal | **Retire Tableau in I&O** and form a **Community of Practice** for data visualization |
@@ -113,7 +113,7 @@ The only two storage modes available, and the decision is per model.
 | DAX available | All functions | A restricted subset |
 | Model size limit | Applies | Not applicable |
 | Load on the source system | Only at refresh | Every visual interaction |
-| Best for | Almost everything at Schwab today | Sources too large to cache, or where caching is not permitted |
+| Best for | Almost everything in this environment today | Sources too large to cache, or where caching is not permitted |
 
 **Default to Import.** Choose DirectQuery only when you can name the specific
 requirement that rules Import out, and only after testing page performance with
@@ -129,7 +129,7 @@ the gateway in the path.
   and the Community of Practice sets them.
 - Report development is decentralized. Naming, certification, and workspace
   standards are part of what the Community of Practice needs to define.
-- No AI tool may receive real Schwab data, credentials, or ticket contents. M365
+- No AI tool may receive real customer data, credentials, or ticket contents. M365
   Copilot is used for **schema, code and prose only**, never source records.
 
 ## Naming conventions
@@ -149,7 +149,7 @@ the gateway in the path.
 Two badges, so attendees always know what applies to them:
 
 - **In scope.** Attendees do this hands-on with the tools they have today.
-- **Future, approval-dependent.** Reference reading about a capability Schwab does
+- **Future, approval-dependent.** Reference reading about a capability the organization does
   not have. Not run, not demoed, not a prerequisite for anything.
 
 If a question comes up about a future capability, answer it briefly and route the

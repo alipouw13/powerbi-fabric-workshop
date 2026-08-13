@@ -1,13 +1,13 @@
-"""Generate synthetic Banking and Capital Markets I&O data for the Schwab
+"""Generate synthetic Banking and Capital Markets I&O data for the
 Tableau-to-Power BI workshop.
 
-The workshop teaches a Tableau audience how to move to Power BI, using Schwab's
-own **Infrastructure & Operations (I&O)** domains. The model follows the star
+The workshop teaches a Tableau audience how to move to Power BI, using an
+enterprise **Infrastructure & Operations (I&O)** domain. The model follows the star
 schema on deck slides 9 and 10: one fact table per domain, all joining the same
 conformed dimensions.
 
 Every organization, service, identifier, event, and metric is SYNTHETIC. No real
-Schwab, customer, account, position, trade, or market data is used.
+customer, account, position, trade, or market data is used.
 
 Shapes written, on purpose, so the migration story lands:
 
@@ -81,14 +81,14 @@ TEAMS = [
 
 # (site_name, city, state, region, datacenter)
 LOCATIONS = [
-    ("Westlake Campus", "Westlake", "TX", "Southwest", "DC-DFW-01"),
-    ("Austin Tech Center", "Austin", "TX", "Southwest", "DC-DFW-01"),
-    ("Phoenix Operations", "Phoenix", "AZ", "West", "DC-PHX-01"),
-    ("Denver Office", "Denver", "CO", "West", "DC-PHX-01"),
-    ("Lone Tree Campus", "Lone Tree", "CO", "West", "DC-PHX-01"),
-    ("Indianapolis Hub", "Indianapolis", "IN", "Midwest", "DC-CHI-01"),
-    ("Orlando Service Center", "Orlando", "FL", "Southeast", "DC-ATL-01"),
-    ("Richfield Office", "Richfield", "OH", "Midwest", "DC-CHI-01"),
+    ("North Campus", "Dallas", "TX", "Southwest", "DC-DFW-01"),
+    ("Central Tech Center", "Fort Worth", "TX", "Southwest", "DC-DFW-01"),
+    ("West Operations", "Las Vegas", "NV", "West", "DC-PHX-01"),
+    ("Summit Office", "Boulder", "CO", "West", "DC-PHX-01"),
+    ("Ridgeview Campus", "Colorado Springs", "CO", "West", "DC-PHX-01"),
+    ("Midwest Hub", "Columbus", "OH", "Midwest", "DC-CHI-01"),
+    ("Southeast Service Center", "Tampa", "FL", "Southeast", "DC-ATL-01"),
+    ("Lakeside Office", "Madison", "WI", "Midwest", "DC-CHI-01"),
 ]
 
 # (severity_code, severity_name, priority, sla_hours, share of incidents)
@@ -157,7 +157,7 @@ def build_dim_date(start: date, end: date) -> pd.DataFrame:
     df["day_name"] = df["date"].dt.day_name()
     df["is_weekend"] = df["day_of_week"].isin([6, 7])
     df["week_of_year"] = df["date"].dt.isocalendar().week.astype(int)
-    # Schwab-style fiscal year aligned to the calendar year for workshop simplicity.
+    # Fiscal year aligned to the calendar year for workshop simplicity.
     df["fiscal_year"] = df["year"]
     df["fiscal_quarter"] = df["quarter"]
     return df[[
@@ -402,7 +402,7 @@ def build_fact_service_desk(rng, dim_date, dim_service, dim_team, dim_location):
     for drow in dim_date.itertuples(index=False):
         weekend_factor = 0.35 if drow.is_weekend else 1.0
         for team in desk_teams.itertuples(index=False):
-            for loc_key in [1, 3, 6]:  # Westlake, Phoenix, Indianapolis staff the desk
+            for loc_key in [1, 3, 6]:  # North Campus, West Operations, Midwest Hub staff the desk
                 for service in dim_service.itertuples(index=False):
                     # Allocate workload by supported business service so every
                     # service-desk metric can roll up to the two focus units.

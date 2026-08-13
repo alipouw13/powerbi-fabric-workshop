@@ -191,7 +191,7 @@ Start single-direction. Turn a specific one on only when you can explain why.
 
 ## Star or snowflake
 
-Schwab has a stated plan to move to a snowflake pattern. Both shapes are
+Some teams arrive with a stated plan to move to a snowflake pattern. Both shapes are
 legitimate, and the honest answer is that they optimize for different things.
 
 | | Star | Snowflake |
@@ -283,7 +283,7 @@ DAX that fits your model.
 ## Related
 
 - [Tableau to Power BI](tableau-to-powerbi.md)
-- [Current state and constraints](schwab-current-state.md)
+- [Current state and constraints](current-state.md)
 - [Visual design](visual-design.md)
 - [Measure definitions](../src/pbip/README.md)
 - [Power Query snippets](../src/powerquery/README.md)

@@ -1,6 +1,6 @@
 # Day 3 - Showcase, Lessons & Next Steps
 
-**August 20, 2026 · 9:00 to 3:00 · Deck slides 27 to 36**
+**Day 3 · 9:00 to 3:00 · Deck slides 27 to 36**
 
 > **Outcome:** A committed 90-day adoption roadmap.
 
@@ -21,8 +21,8 @@ Deck slide 28.
 | 10:30 | Lessons learned and pitfalls | All groups | What surprised us, what to avoid |
 | 11:15 | Reusable patterns library | Microsoft | Templates, measures, and themes to keep |
 | 11:45 | Art of the possible: Fabric, once approved | Microsoft | A preview of what is next, clearly future |
-| 1:00 | Adoption roadmap: now, next, later | Ricky | Sequence the migration across I&O |
-| 2:00 | Community of Practice and next steps | Ricky | Champions, coaching, quarterly reviews |
+| 1:00 | Adoption roadmap: now, next, later | Customer lead | Sequence the migration across I&O |
+| 2:00 | Community of Practice and next steps | Customer lead | Champions, coaching, quarterly reviews |
 
 ---
 
@@ -54,7 +54,7 @@ Deck slide 30 lists the pitfalls to check yourselves against:
 
 Add the ones this room actually hit. Two that usually surface here:
 
-- **The gateway string mismatch.** `SQLPROD01` versus `sqlprod01.schwab.com`.
+- **The gateway string mismatch.** `SQLPROD01` versus `sqlprod01.contoso.com`.
 - **Generated DAX that was right at the total and wrong by month.** Ask which
   groups caught it, and how.
 
@@ -66,7 +66,7 @@ Deck slide 31. What every group can lift so nobody starts from a blank page:
 | --- | --- |
 | Conformed dimensions - Date, CI, Service, Team, Location, Severity | `data/raw/sql/dim_*.csv`, and the model pattern in [Lab 1](../labs/lab-01-semantic-model/README.md) |
 | Measure library - totals, running sums, period over period, percent of total | [`src/sql/sample_dax_queries.dax`](../src/sql/sample_dax_queries.dax) |
-| Report theme | [`src/theme/schwab-io-theme.json`](../src/theme/schwab-io-theme.json) |
+| Report theme | [`src/theme/io-workshop-theme.json`](../src/theme/io-workshop-theme.json) |
 | Page templates - trend, breakdown, KPI | [Lab 2](../labs/lab-02-report-page/README.md) |
 | Power Query snippets - staging, reference dimensions, folder combine, schema guard | [`src/powerquery/README.md`](../src/powerquery/README.md) |
 | M365 Copilot specialist agents and prompt patterns | [copilot-agents.md](../reference/copilot-agents.md) |
@@ -126,7 +126,7 @@ Deck slide 33. Fill it in with real names and real dates, in the room.
 - Adopt OneLake, Lakehouse, and Copilot once approved
 - Scale the Community of Practice
 
-**Test for the 30-day list: nothing on it may be blocked by a capability Schwab
+**Test for the 30-day list: nothing on it may be blocked by a capability the organization
 does not have today.** If something is, it belongs in NEXT or LATER.
 
 ## 2:00 - Retrospective and Community of Practice
