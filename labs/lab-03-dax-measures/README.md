@@ -128,10 +128,11 @@ CALCULATE(
   table. The first month is blank for the prior-month measures - correct, not a bug.
 - Add `Running Total Incidents` to your Lab 2 line chart as a second line.
 
-> **Group 5**, these only work if you related `dim_date` to `fact_asset[purchase_date]` in
-> Lab 1, and they then mean "by purchase date". If you chose no date relationship, skip
-> this step and spend the time on step 4 instead - `Assets Expiring in 90 Days` is your
-> time-based measure, and it uses `TODAY()` rather than the date table.
+> **Group 5**, these work through whichever `dim_date` relationship you made active in
+> Lab 1, so they mean "by purchase date". To get the same trend by warranty expiry,
+> wrap them in `USERELATIONSHIP( dim_date[date_key], fact_asset[warranty_end_date_key] )`
+> and compare the two shapes - a renewal cliff looks nothing like a purchase curve.
+> `Assets Expiring in 90 Days` in step 4 is the `TODAY()`-based alternative.
 
 **Coming from Tableau:** the running total is the Running Sum table calc. Tableau computed
 it across the view; DAX computes it by expanding the filter context to all dates up to the
