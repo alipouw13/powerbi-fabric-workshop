@@ -77,8 +77,10 @@ CONFORMED DIMENSIONS (shared by every fact, one-to-many, single direction, filte
 
   dim_date(date_key, date, year, quarter, month, month_name, month_year,
            day_of_month, day_of_week, day_name, is_weekend, week_of_year,
-           fiscal_year, fiscal_quarter)
+           fiscal_year, fiscal_quarter, is_reporting_period)
       - marked as the date table on dim_date[date]
+      - covers whole calendar years, wider than the event window;
+        is_reporting_period flags the window the facts actually cover
 
   dim_service(service_key, service_id, service_name, service_tier,
               business_unit, business_domain)
@@ -91,9 +93,13 @@ CONFORMED DIMENSIONS (shared by every fact, one-to-many, single direction, filte
         important but tolerant of a short outage
 
   dim_configuration_item(ci_key, ci_id, ci_name, ci_type, environment,
-                         criticality, service_key, location_key, support_group)
-      - also carries service_key and location_key, but those are NOT related in the
-        model; the fact table is the only thing that joins to dimensions
+                         criticality, service_key, location_key,
+                         support_team_key, support_group)
+      - also carries service_key, location_key and support_team_key, but those are
+        NOT related in the model; the fact table is the only thing that joins to
+        dimensions
+      - support_group is the owning team's assignment_group, derived from
+        support_team_key
 
   dim_team(team_key, team_id, team_name, assignment_group, shift_coverage)
 
@@ -104,8 +110,11 @@ CONFORMED DIMENSIONS (shared by every fact, one-to-many, single direction, filte
                sla_target_hours, severity_sort)
       - severity_name sorts by severity_sort: Critical, High, Moderate, Low
 
-FACT TABLES - one per domain group. Every fact carries service_key, so
-dim_service[business_unit] slices all of them the same way.
+FACT TABLES - one per domain group. Every fact carries service_key, location_key
+and team_key, so dim_service[business_unit] slices all of them the same way.
+On fact_incident and fact_service_desk, team_key is the team that handled the
+work. On fact_capacity, fact_mainframe and fact_asset it is the team that owns
+the CI.
 
   fact_incident(incident_key, incident_number, date_key, ci_key, service_key,
                 team_key, location_key, severity_key, opened_at, resolved_at,
@@ -116,38 +125,41 @@ dim_service[business_unit] slices all of them the same way.
       NOTE: open incidents have blank resolved_at, time_to_resolve_minutes and
             sla_met_flag
 
-  fact_capacity(date_key, ci_key, service_key, location_key,
-                cpu_utilization_pct, memory_utilization_pct,
+  fact_capacity(capacity_key, date_key, ci_key, service_key, location_key,
+                team_key, cpu_utilization_pct, memory_utilization_pct,
                 storage_allocated_gb, storage_used_gb, headroom_pct)
       GRAIN: one row per configuration item, per month
       NOTE: the _pct columns are percentages and must be averaged, never summed
 
-  fact_mainframe(date_key, ci_key, service_key, location_key, mips_consumed,
-                 mips_capacity, batch_jobs_completed, batch_jobs_failed,
-                 batch_window_minutes, transactions_processed)
+  fact_mainframe(mainframe_key, date_key, ci_key, service_key, location_key,
+                 team_key, mips_consumed, mips_capacity, batch_jobs_completed,
+                 batch_jobs_failed, batch_window_minutes, transactions_processed)
       GRAIN: one row per LPAR, per day
       NOTE: mips_capacity repeats on every daily row for the same LPAR, so summing
             it across a month multiplies installed capacity by the number of days
 
-  fact_service_desk(date_key, service_key, team_key, location_key,
-                    tickets_received, tickets_resolved, first_contact_resolved,
-                    calls_abandoned, agents_scheduled, agents_available,
-                    avg_handle_time_minutes, avg_speed_to_answer_seconds)
+  fact_service_desk(service_desk_key, date_key, service_key, team_key,
+                    location_key, tickets_received, tickets_resolved,
+                    first_contact_resolved, calls_abandoned, agents_scheduled,
+                    agents_available, avg_handle_time_minutes,
+                    avg_speed_to_answer_seconds)
       GRAIN: one row per service, per team, per location, per day
       NOTE: agents_scheduled and agents_available are staffing counts allocated to a
             service on a day; avg_handle_time_minutes and avg_speed_to_answer_seconds
             are already averages, so a plain AVERAGE of them weights a quiet
             service the same as a busy one
 
-  fact_asset(asset_key, asset_tag, ci_key, service_key, location_key,
-             purchase_date, warranty_end_date, lifecycle_status,
-             acquisition_cost_usd, annual_support_cost_usd, is_under_warranty,
-             cmdb_complete_flag, asset_count)
+  fact_asset(asset_key, asset_tag, ci_key, service_key, location_key, team_key,
+             purchase_date_key, warranty_end_date_key, purchase_date,
+             warranty_end_date, lifecycle_status, acquisition_cost_usd,
+             annual_support_cost_usd, is_under_warranty, cmdb_complete_flag,
+             asset_count)
       GRAIN: one row per asset
-      NOTE: this fact has NO date_key. It is a snapshot of the estate, not a stream
-            of events. Either relate dim_date[date] to fact_asset[purchase_date] and
-            accept that time intelligence means "by purchase date", or use
-            TODAY()-based measures and no date relationship at all
+      NOTE: this fact has TWO date keys, so dim_date is a role-playing dimension.
+            purchase_date_key is the ACTIVE relationship; warranty_end_date_key is
+            INACTIVE and needs USERELATIONSHIP(dim_date[date_key],
+            fact_asset[warranty_end_date_key]) inside CALCULATE. Say which role a
+            measure means in its description.
 
 MY GROUP'S FACT TABLE IS: <fill this in>
 ```

@@ -77,18 +77,21 @@ Fact table (grain: one row per incident):
 Conformed dimensions:
   dim_date(date_key, date, year, quarter, month, month_name, month_year,
            day_of_month, day_of_week, day_name, is_weekend, week_of_year,
-           fiscal_year, fiscal_quarter)
+           fiscal_year, fiscal_quarter, is_reporting_period)
   dim_service(service_key, service_id, service_name, service_tier, business_unit,
               business_domain)
   dim_configuration_item(ci_key, ci_id, ci_name, ci_type, environment,
-                         criticality, service_key, location_key, support_group)
+                         criticality, service_key, location_key,
+                         support_team_key, support_group)
   dim_team(team_key, team_id, team_name, assignment_group, shift_coverage)
   dim_location(location_key, location_id, site_name, city, state_province,
                country, region, datacenter)
   dim_severity(severity_key, severity_code, severity_name, priority,
                sla_target_hours, severity_sort)
 
-dim_date is marked as the date table on dim_date[date].
+dim_date is marked as the date table on dim_date[date]. It covers whole calendar
+years, which is wider than the event window; dim_date[is_reporting_period] flags
+the window the facts actually cover.
 All relationships are one-to-many, single direction, dimension filtering fact.
 
 Existing measures:
@@ -105,23 +108,25 @@ Rules:
 For the other domain groups, replace the fact table block:
 
 ```
-fact_capacity(date_key, ci_key, service_key, location_key,
+fact_capacity(capacity_key, date_key, ci_key, service_key, location_key, team_key,
   cpu_utilization_pct, memory_utilization_pct, storage_allocated_gb,
   storage_used_gb, headroom_pct)                    -- one row per CI per month
 
-fact_mainframe(date_key, ci_key, service_key, location_key, mips_consumed, mips_capacity,
-  batch_jobs_completed, batch_jobs_failed, batch_window_minutes,
-  transactions_processed)                           -- one row per LPAR per day
+fact_mainframe(mainframe_key, date_key, ci_key, service_key, location_key, team_key,
+  mips_consumed, mips_capacity, batch_jobs_completed, batch_jobs_failed,
+  batch_window_minutes, transactions_processed)     -- one row per LPAR per day
 
-fact_service_desk(date_key, service_key, team_key, location_key, tickets_received,
-  tickets_resolved, first_contact_resolved, calls_abandoned, agents_scheduled,
-  agents_available, avg_handle_time_minutes,
+fact_service_desk(service_desk_key, date_key, service_key, team_key, location_key,
+  tickets_received, tickets_resolved, first_contact_resolved, calls_abandoned,
+  agents_scheduled, agents_available, avg_handle_time_minutes,
   avg_speed_to_answer_seconds)  -- one row per service, team, location, and day
 
-fact_asset(asset_key, asset_tag, ci_key, service_key, location_key,
-  purchase_date, warranty_end_date, lifecycle_status, acquisition_cost_usd,
-  annual_support_cost_usd, is_under_warranty, cmdb_complete_flag,
-  asset_count)                                             -- one row per asset
+fact_asset(asset_key, asset_tag, ci_key, service_key, location_key, team_key,
+  purchase_date_key, warranty_end_date_key, purchase_date, warranty_end_date,
+  lifecycle_status, acquisition_cost_usd, annual_support_cost_usd,
+  is_under_warranty, cmdb_complete_flag, asset_count)      -- one row per asset
+  -- two date keys: purchase_date_key is ACTIVE, warranty_end_date_key is INACTIVE
+  -- and needs USERELATIONSHIP inside CALCULATE
 ```
 
 ## Prompt patterns that work

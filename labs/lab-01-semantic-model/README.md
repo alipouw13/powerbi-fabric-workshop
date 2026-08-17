@@ -79,22 +79,35 @@ this lab.
 | Group | Load these dimensions |
 | --- | --- |
 | 1 ITSM | all six |
-| 2 Capacity | `dim_date`, `dim_service`, `dim_configuration_item`, `dim_location` |
-| 3 Mainframe | `dim_date`, `dim_service`, `dim_configuration_item`, `dim_location` |
+| 2 Capacity | `dim_date`, `dim_service`, `dim_configuration_item`, `dim_location`, `dim_team` |
+| 3 Mainframe | `dim_date`, `dim_service`, `dim_configuration_item`, `dim_location`, `dim_team` |
 | 4 Service Desk | `dim_date`, `dim_service`, `dim_team`, `dim_location` |
-| 5 Asset | `dim_service`, `dim_configuration_item`, `dim_location`, and `dim_date` *(see note)* |
+| 5 Asset | `dim_date`, `dim_service`, `dim_configuration_item`, `dim_location`, `dim_team` *(see note)* |
 
 - Choose **Import**. Deck slide 11: `Prefer Import mode for now`.
 - Save as `sm_io_<yourdomain>.pbix`, for example `sm_io_itsm.pbix`.
 
-> **Group 5, you have a real modeling decision.** `fact_asset` has **no `date_key`**. It
-> is a snapshot of the estate, not a stream of events, so there is no single date that
-> describes a row - there is `purchase_date` and `warranty_end_date`. You have two honest
-> options: relate `dim_date[date]` to `fact_asset[purchase_date]` and accept that all time
-> intelligence then means "by purchase date", or load no date dimension and answer your
-> questions with `TODAY()`-based measures instead. Decide as a group, write down which you
-> chose and why, and say it out loud at the stand-up. Facts without a natural date are
-> common and this is the right conversation to have about them.
+> **Group 5, you have a real modeling decision.** `fact_asset` carries **two** date
+> keys - `purchase_date_key` and `warranty_end_date_key` - because an asset is a
+> snapshot with two dates that matter, not a stream of events with one. Power BI
+> allows one **active** relationship between a pair of tables, so build both and
+> the second arrives inactive, drawn as a dotted line. That is correct.
+>
+> Make `purchase_date_key` the active one, then reach for the other in a measure:
+>
+> ```dax
+> Assets Expiring =
+> CALCULATE(
+>     [Total Assets],
+>     USERELATIONSHIP( dim_date[date_key], fact_asset[warranty_end_date_key] )
+> )
+> ```
+>
+> The alternative is a second date table, `dim_warranty_date`, with both active.
+> Decide as a group, write down which relationship is active and why, and say it
+> out loud at the stand-up. Role-playing dimensions are common and this is the
+> right conversation to have about them. Background:
+> [star-schema.md](../../reference/star-schema.md#role-playing-dimensions).
 
 > **Do not** load `incident_report_extract.csv` here. That wide file is the Tableau
 > "before" you took apart in [Lab 0](../lab-00-connect-and-shape/README.md), and its
@@ -145,8 +158,7 @@ A field list a business user can read without a translator is the difference bet
 model people adopt and one they work around.
 
 ### 3. Mark the date table
-Every group except group 5, and group 5 too if you chose to relate `dim_date` to
-`purchase_date`.
+Every group, including group 5.
 
 - Select `dim_date` → **Table tools** → **Mark as date table**.
 - Choose the `date` column, **not** `date_key`.
@@ -154,6 +166,11 @@ Every group except group 5, and group 5 too if you chose to relate `dim_date` to
 
 Skip this and every time-intelligence measure in Lab 3 will either fail or silently
 return the wrong number. Thirty seconds of work; an entire category of bug prevented.
+
+> `dim_date` covers whole calendar years, which is what Mark as Date Table requires
+> and wider than the two years of events. On a trend visual that shows empty years,
+> filter on `dim_date[is_reporting_period] = TRUE` rather than trimming the table.
+> Then hide `is_reporting_period` - it is plumbing.
 
 ### 4. Sort severity properly
 Only groups that loaded `dim_severity`.
@@ -213,8 +230,9 @@ Five minutes here saves an hour on Day 3.
   two rows, **Banking** and **Capital Markets**, and they should sum to the card total.
 - Add `dim_service[business_domain]`, then `dim_service[Service]`. Each level should still
   sum back to the total. That three-level hierarchy is what your Lab 2 report will drill.
-- Add `dim_date[month_year]`. Is every month present, with no blank row? *(Group 5: only
-  if you related `dim_date` to `purchase_date` - otherwise skip this one.)*
+- Add `dim_date[month_year]`. Is every month present, with no blank row? Filter on
+  `dim_date[is_reporting_period] = TRUE` so the empty years either side drop out.
+  *(Group 5: this is by purchase date, whichever relationship you made active.)*
 - A **blank row** in a dimension means referential integrity is broken: the fact has a key
   the dimension does not. Find it now, not on Day 3.
 
@@ -232,7 +250,7 @@ because a model that only refreshes on your laptop has not been migrated.
   connections**, and bind it to the connection you proved in
   [Day 1 setup step 4](../day-1-setup/README.md#4-prove-the-gateway-path-end-to-end).
 - **Refresh now.** Time it, and compare with the Desktop baseline from
-  [Lab 0 step 6](../lab-00-connect-and-shape/README.md#6-load-only-what-a-model-will-need).
+  [Lab 0 step 7](../lab-00-connect-and-shape/README.md#7-load-only-what-a-model-will-need).
   If it is dramatically slower, a fold you were relying on is breaking on the gateway.
 - Set the schedule **after** the upstream job lands, not on the hour out of habit. Send
   failure notifications to a group mailbox, not a person.

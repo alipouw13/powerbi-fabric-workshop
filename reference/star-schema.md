@@ -124,6 +124,13 @@ table, with the same keys and the same meaning in every one.
 the keys and meaning match, "Electronic Trading Platform" means the same thing on
 the ITSM report as it does on the Capacity or Service Desk report.
 
+`dim_team` is conformed too, with a caveat worth knowing. On `fact_incident` and
+`fact_service_desk`, `team_key` is the team that **handled the work**. On
+`fact_capacity`, `fact_mainframe` and `fact_asset` it is the team that **owns the
+CI**, taken from `dim_configuration_item[support_team_key]`. Same dimension, same
+keys, slightly different question. Write that into the table description, because
+somebody will otherwise compare the two and conclude the data is wrong.
+
 Why that matters in practice:
 
 - **Reports reconcile.** Two teams filtering to Tier 0 get the same set of
@@ -159,6 +166,54 @@ Every key must be **unique in the dimension** and **present in the fact**. Check
 both before you build a single visual. A duplicate key breaks the relationship; a
 fact key with no matching dimension row lands in a blank member and quietly
 undercounts every sliced total.
+
+`data/generate_data.py` enforces exactly this before it writes a single file:
+every surrogate key unique and non-null, every foreign key resolving to a real
+dimension row, every fact carrying a date key and reaching both business units.
+Run the same check against your own source before you model it. The failure is
+cheap to find now and expensive to find in a steering committee.
+
+## Role-playing dimensions
+
+A **role-playing dimension** is one dimension joined to the same fact more than
+once, playing a different role each time.
+
+`fact_asset` is the example in this dataset. It carries two date keys:
+
+| Column | Role | Question it answers |
+| --- | --- | --- |
+| `purchase_date_key` | When the asset was bought | Capital spend by year, estate age |
+| `warranty_end_date_key` | When cover expires | Renewal exposure in the next 90 days |
+
+Power BI allows **one active relationship** between a pair of tables. Build both
+and the second arrives inactive, drawn as a dotted line. That is correct
+behaviour, not a bug.
+
+Three ways to handle it, in order of preference for this workshop:
+
+1. **One active relationship plus `USERELATIONSHIP`.** Make `purchase_date_key`
+   active, and reach for the other only where you need it:
+
+   ```dax
+   Assets Expiring =
+   CALCULATE(
+       [Total Assets],
+       USERELATIONSHIP( dim_date[date_key], fact_asset[warranty_end_date_key] )
+   )
+   ```
+
+   One date table, one slicer, and the exception is explicit in the measure.
+
+2. **A second date table**, for example `dim_warranty_date`, both active. Clearer
+   on the canvas, because each date has its own slicer. The cost is a second
+   table to maintain and a page that can filter on two calendars at once, which
+   confuses people.
+
+3. **No date relationship at all**, answering with `TODAY()`-based measures. Fine
+   for "how many are out of warranty right now", useless for any trend.
+
+Whichever you choose, **write down which relationship is active**. A model where
+`dim_date` silently means "purchase date" is a model that will be misread.
 
 ## Relationships
 
@@ -243,7 +298,11 @@ What marking buys you:
 
 Requirements: `date` must be a date type, unique, contiguous with no gaps, and
 cover full years from the first day of the first year to the last day of the last
-year. `dim_date` in this dataset already satisfies this.
+year. `dim_date` in this dataset already satisfies this - it spans whole calendar
+years, from the year of the oldest asset purchase to the year of the newest
+warranty expiry, which is wider than the reporting window on purpose. Use
+`is_reporting_period` to filter out the empty years on a visual, and hide the
+column.
 
 Also set **Sort by column** on `month_name` so it sorts by `month`, not
 alphabetically. Otherwise April leads your trend line.
@@ -274,6 +333,7 @@ DAX that fits your model.
 - [ ] Every fact key matches a dimension row. No blank members.
 - [ ] All relationships are one to many, single direction, dimension to fact.
 - [ ] No bidirectional relationships, or one with a written reason.
+- [ ] Any role-playing dimension has one active relationship, and you wrote down which.
 - [ ] `dim_date` is marked as the date table on `date`.
 - [ ] Auto date/time is turned off.
 - [ ] `month_name` sorts by `month`.

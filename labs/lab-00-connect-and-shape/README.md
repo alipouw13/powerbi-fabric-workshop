@@ -25,14 +25,18 @@ staging queries are what you build here.
 - A staging query built in the order that lets it fold
 - Dimensions carved out by **reference**, not copy-paste
 - A hardened combine over the folder of monthly extracts, with a schema guard
+- A cleanup query over an export that is wrong in eight different ways
 - A set of queries loading only what a model will actually use
 
 ## Prerequisites
 - [Day 1 setup](../day-1-setup/README.md) complete, including your four Copilot tabs and
   the gateway connection
-- `data\raw\tableau_extract\incident_report_extract.csv` and `data\raw\excel\` generated
+- `data\raw\tableau_extract\incident_report_extract.csv`, `data\raw\excel\` and
+  `data\raw\dirty\` generated
 - Your Query Engineer tab open
-- Reference: [Power Query snippets](../../src/powerquery/README.md), [gateway setup](../../reference/gateway-setup.md)
+- Reference: [Power Query snippets](../../src/powerquery/README.md),
+  [dirty-file catalogue](../../data/power-query-cleanup.md),
+  [gateway setup](../../reference/gateway-setup.md)
 
 > **This lab is the practice file, not the model file.** Work in a scratch `.pbix` -
 > call it `pq_lab_<yourdomain>.pbix`. In [Lab 1](../lab-01-semantic-model/README.md) you
@@ -179,7 +183,51 @@ looks right is worse than an error** - that is the whole argument for this step.
 > than reading the docs. If the generated M is longer than the click-path would have been,
 > use the click-path - generated code nobody understands is a maintenance liability.
 
-### 6. Load only what a model will need
+### 6. Clean an export that is wrong in eight ways
+Everything so far has been a well-formed file. `data\raw\dirty\` is what the rest of
+your sources actually look like.
+
+Pick **one file per group** and clean it end to end. The full catalogue of defects,
+the fix for each, and the checks that prove you got it right are in
+[`data/power-query-cleanup.md`](../../data/power-query-cleanup.md).
+
+| Group | File | The interesting problem |
+| --- | --- | --- |
+| 1 | `incident_export_dirty.csv` | Four junk rows above the header, three date formats, duplicates, a `TOTAL` row |
+| 2 | `capacity_by_month_crosstab.csv` | Months across the columns, group labels blanked on repeat rows |
+| 3 | `service_desk_daily_dirty.csv` | A two-row header |
+| 4 | `service_desk_daily_dirty.csv` | Same file, and it is your own domain's data |
+| 5 | `asset_inventory_dirty.csv` | `$12,450.00`, `(1,382.85)` and `USD 3,400` in one column |
+
+Three habits to practise while you do it:
+
+1. **Fix the shape before the types.** Remove the preamble, promote the headers,
+   strip the total rows, *then* set data types. Type first and every subsequent step
+   inherits an error column.
+2. **Trim before you dedupe.** ` AST000001 ` and `AST000001` are different strings.
+   Remove Duplicates on padded data removes nothing and reports success.
+3. **Replace the null tokens explicitly.** `N/A`, `-`, `NULL`, `#N/A` and blank all
+   mean the same thing to a human and five different things to the mashup engine.
+
+> **The cross-tab is the one to watch.** In `capacity_by_month_crosstab.csv`, the
+> order is Fill Down → remove the `Total` column → filter the `Grand Total` row →
+> **then** Unpivot. Unpivot first and the total column becomes a thirteenth month
+> and every blank group label becomes a null category. Both produce a chart that
+> renders perfectly and is wrong.
+
+Reconcile when you are done. Every dirty file is derived from a clean table in
+`data\raw\sql\`, so your cleaned row count and totals have a right answer to match.
+
+> ### Query Engineer assist
+> Paste the defect list for your file from
+> [`power-query-cleanup.md`](../../data/power-query-cleanup.md) into your Query
+> Engineer tab and ask for the M. Then run the same four checks as step 5: row
+> count, nulls, data types, step names. This is the clearest demonstration in the
+> workshop of why "verify the generated M" is a rule and not advice - the model
+> will confidently produce a query that drops the `TOTAL` row *and* forty
+> legitimate rows with it.
+
+### 7. Load only what a model will need
 - Review every query. **Enable load** off for staging and function queries, on only for the
   dimensions and facts a model would use.
 - Check the field list after loading. Anything there that no visual will use is memory and
@@ -191,7 +239,7 @@ looks right is worse than an error** - that is the whole argument for this step.
   once there is a model worth refreshing. The folding decisions you made in step 3 are what
   that refresh time will be made of.
 
-### 7. Save what worked
+### 8. Save what worked
 Add the M snippets that worked to [`src/powerquery/`](../../src/powerquery/README.md), each
 with a one-line description. Without Dataflows, a shared snippet library is how you get
 transformation reuse - low-tech, and it works.
@@ -226,6 +274,8 @@ use one, put the SQL in source control and comment why.
 - `dim_service` came out at 12 rows across two business units.
 - The monthly folder combines, the renamed column is handled, and the `TOTAL` row is gone.
 - The schema guard throws a readable error when a column goes missing.
+- Your dirty file loads with correct data types, no error cells, no duplicate rows,
+  and no total row - and it reconciles to the matching table in `data\raw\sql\`.
 - You used the Query Engineer to draft M and checked rows, nulls, types and step names
   afterwards.
 - Only the queries a model would use have **Enable load** on, and you know your Desktop

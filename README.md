@@ -118,10 +118,11 @@ the same business-unit slicer works in every group's report.
 | 5 | Asset & Workplace Services | `fact_asset` |
 
 The six conformed dimensions are `dim_date`, `dim_service`, `dim_configuration_item`,
-`dim_team`, `dim_location` and `dim_severity`. `dim_service` and `dim_location` are
-shared by all five facts; the rest apply to the groups whose fact carries that key.
-`fact_asset` has no `date_key`, which gives group 5 a real modeling decision to make in
-Lab 1.
+`dim_team`, `dim_location` and `dim_severity`. `dim_service`, `dim_location` and
+`dim_team` are shared by all five facts; the rest apply to the groups whose fact
+carries that key. `fact_asset` carries **two** date keys, `purchase_date_key` and
+`warranty_end_date_key`, which makes `dim_date` a role-playing dimension and gives
+group 5 a real modeling decision to make in Lab 1.
 
 ## Quick start
 

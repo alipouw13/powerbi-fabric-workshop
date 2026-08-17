@@ -305,6 +305,8 @@ Model `sm_io_assets`, fact table `fact_asset`, one row per asset.
 | Annual Support Cost | Annual run-rate support cost. | Currency, 0 decimals |
 | Avg Acquisition Cost | Mean asset value. | Currency, 0 decimals |
 | Assets Expiring in 90 Days | Assets whose warranty expires inside the next 90 days. Drives the renewal worklist. | Whole number |
+| Assets Purchased | Assets bought in the period on the date slicer. Uses the active relationship. | Whole number |
+| Warranties Expiring | Assets whose cover ends in the period on the date slicer. Uses the inactive relationship. | Whole number |
 
 ```dax
 Total Assets = SUM( fact_asset[asset_count] )
@@ -332,11 +334,29 @@ CALCULATE(
     fact_asset[warranty_end_date] >= TODAY(),
     fact_asset[warranty_end_date] <= TODAY() + 90
 )
+
+// dim_date plays two roles here. purchase_date_key is the active relationship,
+// so this needs nothing special.
+Assets Purchased = [Total Assets]
+
+// warranty_end_date_key is the inactive one. USERELATIONSHIP swaps it in for
+// the duration of this measure only.
+Warranties Expiring =
+CALCULATE(
+    [Total Assets],
+    USERELATIONSHIP( dim_date[date_key], fact_asset[warranty_end_date_key] )
+)
 ```
 
 `Assets Expiring in 90 Days` uses `TODAY()`, so it moves with the report rather
 than with the model refresh. That is intended here. Do not use `TODAY()` in a
 measure that has to reconcile to a fixed reported figure.
+
+`Assets Purchased` and `Warranties Expiring` put the same count on the same date
+slicer through two different relationships. Both are correct, and they answer
+different questions - which is exactly why the model needs the role written into
+each measure description. Background:
+[role-playing dimensions](../../reference/star-schema.md#role-playing-dimensions).
 
 ---
 
